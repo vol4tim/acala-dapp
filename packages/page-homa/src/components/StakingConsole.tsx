@@ -12,7 +12,7 @@ import { StakingPoolContext } from './StakingPoolProvider';
 
 export const StakingConsole: FC = () => {
   const { rewardRate, stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
-  const balance = useBalance(stakingPool?.stakingCurrency);
+  const balance = useBalance(stakingPool ? stakingPool.stakingCurrency : '');
 
   const validator = useFormValidator({
     stakingBalance: {
@@ -96,7 +96,7 @@ export const StakingConsole: FC = () => {
       </Grid>
       <Grid item>
         <BalanceInput
-          error={!!form.errors.stakingBalance}
+          error={form.errors.stakingBalance}
           id='stakingBalance'
           name='stakingBalance'
           onChange={form.handleChange}

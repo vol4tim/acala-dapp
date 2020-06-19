@@ -2,7 +2,7 @@ import React, { useState, useEffect, FC, ReactNode } from 'react';
 import { isEmpty } from 'lodash';
 import { Card, ListConfig, List, Dropdown, DropdownConfig } from '@acala-dapp/ui-components';
 import { useAllLoans, useLoan } from '@acala-dapp/react-hooks';
-import { formatCurrency, FormatFixed18 } from '@acala-dapp/react-components';
+import { getTokenName, FormatFixed18 } from '@acala-dapp/react-components';
 import classes from './CollateralCard.module.scss';
 import { Fixed18 } from '@acala-network/app-util';
 
@@ -69,7 +69,7 @@ export const CollateralCard: FC = () => {
 
   const dropdownConfig = loanTypes.map((item): DropdownConfig => {
     return {
-      render: (): string => formatCurrency(item.token),
+      render: (): string => getTokenName(item.token),
       value: item.token.toString()
     };
   });

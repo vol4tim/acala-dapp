@@ -1,7 +1,7 @@
 import React, { FC, useContext, ReactNode } from 'react';
 
 import { Card, ListConfig, List } from '@acala-dapp/ui-components';
-import { formatCurrency } from '@acala-dapp/react-components';
+import { getTokenName } from '@acala-dapp/react-components';
 import { convertToFixed18 } from '@acala-network/app-util';
 import { FormatFixed18 } from '@acala-dapp/react-components/format/FormatFixed18';
 
@@ -19,7 +19,7 @@ export const SystemInfo: FC = () => {
       key: 'liquidExchangeRate',
       /* eslint-disable-next-line react/display-name */
       render: (data): ReactNode => <FormatFixed18 data={data} />,
-      title: `Exchange Rate (${formatCurrency(stakingPool.stakingCurrency)} / ${formatCurrency(stakingPool.liquidCurrency)})`
+      title: `Exchange Rate (${getTokenName(stakingPool.stakingCurrency)} / ${getTokenName(stakingPool.liquidCurrency)})`
     },
     {
       key: 'maxRatio',

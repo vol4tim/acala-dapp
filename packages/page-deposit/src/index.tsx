@@ -1,14 +1,14 @@
 import React, { FC } from 'react';
 
 import { Page, Grid } from '@acala-dapp/ui-components';
-import { UserCard } from './components/UserCard';
-import { SystemCard } from './components/SystemCard';
+import { WalletBalance } from '@acala-dapp/react-components';
+
 import { SelectAction } from './components/SelectAction';
 import { DepositProvider } from './components/Provider';
 import { Console } from './components/Console';
 import { PoolOverview } from './components/PoolOverview';
 import { Transaction } from './components/Transaction';
-import { WalletBalanceCard, PricesFeedCard } from '@acala-dapp/react-components';
+import { UserCard, SystemCard } from './components/InformationCard';
 
 const PageDeposit: FC = () => {
   return (
@@ -17,46 +17,34 @@ const PageDeposit: FC = () => {
         <Page.Title title='Deposit & Earn' />
         <Page.Content>
           <Grid container
-            direction='row'>
-            <Grid container
-              direction='column'
-              item
-              lg={8}
-              md={12}>
-              <Grid container
-                direction='row'
-                item>
-                <Grid item>
-                  <UserCard />
-                </Grid>
-                <Grid item>
-                  <SystemCard />
-                </Grid>
-              </Grid>
-              <Grid item>
-                <SelectAction />
-              </Grid>
-              <Grid item>
-                <Console />
-              </Grid>
-              <Grid item>
-                <PoolOverview />
-              </Grid>
-              <Grid item>
-                <Transaction />
-              </Grid>
+            direction='column'
+            item>
+            <Grid item>
+              <WalletBalance />
             </Grid>
             <Grid container
-              direction='column'
-              item
-              lg={4}
-              md={12}>
-              <Grid item>
-                <WalletBalanceCard />
+              direction='row'
+              item>
+              <Grid item
+                xs={6}>
+                <UserCard />
               </Grid>
-              <Grid item>
-                <PricesFeedCard />
+              <Grid item
+                xs={6}>
+                <SystemCard />
               </Grid>
+            </Grid>
+            <Grid item>
+              <SelectAction />
+            </Grid>
+            <Grid item>
+              <Console />
+            </Grid>
+            <Grid item>
+              <PoolOverview />
+            </Grid>
+            <Grid item>
+              <Transaction />
             </Grid>
           </Grid>
         </Page.Content>

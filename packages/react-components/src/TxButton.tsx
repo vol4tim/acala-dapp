@@ -1,11 +1,17 @@
 import React, { FC, PropsWithChildren, useState } from 'react';
+import { switchMap, map, timeout, finalize, take } from 'rxjs/operators';
+
+import { SubmittableResult, ApiRx } from '@polkadot/api';
+import { ITuple } from '@polkadot/types/types';
+import { DispatchError, AccountInfo } from '@polkadot/types/interfaces';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+
 import { useAccounts, useApi, useNotification, useHistory } from '@acala-dapp/react-hooks';
 import { Button, ButtonProps } from '@acala-dapp/ui-components';
-import { FormatAddress } from './format';
-import { SubmittableResult, ApiPromise } from '@polkadot/api';
 import { CreateNotification } from '@acala-dapp/ui-components/Notification/context';
-import { ITuple } from '@polkadot/types/types';
-import { DispatchError } from '@polkadot/types/interfaces';
+import { NotificationConfig } from '@acala-dapp/ui-components/Notification/types';
+
+import { FormatAddress } from './format';
 
 interface Props extends ButtonProps {
   section: string;
@@ -17,9 +23,9 @@ interface Props extends ButtonProps {
   addon?: any;
 }
 
-const TX_TIMEOUT = 60 * 1000;
+const MAX_TX_DURATION_TIME = 60 * 1000;
 
-function extractEvents (api: ApiPromise, result: SubmittableResult, createNotification: CreateNotification): void {
+function extractEvents (api: ApiRx, result: SubmittableResult, createNotification: CreateNotification): void {
   if (!result || !result.events) {
     return;
   }
@@ -92,7 +98,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     onFinally && onFinally();
   };
 
-  const onClick = async (): Promise<void> => {
+  const onClick = (): void => {
     if (!api.tx[section] || !api.tx[section][method]) {
       console.error(`can not find api.tx.${section}.${method}`);
 
@@ -108,83 +114,94 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     // lock btn click
     setIsSending(true);
 
-    try {
-      const account = await api.query.system.account(active.address);
+    let notification: NotificationConfig = {} as NotificationConfig;
 
-      const signedTx = await api.tx[section][method](...params).signAsync(
-        active.address,
-        {
-          nonce: account.nonce.toNumber()
+    // try {
+    const subscriber = api.query.system.account<AccountInfo>(active.address).pipe(
+      switchMap((account) => {
+        return api.tx[section][method](...params).signAsync(
+          active.address,
+          {
+            nonce: account.nonce.toNumber()
+          }
+        );
+      }),
+      take(1),
+      switchMap((signedTx: SubmittableExtrinsic<'rxjs'>) => {
+        const hash = signedTx.hash.toString();
+
+        notification = createNotification({
+          content: <FormatAddress address={hash} />,
+          icon: 'loading',
+          title: `${section}: ${method}`,
+          type: 'info'
+        });
+
+        return signedTx.send().pipe(timeout(MAX_TX_DURATION_TIME));
+      }),
+      map((result): boolean => {
+        if (
+          result.status.isInBlock ||
+          result.status.isFinalized
+        ) {
+          extractEvents(api, result as unknown as SubmittableResult, createNotification);
+
+          return true;
         }
-      );
 
-      const hash = signedTx.hash.toString();
+        if (
+          result.status.isUsurped ||
+          result.status.isDropped ||
+          result.status.isFinalityTimeout
+        ) {
+          throw new Error(result.status.toString());
+        }
 
-      const notification = createNotification({
-        content: <FormatAddress address={hash} />,
-        icon: 'loading',
-        title: `${section}: ${method}`,
-        type: 'info'
-      });
+        return false;
+      }),
+      finalize(() => {
+        _onFinally();
+      })
+    ).subscribe({
+      error: (error: Error) => {
+        let config = {};
 
-      // timeout
-      await Promise.race([
-        new Promise((resolve) => setTimeout(() => resolve('timeout'), TX_TIMEOUT)),
-        new Promise((resolve, reject) => {
-          (async (): Promise<void> => {
-            const unsub = await signedTx.send((result) => {
-              if (
-                result.status.isInBlock ||
-                result.status.isFinalized
-              ) {
-                resolve(result);
-              } else if (
-                result.status.isUsurped ||
-                result.status.isDropped ||
-                result.status.isFinalityTimeout
-              ) {
-                unsub && unsub();
-                reject(result);
-              }
-
-              if (result.status.isFinalized) {
-                unsub && unsub();
-              } else {
-                extractEvents(api, result as unknown as SubmittableResult, createNotification);
-              }
-            }).catch(reject);
-          })();
-        })
-      ]).then((result) => {
-        if (result === 'timeout') {
-          notification.update({
+        if (error.name === 'TimeoutError') {
+          config = {
             icon: 'info',
             removedDelay: 4000,
             title: 'Extrinsic timed out, Please check manually',
             type: 'info'
-          });
+          };
         } else {
+          config = {
+            icon: 'error',
+            removedDelay: 4000,
+            type: 'error'
+          };
+        }
+
+        if (Reflect.has(notification, 'update')) {
+          notification.update(config);
+        }
+
+        _onFailed();
+        setIsSending(false);
+        subscriber.unsubscribe();
+      },
+      next: (isDone) => {
+        if (isDone) {
           notification.update({
             icon: 'success',
             removedDelay: 4000,
             type: 'success'
           });
           _onSuccess();
+          setIsSending(false);
+          subscriber.unsubscribe();
         }
-      }).catch(() => {
-        notification.update({
-          icon: 'error',
-          removedDelay: 4000,
-          type: 'error'
-        });
-        _onFailed();
-      }).finally(() => {
-        _onFinally();
-      });
-    } catch (e) {
-      // reset isSending
-      setIsSending(false);
-    }
+      }
+    });
   };
 
   return (

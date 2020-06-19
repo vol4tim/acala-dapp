@@ -1,0 +1,18 @@
+.item, .input {
+  font-size: 14px;
+  line-height: 16px;
+}
+
+:global(.kTKCiE > .container):before {
+  box-shadow: 0 0 1px 1px #e0e0e0 !important;
+}
+
+.option {
+  padding: 8px 16px;
+  font-size: 14px;
+  line-height: 16px;
+
+  .identicon {
+    margin-right: 12px;
+  }
+}

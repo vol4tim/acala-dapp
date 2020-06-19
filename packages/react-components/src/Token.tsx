@@ -1,53 +1,91 @@
-import React, { FC, memo, ReactNode } from 'react';
+import React, { FC } from 'react';
 import clsx from 'clsx';
-import { CurrencyId } from '@acala-network/types/interfaces';
+
 import { BareProps } from '@acala-dapp/ui-components/types';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { Condition } from '@acala-dapp/ui-components';
 
 import classes from './Token.module.scss';
-import { formatCurrency } from './utils';
-import AcaIcon from './assets/coins-icon/ACA.svg';
-import AUSDIcon from './assets/coins-icon/aUSD.svg';
-import BtcIcon from './assets/coins-icon/BTC.svg';
-import DotIcon from './assets/coins-icon/DOT.svg';
-import LDotIcon from './assets/coins-icon/LDOT.svg';
+import { getTokenImage, getTokenName, getTokenFullName } from './utils';
 
-interface Props extends BareProps {
-  token: CurrencyId | string;
+interface TokenComponentProps extends BareProps {
+  currency: CurrencyLike;
+}
+
+const generateTokenComponent = (getFN: (currency: CurrencyLike) => any, wrapperComponent: string, getProps: (data: any) => object, displayName: string): FC<TokenComponentProps> => {
+  const Component: FC<TokenComponentProps> = ({ className, currency }) => {
+    const content = getFN(currency);
+
+    return content ? React.createElement(wrapperComponent, { className, ...getProps(content) }) : null;
+  };
+
+  Component.displayName = displayName;
+
+  return Component;
+};
+
+/**
+ * @name TokenImage
+ * @descript show token image
+ * @param currency
+ */
+export const TokenImage = generateTokenComponent(
+  getTokenImage,
+  'img',
+  (data: any) => ({ src: data }),
+  'TokenImage'
+);
+
+/**
+ * @name TokenName
+ * @descript show token name
+ * @param currency
+ */
+export const TokenName = generateTokenComponent(
+  getTokenName,
+  'span',
+  (data: any) => ({ children: data }),
+  'TokenName'
+);
+
+/**
+ * @name TokenFullName
+ * @description show token fullname
+ * @param currency
+ */
+export const TokenFullName = generateTokenComponent(
+  getTokenFullName,
+  'span',
+  (data: any) => ({ children: data }),
+  'TokenFullName'
+);
+
+export interface TokenProps extends BareProps {
+  currency: CurrencyLike;
+  imageClassName?: string;
+  nameClassName?: string;
+  fullnameClassName?: string;
   icon?: boolean;
   name?: boolean;
+  fullname?: boolean;
   upper?: boolean;
   padding?: boolean;
 }
 
-const ICON_CONFIG = {
-  aca: AcaIcon,
-  ausd: AUSDIcon,
-  dot: DotIcon,
-  ldot: LDotIcon,
-  xbtc: BtcIcon
-};
-
-export const Token: FC<Props> = memo(({
+export const Token: FC<TokenProps> = ({
   className,
-  icon,
+  currency,
+  fullname = false,
+  fullnameClassName,
+  icon = false,
+  imageClassName,
   name = true,
-  padding = false,
-  token,
-  upper = true
+  nameClassName,
+  padding = false
 }) => {
-  if (!token) {
+  if (!currency) {
     return null;
   }
-
-  const renderIcon = (): ReactNode => {
-    const result = Reflect.get(ICON_CONFIG, token.toString().toLowerCase());
-
-    if (!result) {
-      return null;
-    }
-
-    return <img src={result} />;
-  };
 
   return (
     <div
@@ -61,23 +99,35 @@ export const Token: FC<Props> = memo(({
         )
       }
     >
-      {
-        icon ? (
-          <span className={
-            clsx(
-              classes.icon,
-              {
-                [classes.noName]: !name
-              }
-            )
-          }>
-            {renderIcon()}
-          </span>
-        ) : null
-      }
-      {name ? formatCurrency(token, upper) : null}
+      <Condition
+        condition={!!icon}
+        match={(
+          <TokenImage
+            className={clsx(classes.icon, imageClassName)}
+            currency={currency}
+          />
+        )}
+      />
+      <div className={classes.nameArea}>
+        <Condition
+          condition={name}
+          match={(
+            <TokenName
+              className={clsx(classes.name, nameClassName)}
+              currency={currency}
+            />
+          )}
+        />
+        <Condition
+          condition={fullname}
+          match={(
+            <TokenFullName
+              className={clsx(classes.fullname, fullnameClassName)}
+              currency={currency}
+            />
+          )}
+        />
+      </div>
     </div>
   );
-});
-
-Token.displayName = 'Token';
+};

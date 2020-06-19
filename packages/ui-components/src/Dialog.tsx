@@ -7,15 +7,18 @@ import { BareProps } from './types';
 import classes from './Dialog.module.scss';
 import { Button } from './Button';
 import clsx from 'clsx';
+import { CloseIcon } from './Icon';
 
 interface Props extends BareProps {
   visiable: boolean;
   title?: ReactNode;
   action?: ReactNode;
+  withClose?: boolean;
   confirmText?: string | null;
   cancelText?: string | null;
   onConfirm?: () => void;
   onCancel?: () => void;
+  onClose?: () => void;
   showCancel?: boolean;
 }
 
@@ -26,12 +29,32 @@ export const Dialog: FC<Props> = memo(({
   className,
   confirmText = 'Confirm',
   onCancel,
+  onClose,
   onConfirm,
   showCancel = false,
   title,
-  visiable = true
+  visiable = true,
+  withClose = false
 }) => {
   const $div = createRef<HTMLDivElement>();
+
+  const renderTitle = (): ReactNode => {
+    if (!title) {
+      return null;
+    }
+
+    return (
+      <div className={classes.title}>
+        {title}
+        { withClose ? (
+          <CloseIcon
+            className={classes.close}
+            onClick={onClose}
+          />
+        ) : null }
+      </div>
+    );
+  };
 
   return (
     <Modal
@@ -54,7 +77,7 @@ export const Dialog: FC<Props> = memo(({
             }
           )
         }>
-          {title ? <div className={classes.title}>{title}</div> : null}
+          {renderTitle()}
           <div className={classes.content}>{children}</div>
           <div className={classes.action}>
             {

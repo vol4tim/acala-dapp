@@ -1,18 +1,19 @@
 import React, { ReactNode, MouseEvent, EventHandler, useRef, ReactElement, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 
-import classes from './Table.module.scss';
 import { randomID } from './utils';
 import { PageLoading } from './Loading';
+import { BareProps } from './types';
+import classes from './Table.module.scss';
 
-type CellAlign = 'left' | 'right' | 'center';
+type AlignType = 'left' | 'right' | 'center';
 
-export type TableItem<T> = {
+export type TableConfig = {
   key?: string;
   title: string;
   dataIndex?: string;
   width?: number;
-  align?: CellAlign;
+  align?: AlignType;
   render?: (...params: any[]) => ReactNode;
 };
 
@@ -21,8 +22,9 @@ interface RawProps<T> {
 }
 
 type Props<T> = {
-  config: TableItem<T>[];
-  data: (T | any)[];
+  border?: boolean;
+  config: TableConfig[];
+  data: T[];
   rawProps?: RawProps<T>;
   showHeader?: boolean;
   cellClassName?: string;
@@ -30,10 +32,12 @@ type Props<T> = {
   empty?: ReactNode;
   size?: 'small' | 'normal';
   loading?: boolean;
-};
+} & BareProps;
 
-export function Table<T extends { [k: string]: any }> ({
+export function Table<T> ({
+  border = false,
   cellClassName,
+  className,
   config,
   data,
   empty,
@@ -47,16 +51,14 @@ export function Table<T extends { [k: string]: any }> ({
   const totalWidthConfiged = useMemo(() => config.reduce((acc, cur) => acc + (cur.width ? cur.width : 0), 0), [config]);
   const defaultCellWidth = useMemo(() => `${100 / config.length}%`, [config]);
 
-  const renderItem = useCallback((config: TableItem<T>, data: T, index: number): ReactNode => {
-    if (!config.render) {
-      return config.dataIndex ? data[config.dataIndex] : '';
+  const renderItem = useCallback((config: TableConfig, data: T, index: number): ReactNode => {
+    if (config.dataIndex && typeof data === 'object') {
+      /* eslint-disable-next-line */
+      // @ts-ignore
+      return config.render ? config.render(data[config.dataIndex]) : data[config.dataIndex];
+    } else {
+      return config.render ? config.render(data, index) : data;
     }
-
-    if (!config.dataIndex) {
-      return config.render(data, index);
-    }
-
-    return config.render(data[config.dataIndex], data, index);
   }, []);
 
   const renderContent = useCallback(() => {
@@ -70,7 +72,7 @@ export function Table<T extends { [k: string]: any }> ({
       );
     }
 
-    if (data?.length) {
+    if (data.length) {
       return data.map((item, index) => {
         /* eslint-disable-next-line @typescript-eslint/no-empty-function */
         let onClick: EventHandler<MouseEvent<HTMLTableRowElement>> = () => {};
@@ -116,17 +118,17 @@ export function Table<T extends { [k: string]: any }> ({
       });
     }
 
-    if (!data?.length && empty) {
+    if (!data.length && empty) {
       return (
         <tr className={classes.empty}>
           <td colSpan={config.length}>{empty}</td>
         </tr>
       );
     }
-  }, [loading, data, data?.length, empty, config, rawProps, cellClassName, renderItem]);
+  }, [loading, data, empty, config, rawProps, cellClassName, renderItem]);
 
   return (
-    <table className={clsx(classes.root, classes[size])}>
+    <table className={clsx(classes.root, classes[size], className, { [classes.border]: border })}>
       <colgroup>
         {
           config.map((_item, index) => (

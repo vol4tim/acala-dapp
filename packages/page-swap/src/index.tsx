@@ -2,7 +2,7 @@ import React, { FC } from 'react';
 
 import { Page, Grid } from '@acala-dapp/ui-components';
 import { SwapConsole } from './components/SwapConsole';
-import { WalletBalanceCard, PricesFeedCard } from '@acala-dapp/react-components';
+import { WalletBalance } from '@acala-dapp/react-components';
 import { AllMarkets } from './components/AllMarkets';
 import { Transaction } from './components/Transaction';
 import { SwapProvider } from './components/SwapProvider';
@@ -14,33 +14,19 @@ const PageSwap: FC = () => {
         <Page.Title title='Swap' />
         <Page.Content>
           <Grid container
-            direction='row'>
-            <Grid container
-              direction='column'
-              item
-              lg={8}
-              md={12}>
-              <Grid item>
-                <SwapConsole />
-              </Grid>
-              <Grid item>
-                <AllMarkets />
-              </Grid>
-              <Grid item>
-                <Transaction />
-              </Grid>
+            direction='column'
+            item>
+            <Grid item>
+              <WalletBalance />
             </Grid>
-            <Grid container
-              direction='column'
-              item
-              lg={4}
-              md={12}>
-              <Grid item>
-                <WalletBalanceCard />
-              </Grid>
-              <Grid item>
-                <PricesFeedCard />
-              </Grid>
+            <Grid item>
+              <SwapConsole />
+            </Grid>
+            <Grid item>
+              <AllMarkets />
+            </Grid>
+            <Grid item>
+              <Transaction />
             </Grid>
           </Grid>
         </Page.Content>

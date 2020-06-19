@@ -1,0 +1,80 @@
+.tokenArea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  padding: 0 0 12px 0;
+  border-bottom: 1px solid #ebeef5;
+
+  .balance {
+    margin-top: 16px;
+    font-size: 24px;
+    line-height: 29px;
+    color: #000000;
+    font-weight: bold;
+  }
+
+  .amount {
+    margin-top: 4px;
+    font-size: 16px;
+    line-height: 19px;
+    color: #999999;
+  }
+}
+
+.actionArea {
+  padding: 16px 24px 24px;
+
+  display: flex;
+
+  .item {
+    box-sizing: border-box;
+    flex: 0 0 50%;
+  }
+
+  .item:nth-child(1) {
+    padding-right: 24px;
+  }
+
+  .item:nth-child(2) {
+    padding-left: 24px;
+  }
+
+  .information {
+    position: relative;
+  }
+
+  .item:nth-child(1) > .information::after {
+    content: '';
+    position: absolute;
+    width: 1px;
+    height: 100%;
+    background: #ecf0f2;
+    top: 0;
+    right: -24px;
+  }
+
+
+  .title {
+    font-size: 14px;
+    line-height: 16px;
+    color: #999999;
+  }
+
+  .balance {
+    display: block;
+    margin-top: 6px;
+    font-size: 16px;
+    line-height: 19px;
+    color: #000000;
+  }
+
+  .actionBtn {
+    margin-top: 24px;
+    width: 100%;
+    height: 32px;
+    font-size: 14px;
+    line-height: 21px;
+  }
+}

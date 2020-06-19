@@ -1,7 +1,7 @@
-import React, { FC, useContext, useMemo, ReactNode } from 'react';
+import React, { FC, useContext, useMemo } from 'react';
 
 import { BaseTxHistory, FormatBalance, FormatTime, FormatHash } from '@acala-dapp/react-components';
-import { TableItem, Status } from '@acala-dapp/ui-components';
+import { TableConfig, Status } from '@acala-dapp/ui-components';
 import { ExtrinsicHistoryData } from '@acala-dapp/react-hooks';
 import { Fixed18 } from '@acala-network/app-util';
 import { StakingPoolContext } from './StakingPoolProvider';
@@ -9,83 +9,83 @@ import { StakingPoolContext } from './StakingPoolProvider';
 export const Transaction: FC = () => {
   const { stakingPool } = useContext(StakingPoolContext);
 
-  const config = useMemo<TableItem<ExtrinsicHistoryData>[]>(() => [
-    {
-      align: 'left',
-      dataIndex: 'hash',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => <FormatHash hash={value} />,
-      title: 'Tx Hash'
-    },
-    {
-      align: 'left',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: ExtrinsicHistoryData): ReactNode => {
-        if (data.method === 'mint') {
-          return (
-            <FormatBalance
-              balance={Fixed18.fromParts(data?.params[0] || 0)}
-              currency={stakingPool?.stakingCurrency}
-            />);
-        }
+  const config = useMemo<TableConfig[]>(() => {
+    if (!stakingPool) return [];
 
-        if (data.method === 'redeem') {
-          const keys = Object.keys(data?.params[1]);
-
-          return (
-            <>
+    return [
+      {
+        align: 'left',
+        dataIndex: 'hash',
+        /* eslint-disable-next-line react/display-name */
+        render: (value): JSX.Element => <FormatHash hash={value} />,
+        title: 'Tx Hash'
+      },
+      {
+        align: 'left',
+        /* eslint-disable-next-line react/display-name */
+        render: (data: ExtrinsicHistoryData): JSX.Element | string => {
+          if (data.method === 'mint') {
+            return (
               <FormatBalance
-                balance={Fixed18.fromParts(data.params[0] || 0)}
-                currency={stakingPool?.liquidCurrency}
-              />
-              {
+                balance={Fixed18.fromParts(data?.params[0] || 0)}
+                currency={stakingPool.stakingCurrency}
+              />);
+          }
 
-                <span style={{ marginLeft: 8 }}>
-                  {(data.params[1] as any).Target ? `ERA: ${(data.params[1] as any).Target}` : keys }
-                </span>
-              }
-            </>
-          );
-        }
+          if (data.method === 'redeem') {
+            const keys = Object.keys(data?.params[1]);
 
-        return '/';
+            return (
+              <>
+                <FormatBalance
+                  balance={Fixed18.fromParts(data.params[0] || 0)}
+                  currency={stakingPool.liquidCurrency}
+                />
+                {
+
+                  <span style={{ marginLeft: 8 }}>
+                    {(data.params[1] as any).Target ? `ERA: ${(data.params[1] as any).Target}` : keys }
+                  </span>
+                }
+              </>
+            );
+          }
+
+          return '/';
+        },
+        title: 'Token'
       },
-      title: 'Token'
-    },
-    {
-      align: 'left',
-      dataIndex: 'method',
-      /* eslint-disable-next-line react/display-name */
-      render: (value: string): ReactNode => {
-        const paramsMap: Map<string, string> = new Map([
-          ['mint', 'Mint & Stake'],
-          ['redeem', 'Redeem'],
-          ['withdraw_redemption', 'Withdraw Redemption']
-        ]);
+      {
+        align: 'left',
+        dataIndex: 'method',
+        /* eslint-disable-next-line react/display-name */
+        render: (value: string): string | undefined => {
+          const paramsMap: Map<string, string> = new Map([
+            ['mint', 'Mint & Stake'],
+            ['redeem', 'Redeem'],
+            ['withdraw_redemption', 'Withdraw Redemption']
+          ]);
 
-        return paramsMap.get(value);
+          return paramsMap.get(value);
+        },
+        title: 'Stake/Redeem'
       },
-      title: 'Stake/Redeem'
-    },
-    {
-      align: 'right',
-      dataIndex: 'time',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => (
-        <FormatTime time={value} />
-      ),
-      title: 'When'
-    },
-    {
-      align: 'right',
-      dataIndex: 'success',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => (
-        <Status success={value} />
-      ),
-      title: 'Result'
-    }
-  ], [stakingPool?.liquidCurrency, stakingPool?.stakingCurrency]);
+      {
+        align: 'right',
+        dataIndex: 'time',
+        /* eslint-disable-next-line react/display-name */
+        render: (value): JSX.Element => <FormatTime time={value} />,
+        title: 'When'
+      },
+      {
+        align: 'right',
+        dataIndex: 'success',
+        /* eslint-disable-next-line react/display-name */
+        render: (value): JSX.Element => <Status success={value} />,
+        title: 'Result'
+      }
+    ];
+  }, [stakingPool]);
 
   return (
     <BaseTxHistory

@@ -1,11 +1,11 @@
 import { useContext } from 'react';
 
-import { ApiContext, ApiData } from '@acala-dapp/react-environment';
+import { ApiContext, ApiContextData } from '@acala-dapp/react-environment';
 
 /**
  * @name useApi
  * @description get api context value
  */
-export const useApi = (): ApiData => {
-  return useContext<ApiData>(ApiContext);
+export const useApi = (): ApiContextData => {
+  return useContext<ApiContextData>(ApiContext);
 };

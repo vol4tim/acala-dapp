@@ -1,5 +1,5 @@
 import { getFormValidator } from "./useFormValidator";
-import { ApiPromise } from "@polkadot/api";
+import { ApiRx } from "@polkadot/api";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import { CurrencyId } from "@acala-network/types/interfaces";
 
@@ -11,7 +11,7 @@ describe('useFormValidator test', () => {
         max: 100,
         min: 0
       }
-    }, {} as ApiPromise, {} as InjectedAccountWithMeta)
+    }, {} as ApiRx, {} as InjectedAccountWithMeta)
 
     // @ts-ignore
     validator({ num: 101 }).then((result: any) => {
@@ -48,7 +48,7 @@ describe('useFormValidator test', () => {
         equalMax: false,
         equalMin: false
       }
-    }, {} as ApiPromise, {} as InjectedAccountWithMeta)
+    }, {} as ApiRx, {} as InjectedAccountWithMeta)
 
     // @ts-ignore
     validator({ num: 101 }).then((result: any) => {
@@ -83,7 +83,7 @@ describe('useFormValidator test', () => {
         max: 10,
         min: 2
       }
-    }, {} as ApiPromise, {} as InjectedAccountWithMeta)
+    }, {} as ApiRx, {} as InjectedAccountWithMeta)
 
     // @ts-ignore
     validator({ str: 'hello' }).then((result: any) => {
@@ -105,7 +105,7 @@ describe('useFormValidator test', () => {
         type: 'string',
         pattern: /^a+b+c+$/
       }
-    }, {} as ApiPromise, {} as InjectedAccountWithMeta)
+    }, {} as ApiRx, {} as InjectedAccountWithMeta)
 
     // @ts-ignore
     regValidator({ str: 'aabbcc' }).then((result: any) => {
@@ -124,7 +124,7 @@ describe('useFormValidator test', () => {
         type: 'balance',
         currency: 'aca' as any as CurrencyId,
       }
-    }, { derive: { currencies: { balance: async () => 100 } } } as any as  ApiPromise, {} as InjectedAccountWithMeta);
+    }, { derive: { currencies: { balance: async () => 100 } } } as any as  ApiRx, {} as InjectedAccountWithMeta);
 
     // @ts-ignore
     validator({ balance: 10 }).then((result: any) => {
@@ -148,7 +148,7 @@ describe('useFormValidator test', () => {
         max: 10,
         min: 2
       }
-    }, { derive: { currencies: { balance: async () => 100 } } } as any as  ApiPromise, {} as InjectedAccountWithMeta);
+    }, { derive: { currencies: { balance: async () => 100 } } } as any as  ApiRx, {} as InjectedAccountWithMeta);
 
     // @ts-ignore
     boundaryValidator({ balance: 11 }).then((result: any) => {

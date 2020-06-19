@@ -1,8 +1,8 @@
 import React, { FC, useState, useEffect, ReactNode } from 'react';
 
-import { BaseTxHistory, FormatTime, FormatHash, Token, formatBalance, formatCurrency } from '@acala-dapp/react-components';
-import { TableItem, Status } from '@acala-dapp/ui-components';
-import { ExtrinsicHistoryData, useConstants, useApi } from '@acala-dapp/react-hooks';
+import { BaseTxHistory, FormatTime, FormatHash, Token, formatBalance, getTokenName } from '@acala-dapp/react-components';
+import { TableConfig, Status } from '@acala-dapp/ui-components';
+import { useConstants, useApi } from '@acala-dapp/react-hooks';
 import { Fixed18, debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
 import { Codec } from '@polkadot/types/types';
 
@@ -30,8 +30,8 @@ const Action: FC<ActionProps> = ({
   useEffect(() => {
     if (api && block) {
       (async (): Promise<void> => {
-        const hash = await api.query.system.blockHash(block);
-        const result = await api.query.cdpEngine.debitExchangeRate.at(hash, token);
+        const hash = await api.query.system.blockHash(block).toPromise();
+        const result = await api.query.cdpEngine.debitExchangeRate.at(hash, token).toPromise();
 
         setDebitExchangeRate(result);
       })();
@@ -57,22 +57,22 @@ const Action: FC<ActionProps> = ({
   const message: Array<string> = [];
 
   if (_collateral.isGreaterThan(ZERO)) {
-    message.push(`Deposit ${formatBalance(_collateral)} ${formatCurrency(token)}`);
+    message.push(`Deposit ${formatBalance(_collateral)} ${getTokenName(token)}`);
   }
 
   if (_collateral.isLessThan(ZERO)) {
-    message.push(`Withdraw ${formatBalance(_collateral.negated())} ${formatCurrency(token)}`);
+    message.push(`Withdraw ${formatBalance(_collateral.negated())} ${getTokenName(token)}`);
   }
 
   if (_debit.isGreaterThan(ZERO)) {
     message.push(
-      `Generate ${getDebit()} ${formatCurrency(stableCurrency)}`
+      `Generate ${getDebit()} ${getTokenName(stableCurrency)}`
     );
   }
 
   if (_debit.isLessThan(ZERO)) {
     message.push(
-      `Pay Back ${getDebit()} ${formatCurrency(stableCurrency)}`
+      `Pay Back ${getDebit()} ${getTokenName(stableCurrency)}`
     );
   }
 
@@ -80,7 +80,7 @@ const Action: FC<ActionProps> = ({
 };
 
 export const Transaction: FC = () => {
-  const config: TableItem<ExtrinsicHistoryData>[] = [
+  const config: TableConfig[] = [
     {
       align: 'left',
       dataIndex: 'hash',
@@ -93,7 +93,7 @@ export const Transaction: FC = () => {
       align: 'left',
       dataIndex: 'params',
       /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => <Token token={value[0]} />,
+      render: (value): ReactNode => <Token currency={value[0]} />,
       title: 'Token',
       width: 1
     },

@@ -1,5 +1,5 @@
 import React, { FC, useContext, ReactNode } from 'react';
-import { Table, Card, TableItem } from '@acala-dapp/ui-components';
+import { Table, Card, TableConfig } from '@acala-dapp/ui-components';
 import { Token, FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18 } from '@acala-network/app-util';
@@ -8,15 +8,15 @@ import { StakingPoolContext } from './StakingPoolProvider';
 
 export const StakingPool: FC = () => {
   const { stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
-  const tableConfig: TableItem<any>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
       render: (value: CurrencyId): ReactNode => (
         <Token
+          currency={value}
           icon
-          token={value}
         />
       ),
       title: 'Pool'

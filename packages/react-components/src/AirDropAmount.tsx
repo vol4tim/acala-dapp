@@ -1,8 +1,10 @@
 import React, { FC } from 'react';
+
 import AccountId from '@polkadot/types/generic/AccountId';
 import { useAccounts, useCall } from '@acala-dapp/react-hooks';
-import { FormatBalance } from './format';
 import { Balance } from '@acala-network/types/interfaces';
+
+import { FormatBalance } from './format';
 
 interface Props {
   currency: string;

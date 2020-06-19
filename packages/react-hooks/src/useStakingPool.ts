@@ -7,6 +7,9 @@ import { Amount, Rate, BlockNumber, Balance } from '@acala-network/types/interfa
 import { useApi } from './useApi';
 import { useCall } from './useCall';
 import { useAccounts } from './useAccounts';
+import { useRxStore } from './useRxStore';
+import { Observable, combineLatest, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 export interface FreeItem {
   era: number;
@@ -20,21 +23,21 @@ export interface RedeemItem {
 
 export interface UseStakingPoolReturnType {
   stakingPool: DerivedStakingPool | undefined;
-  stakingPoolHelper: StakingPoolHelper;
+  stakingPoolHelper: StakingPoolHelper | undefined;
   unbondingDuration: number;
   eraDuration: number;
   freeList: FreeItem[];
-  rewardRate: Rate;
+  rewardRate: Rate | undefined;
   redeemList: RedeemItem[];
 }
 
 export const useStakingPool = (): UseStakingPoolReturnType => {
   const { api } = useApi();
   const { active } = useAccounts();
-  const [stakingPoolHelper, setStakingPoolHelper] = useState<StakingPoolHelper>(null as any as StakingPoolHelper);
-  // FIXME: need fix api-derive type
-  const stakingPool = useCall<DerivedStakingPool>('derive.homa.stakingPool', []);
-  const rewardRate = useCall<Rate>('query.polkadotBridge.mockRewardRate', []) as Rate;
+  const [stakingPoolHelper, setStakingPoolHelper] = useState<StakingPoolHelper | undefined>();
+  const [stakingPool, setStakingPool] = useState<DerivedStakingPool | undefined>();
+  const { stakingPool: stakingPoolStore } = useRxStore();
+  const rewardRate = useCall<Rate>('query.polkadotBridge.mockRewardRate', []);
 
   const [freeList, setFreeList] = useState<FreeItem[]>([]);
   const [redeemList, setRedeemList] = useState<RedeemItem[]>([]);
@@ -61,83 +64,66 @@ export const useStakingPool = (): UseStakingPoolReturnType => {
     return expectedBlockTime.toNumber() * eraLength.toNumber();
   }, [api]);
 
-  const fetchFreeList = useCallback(async (start: number, duration: number) => {
-    const list = [];
+  const fetchFreeList = useCallback((start: number, duration: number): Observable<{ era: number; free: Fixed18}[]> => {
+    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index);
 
-    for (let i = start; i < start + duration; i++) {
-      const result = await api.query.stakingPool.unbonding<Amount[]>(i);
-      const free = Fixed18.fromParts(result[0].toString()).sub(Fixed18.fromParts(result[1].toString()));
+    return combineLatest(
+      eraArray.map((duration: number) => api.query.stakingPool.unbonding<Amount[]>(duration))
+    ).pipe(
+      map((result) => eraArray.map((era, index) => {
+        const free = Fixed18.fromParts(result[index][0].toString()).sub(Fixed18.fromParts(result[index][1].toString()));
 
-      list.push({
-        era: i,
-        free: free
-      });
-    }
-
-    return list.filter((item) => !item.free.isZero());
+        return { era, free };
+      })),
+      map((result) => result.filter((item): boolean => !item.free.isZero()))
+    );
   }, [api]);
 
-  const fetchRedeemList = useCallback(async () => {
+  const fetchRedeemList = useCallback((): Observable<{ era: number; balance: Fixed18}[]> => {
     if (!stakingPool || !active) {
-      return [];
+      return of([]);
     }
 
     const duration = stakingPool.bondingDuration.toNumber();
     const start = stakingPool.currentEra.toNumber();
-    const list = [];
+    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index);
 
-    for (let i = start; i < start + duration + 2; i++) {
-      const result = await api.query.stakingPool.claimedUnbond<Balance>(active.address, i);
-
-      if (!result.isEmpty) {
-        list.push({
-          balance: convertToFixed18(result),
-          era: i
-        });
-      }
-    }
-
-    return list;
+    return combineLatest(
+      eraArray.map((era: number) => api.query.stakingPool.claimedUnbond<Balance>(active.address, era))
+    ).pipe(
+      map((result) => eraArray.map((era, index) => ({
+        balance: result[index].isEmpty ? Fixed18.ZERO : convertToFixed18(result[index]),
+        era
+      }))),
+      map((result) => result.filter((item): boolean => !item.balance.isZero()))
+    );
   }, [stakingPool, active, api.query.stakingPool]);
 
   useEffect(() => {
-    (async (): Promise<void> => {
-      const list = await fetchRedeemList();
+    const subscriber = fetchRedeemList().subscribe(setRedeemList);
 
-      setRedeemList(list);
-    })();
+    return (): void => subscriber.unsubscribe();
   }, [fetchRedeemList, setRedeemList]);
 
   useEffect(() => {
-    if (stakingPool) {
-      (async (): Promise<void> => {
-        const list = await fetchFreeList(
-          stakingPool.currentEra.toNumber() + 1,
-          stakingPool.bondingDuration.toNumber()
-        );
+    if (!stakingPool) return;
 
-        setFreeList(list);
-      })();
-    }
+    const subscriber = fetchFreeList(
+      stakingPool.currentEra.toNumber() + 1,
+      stakingPool.bondingDuration.toNumber()
+    ).subscribe(setFreeList);
+
+    return (): void => subscriber.unsubscribe();
   }, [fetchFreeList, stakingPool]);
 
   useEffect(() => {
-    if (stakingPool) {
-      setStakingPoolHelper(
-        new StakingPoolHelper({
-          bondingDuration: stakingPool.bondingDuration,
-          communalFree: stakingPool.freeUnbonded,
-          currentEra: stakingPool.currentEra,
-          defaultExchangeRate: stakingPool.defaultExchangeRate,
-          liquidTokenIssuance: stakingPool.liquidTokenIssuance,
-          maxClaimFee: stakingPool.maxClaimFee,
-          nextEraClaimedUnbonded: stakingPool.nextEraUnbond[1],
-          totalBonded: stakingPool.totalBonded,
-          unbondingToFree: stakingPool.unbondingToFree
-        })
-      );
-    }
-  }, [stakingPool]);
+    const subscribe = stakingPoolStore.subscribe((result) => {
+      setStakingPoolHelper(result.helper);
+      setStakingPool(result.stakingPool);
+    });
+
+    return (): void => subscribe.unsubscribe();
+  }, [stakingPoolStore, setStakingPool, setStakingPoolHelper]);
 
   return {
     eraDuration,

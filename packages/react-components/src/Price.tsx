@@ -1,36 +1,34 @@
-import React, { FC, memo } from 'react';
-
-import { CurrencyId } from '@acala-network/types/interfaces';
-import { convertToFixed18 } from '@acala-network/app-util';
-import { DerivedPrice } from '@acala-network/api-derive';
+import React, { FC } from 'react';
 
 import { usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { FormatFixed18 } from './format';
-import { getValueFromTimestampValue } from './utils';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
-interface Props extends BareProps {
-  token: CurrencyId | string;
+import { FormatFixed18, FormatFixed18Props } from './format';
+
+interface Props extends BareProps, FormatFixed18Props {
+  currency: CurrencyLike;
 }
 
-export const Price: FC<Props> = memo(({
+/**
+ * @name Price
+ * @description show the `currency` price
+ */
+export const Price: FC<Props> = ({
   className,
-  token
+  currency
 }) => {
-  const price = usePrice(token) as DerivedPrice;
+  const price = usePrice(currency);
 
-  if (!price || !price.price) {
+  if (!price) {
     return null;
   }
 
   return (
     <FormatFixed18
       className={className}
-      data={convertToFixed18(getValueFromTimestampValue(price.price))}
+      data={price}
       prefix='$'
-      withpadDecimalPlaces
     />
   );
-});
-
-Price.displayName = 'Price';
+};

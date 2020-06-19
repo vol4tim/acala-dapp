@@ -2,7 +2,7 @@ import React, { FC, ReactNode } from 'react';
 import Identicon from '@polkadot/react-identicon';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
-import { Card, Loading, CopyIcon, Button } from '@acala-dapp/ui-components';
+import { Card, Loading, CopyIcon, EditIcon } from '@acala-dapp/ui-components';
 
 import { useAccounts, useNotification } from '@acala-dapp/react-hooks';
 import classes from './UserCard.module.scss';
@@ -37,18 +37,16 @@ export const UserCard: FC = () => {
         <div className={classes.info}>
           <div className={classes.name}>
             {active.meta.name || 'User'}
-            <Button
-              color='primary'
-              onClick={openSelectAccount}
-              type='ghost'
-            >
-            change
-            </Button>
           </div>
           <FormatAddress
             address={active.address}
             className={classes.address}
           />
+        </div>
+        <div className={classes.edit}
+          onClick={openSelectAccount}>
+          <EditIcon />
+          <p className={classes.action}>Change</p>
         </div>
         <CopyToClipboard
           onCopy={handleCopy}
@@ -56,6 +54,7 @@ export const UserCard: FC = () => {
         >
           <div className={classes.copy}>
             <CopyIcon />
+            <p className={classes.action}>Copy</p>
           </div>
         </CopyToClipboard>
       </>

@@ -1,12 +1,12 @@
-import React, { FC, useEffect, useState, ChangeEvent, ReactNode } from 'react';
+import React, { FC, ChangeEvent, ReactNode, useMemo, useCallback } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { stableCoinToDebit, Fixed18, LoanHelper } from '@acala-network/app-util';
+import { stableCoinToDebit, Fixed18, convertToFixed18, calcLiquidationPrice, calcCollateralRatio } from '@acala-network/app-util';
 
 import { Dialog, ButtonProps, Button, List, ListConfig } from '@acala-dapp/ui-components';
-import { useModal, useFormValidator, useLoan, useConstants } from '@acala-dapp/react-hooks';
+import { useModal, useFormValidator, useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
 import { BalanceInput, TxButton, FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
 
 import classes from './LoanActionButton.module.scss';
@@ -17,25 +17,50 @@ interface Props extends Omit<ButtonProps, 'onClick' | 'type'> {
   type: ActionType;
   text: string;
   token: CurrencyId | string;
-  max: number;
 }
 
 export const LonaActionButton: FC<Props> = ({
-  max,
   text,
   token,
   type,
   ...other
 }) => {
   const { close, open, status } = useModal(false);
-  const { stableCurrency } = useConstants();
+  const { minmumDebitValue, stableCurrency } = useConstants();
+  const balance = useBalance(token);
+  const stableCurrencyBalance = useBalance(stableCurrency);
+  const loanHelper = useLoanHelper(token);
+
+  const maxInput = useMemo(() => {
+    if (!balance || !loanHelper || !stableCurrencyBalance) return 0;
+
+    if (type === 'payback') {
+      return convertToFixed18(stableCurrencyBalance).min(loanHelper.canPayBack).toNumber(2, 3);
+    }
+
+    if (type === 'generate') {
+      return loanHelper.canGenerate.toNumber();
+    }
+
+    if (type === 'deposit') {
+      return convertToFixed18(balance).toNumber();
+    }
+
+    if (type === 'withdraw') {
+      return loanHelper.collaterals.sub(loanHelper.requiredCollateral).toNumber();
+    }
+
+    return 0;
+  }, [balance, loanHelper, stableCurrencyBalance, type]);
+
   const validator = useFormValidator({
     value: {
-      max: max,
+      max: maxInput,
       min: 0,
       type: 'number'
     }
   });
+
   const form = useFormik({
     initialValues: {
       value: (('' as any) as number)
@@ -43,35 +68,72 @@ export const LonaActionButton: FC<Props> = ({
     onSubmit: noop,
     validate: validator
   });
-  const { currentLoanType, currentUserLoan, currentUserLoanHelper, getUserLoanHelper, minmumDebitValue } = useLoan(token);
-  const [collateral, setCollateral] = useState<number>(0);
-  const [debit, setDebit] = useState<number>(0);
-  const [loanHelper, setLoanHelper] = useState<LoanHelper | null>();
 
-  useEffect(() => {
-    const _result = getUserLoanHelper(currentUserLoan, currentLoanType, collateral, debit);
+  const collateral = useMemo<number>((): number => {
+    if (!form.values.value) return 0;
 
-    setLoanHelper(_result);
-  }, [currentLoanType, currentUserLoan, collateral, debit, setLoanHelper, getUserLoanHelper]);
+    if (type === 'deposit') {
+      return form.values.value;
+    }
 
-  const checkOperateStableCurrency = (): boolean => {
+    if (type === 'withdraw') {
+      return -form.values.value;
+    }
+
+    return 0;
+  }, [form.values, type]);
+
+  const debit = useMemo<number>((): number => {
+    if (!form.values.value) return 0;
+
+    if (type === 'generate') {
+      return form.values.value;
+    }
+
+    if (type === 'payback') {
+      return -form.values.value;
+    }
+
+    return 0;
+  }, [form.values, type]);
+
+  const newLiquidationPrice = useMemo<Fixed18>(() => {
+    if (!loanHelper) return Fixed18.ZERO;
+
+    return calcLiquidationPrice(
+      loanHelper.collaterals.add(Fixed18.fromNatural(collateral)),
+      loanHelper.debitAmount.add(Fixed18.fromNatural(debit)),
+      loanHelper.liquidationRatio
+    );
+  }, [collateral, debit, loanHelper]);
+
+  const newCollateralRatio = useMemo(() => {
+    if (!loanHelper) return Fixed18.ZERO;
+
+    return calcCollateralRatio(
+      loanHelper.collaterals.add(Fixed18.fromNatural(collateral)).mul(loanHelper.collateralPrice),
+      loanHelper.debitAmount.add(Fixed18.fromNatural(debit))
+    );
+  }, [collateral, debit, loanHelper]);
+
+  const isStableCurrency = useMemo((): boolean => {
     return type === 'payback' || type === 'generate';
-  };
+  }, [type]);
 
-  const getDialogTitle = (): string => {
-    const _token = checkOperateStableCurrency() ? stableCurrency : token;
+  const dialogTitle = useMemo((): string => {
+    const _token = isStableCurrency ? stableCurrency : token;
 
     return `${text} ${_token}`;
-  };
+  }, [isStableCurrency, stableCurrency, text, token]);
 
-  const handleClick = (): void => {
+  const handleClick = useCallback((): void => {
     open();
-  };
+  }, [open]);
 
   const getParams = (): string[] => {
     const params = [token.toString(), '0', '0'];
 
-    if (!form.values.value || !loanHelper || !currentUserLoan || !currentUserLoanHelper) {
+    if (!form.values.value || !loanHelper) {
       return params;
     }
 
@@ -79,11 +141,11 @@ export const LonaActionButton: FC<Props> = ({
       case 'payback': {
         if (
           Fixed18.fromNatural(form.values.value)
-            .sub(currentUserLoanHelper.debitAmount)
+            .sub(loanHelper.debitAmount)
             .negated()
             .isLessThan(minmumDebitValue)
         ) {
-          params[2] = currentUserLoanHelper.debits.negated().innerToString();
+          params[2] = loanHelper.debits.negated().innerToString();
         } else {
           params[2] = stableCoinToDebit(
             Fixed18.fromNatural(form.values.value),
@@ -109,11 +171,11 @@ export const LonaActionButton: FC<Props> = ({
 
       case 'withdraw': {
         if (
-          currentUserLoanHelper.collaterals
+          loanHelper.collaterals
             .sub(Fixed18.fromNatural(form.values.value))
             .isLessThan(Fixed18.fromNatural(0.0000001))
         ) {
-          params[1] = currentUserLoanHelper.collaterals.negated().innerToString();
+          params[1] = loanHelper.collaterals.negated().innerToString();
         } else {
           params[1] = Fixed18.fromNatural(form.values.value).negated().innerToString();
         }
@@ -125,7 +187,7 @@ export const LonaActionButton: FC<Props> = ({
     return params;
   };
 
-  const checkDisabled = (): boolean => {
+  const isDisabled = useMemo((): boolean => {
     if (!form.values.value) {
       return true;
     }
@@ -135,7 +197,7 @@ export const LonaActionButton: FC<Props> = ({
     }
 
     return false;
-  };
+  }, [form.values, form.errors]);
 
   const config: ListConfig[] = [
     {
@@ -174,57 +236,36 @@ export const LonaActionButton: FC<Props> = ({
     }
   ];
 
-  useEffect(() => {
-    const value = form.values.value;
-
-    if (value) {
-      switch (type) {
-        case 'deposit': {
-          setCollateral(value);
-          break;
-        }
-
-        case 'withdraw': {
-          setCollateral(-value);
-          break;
-        }
-
-        case 'generate': {
-          setDebit(value);
-          break;
-        }
-
-        case 'payback': {
-          setDebit(-value);
-          break;
-        }
-      }
-    }
-  }, [form.values.value, type, setCollateral, setDebit]);
-
   const _close = (): void => {
-    setCollateral(0);
-    setDebit(0);
-    form.resetForm();
     close();
+    form.resetForm();
   };
 
-  const getValueWithCheckFormError = (value: any): any => {
-    if (form?.errors?.value) {
+  const formatListData = useCallback((value: Fixed18): Fixed18 => {
+    if (form.errors.value) {
       return Fixed18.fromNatural(NaN);
     }
 
     return value || Fixed18.fromNatural(NaN);
-  };
+  }, [form.errors]);
 
-  const listData = {
-    borrowed: getValueWithCheckFormError(loanHelper?.debitAmount),
-    collateralRate: getValueWithCheckFormError(loanHelper?.collateralRatio),
-    liquidationPrice: getValueWithCheckFormError(loanHelper?.liquidationPrice)
-  };
+  const listData = useMemo(() => {
+    if (!loanHelper) return {};
+
+    return {
+      borrowed: formatListData(loanHelper.debitAmount),
+      canGenerate: formatListData(loanHelper.canGenerate),
+      collateralRate: formatListData(newCollateralRatio),
+      liquidationPrice: formatListData(newLiquidationPrice)
+    };
+  }, [loanHelper, newCollateralRatio, newLiquidationPrice, formatListData]);
+
+  const showMaxBtn = useMemo<boolean>((): boolean => {
+    return type !== 'generate';
+  }, [type]);
 
   const handleMax = (): void => {
-    form.setFieldValue('value', max);
+    form.setFieldValue('value', maxInput);
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
@@ -250,7 +291,7 @@ export const LonaActionButton: FC<Props> = ({
               Close
             </Button>
             <TxButton
-              disabled={checkDisabled()}
+              disabled={isDisabled}
               method='adjustLoan'
               onSuccess={_close}
               params={getParams()}
@@ -262,17 +303,17 @@ export const LonaActionButton: FC<Props> = ({
           </>
         }
         className={classes.dialog}
-        title={getDialogTitle()}
+        title={dialogTitle}
         visiable={status}
       >
         <BalanceInput
-          error={!!form.errors.value}
+          error={form.errors.value}
           id='value'
           name='value'
           onChange={handleChange}
           onMax={handleMax}
-          showMaxBtn={type !== 'generate'}
-          token={checkOperateStableCurrency() ? stableCurrency : token}
+          showMaxBtn={showMaxBtn}
+          token={isStableCurrency ? stableCurrency : token}
           value={form.values.value}
         />
         <List

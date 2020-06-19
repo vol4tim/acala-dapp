@@ -24,6 +24,7 @@ interface Props extends BareProps {
   arrowClassName?: string;
   activeContentClassName?: string;
   selectedRender?: (value: any) => ReactNode;
+  compareFN?: (a: any, b: any) => boolean;
 }
 
 export const Dropdown: FC<Props> = memo(({
@@ -31,6 +32,7 @@ export const Dropdown: FC<Props> = memo(({
   arrowClassName,
   border = true,
   className,
+  compareFN,
   config,
   itemClassName,
   menuClassName,
@@ -42,7 +44,7 @@ export const Dropdown: FC<Props> = memo(({
 }) => {
   const [open, setOpen] = useState<boolean>(false);
   const $rootRef = createRef<HTMLDivElement>();
-  const active = config.find((data: DropdownConfig) => data.value === value);
+  const active = config.find((data: DropdownConfig) => compareFN ? compareFN(data.value, value) : data.value === value);
 
   useEffect(() => {
     if (!$rootRef.current) {

@@ -4,6 +4,7 @@ import { ConnectError, NoAccounts, NoExtensions } from '@acala-dapp/react-compon
 import { UIProvider, Notification, FullLoading } from '@acala-dapp/ui-components';
 import { ApiProvider, AccountProvider, GlobalStoreProvider } from '@acala-dapp/react-environment';
 import { useAppSetting } from '@acala-dapp/react-hooks/useAppSetting';
+import { RxStoreProvider } from '@acala-dapp/react-components/RxStore';
 
 import { RouterProvider } from './components/RouterProvider';
 import { config as routerConfig } from './router-config';
@@ -24,9 +25,11 @@ const App: FC = () => {
             NoExtensions={<NoExtensions />}
             applicationName={'Acala Dapp'}
           >
-            <GlobalStoreProvider>
-              <RouterProvider config={routerConfig} />
-            </GlobalStoreProvider>
+            <RxStoreProvider>
+              <GlobalStoreProvider>
+                <RouterProvider config={routerConfig} />
+              </GlobalStoreProvider>
+            </RxStoreProvider>
           </AccountProvider>
         </ApiProvider>
       </Notification>

@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react';
-import { Card, Table, TableItem } from '@acala-dapp/ui-components';
+import { Card, Table, TableConfig } from '@acala-dapp/ui-components';
 import { useCouncilMembers } from '@acala-dapp/react-hooks';
 import AccountId from '@polkadot/types/generic/AccountId';
 import { FormatAddress } from '@acala-dapp/react-components';
@@ -11,7 +11,7 @@ interface Props {
 export const CouncilMembers: FC<Props> = ({ council }) => {
   const members = useCouncilMembers(council);
 
-  const tableConfig: TableItem<any>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */

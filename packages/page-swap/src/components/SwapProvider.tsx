@@ -1,4 +1,6 @@
 import React, { memo, createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo } from 'react';
+import { Observable, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { Vec } from '@polkadot/types';
 import { CurrencyId } from '@acala-network/types/interfaces';
@@ -22,10 +24,10 @@ interface ContextData {
   supplyCurrencies: (CurrencyId | string)[];
   targetCurrencies: (CurrencyId | string)[];
 
-  calcSupply: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number) => Promise<number>;
-  calcTarget: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number) => Promise<number>;
+  calcSupply: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number) => Observable<number>;
+  calcTarget: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number) => Observable<number>;
 
-  setCurrency: (target: CurrencyId, other: CurrencyId, callback?: (pool: PoolData) => void) => Promise<void>;
+  setCurrency: (target: CurrencyId, other: CurrencyId, callback?: (pool: PoolData) => void) => void;
   pool: PoolData;
 
   isInitialized: boolean;
@@ -66,41 +68,43 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
     targetSize: 0
   });
 
-  const setCurrency = useCallback(async (supply: CurrencyId, target: CurrencyId): Promise<void> => {
+  const setCurrency = useCallback((supply: CurrencyId, target: CurrencyId): void => {
     // base to other
     if (tokenEq(supply, dexBaseCurrency) && !tokenEq(target, dexBaseCurrency)) {
-      const pool = await (api.derive as any).dex.pool(target) as DerivedDexPool;
-
-      setPool({
-        supplyCurrency: supply,
-        supplySize: convertToFixed18(pool.base).toNumber(),
-        targetCurrency: target,
-        targetSize: convertToFixed18(pool.other).toNumber()
+      ((api.derive as any).dex.pool(target) as Observable<DerivedDexPool>).subscribe((pool) => {
+        setPool({
+          supplyCurrency: supply,
+          supplySize: convertToFixed18(pool.base).toNumber(),
+          targetCurrency: target,
+          targetSize: convertToFixed18(pool.other).toNumber()
+        });
       });
     }
 
     // other to base
     if (tokenEq(target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency)) {
-      const pool = await (api.derive as any).dex.pool(supply) as DerivedDexPool;
-
-      setPool({
-        supplyCurrency: supply,
-        supplySize: convertToFixed18(pool.other).toNumber(),
-        targetCurrency: target,
-        targetSize: convertToFixed18(pool.base).toNumber()
+      ((api.derive as any).dex.pool(supply) as Observable<DerivedDexPool>).subscribe((pool) => {
+        setPool({
+          supplyCurrency: supply,
+          supplySize: convertToFixed18(pool.other).toNumber(),
+          targetCurrency: target,
+          targetSize: convertToFixed18(pool.base).toNumber()
+        });
       });
     }
 
     // other to other
     if (!tokenEq(target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency)) {
-      const supplyPool = await (api.derive as any).dex.pool(supply) as DerivedDexPool;
-      const targetPool = await (api.derive as any).dex.pool(target) as DerivedDexPool;
-
-      setPool({
-        supplyCurrency: supply,
-        supplySize: convertToFixed18(targetPool.other).toNumber(),
-        targetCurrency: target,
-        targetSize: convertToFixed18(supplyPool.other).toNumber()
+      combineLatest([
+        (api.derive as any).dex.pool(supply) as Observable<DerivedDexPool>,
+        (api.derive as any).dex.pool(target) as Observable<DerivedDexPool>
+      ]).subscribe(([supplyPool, targetPool]) => {
+        setPool({
+          supplyCurrency: supply,
+          supplySize: convertToFixed18(targetPool.other).toNumber(),
+          targetCurrency: target,
+          targetSize: convertToFixed18(supplyPool.other).toNumber()
+        });
       });
     }
 
@@ -114,80 +118,84 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
     }
   }, [api.derive, dexBaseCurrency, setPool]);
 
-  const calcSupply = useCallback(async (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number): Promise<number> => {
+  const calcSupply = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number): Observable<number> => {
     // reload supply pool and target pool
-    const supplyPool = await (api.derive as any).dex.pool(supplyCurrency);
-    const targetPool = await (api.derive as any).dex.pool(targetCurrency);
+    return combineLatest([
+      (api.derive as any).dex.pool(supplyCurrency) as Observable<DerivedDexPool>,
+      (api.derive as any).dex.pool(targetCurrency) as Observable<DerivedDexPool>
+    ]).pipe(
+      map(([supplyPool, targetPool]) => {
+        if (!supplyPool || !targetPool) return 0;
 
-    if (!(supplyPool && targetPool)) {
-      return '' as any as number;
-    }
+        if (!supplyCurrency.eq(dexBaseCurrency) && targetCurrency.eq(dexBaseCurrency)) {
+          // other to base
+          return calcSupplyInOtherToBase(
+            Fixed18.fromNatural(target),
+            convertPool(supplyPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
+          return calcSupplyInBaseToOther(
+            Fixed18.fromNatural(target),
+            convertPool(targetPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
+          // other to other
+          return calcSupplyInOtherToOther(
+            Fixed18.fromNatural(target),
+            convertPool(supplyPool),
+            convertPool(targetPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        }
 
-    if (!supplyCurrency.eq(dexBaseCurrency) && targetCurrency.eq(dexBaseCurrency)) {
-      // other to base
-      return calcSupplyInOtherToBase(
-        Fixed18.fromNatural(target),
-        convertPool(supplyPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
-      return calcSupplyInBaseToOther(
-        Fixed18.fromNatural(target),
-        convertPool(targetPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
-      // other to other
-      return calcSupplyInOtherToOther(
-        Fixed18.fromNatural(target),
-        convertPool(supplyPool),
-        convertPool(targetPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    }
-
-    return 0;
+        return 0;
+      })
+    );
   }, [api.derive, dexBaseCurrency, feeRate]);
 
-  const calcTarget = useCallback(async (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number): Promise<number> => {
+  const calcTarget = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number): Observable<number> => {
     // reload supply pool and target pool
-    const supplyPool = await (api.derive as any).dex.pool(supplyCurrency);
-    const targetPool = await (api.derive as any).dex.pool(targetCurrency);
+    return combineLatest([
+      (api.derive as any).dex.pool(supplyCurrency) as Observable<DerivedDexPool>,
+      (api.derive as any).dex.pool(targetCurrency) as Observable<DerivedDexPool>
+    ]).pipe(
+      map(([supplyPool, targetPool]) => {
+        if (!supplyPool || !targetPool) return 0;
 
-    if (!(supplyPool && targetPool)) {
-      return '' as any as number;
-    }
+        if (!supplyCurrency.eq(dexBaseCurrency) && targetCurrency.eq(dexBaseCurrency)) {
+          // other to base
+          return calcTargetInOtherToBase(
+            Fixed18.fromNatural(supply),
+            convertPool(supplyPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
+          return calcTargetInBaseToOther(
+            Fixed18.fromNatural(supply),
+            convertPool(targetPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
+          // other to other
+          return calcTargetInOtherToOther(
+            Fixed18.fromNatural(supply),
+            convertPool(supplyPool),
+            convertPool(targetPool),
+            convertToFixed18(feeRate),
+            Fixed18.fromNatural(slippage || 0)
+          ).toNumber();
+        }
 
-    if (!supplyCurrency.eq(dexBaseCurrency) && targetCurrency.eq(dexBaseCurrency)) {
-      // other to base
-      return calcTargetInOtherToBase(
-        Fixed18.fromNatural(supply),
-        convertPool(supplyPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
-      return calcTargetInBaseToOther(
-        Fixed18.fromNatural(supply),
-        convertPool(targetPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
-      // other to other
-      return calcTargetInOtherToOther(
-        Fixed18.fromNatural(supply),
-        convertPool(supplyPool),
-        convertPool(targetPool),
-        convertToFixed18(feeRate),
-        Fixed18.fromNatural(slippage || 0)
-      ).toNumber();
-    }
-
-    return 0;
+        return 0;
+      })
+    );
   }, [api.derive, dexBaseCurrency, feeRate]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 import React, { FC, useRef, useContext, ReactNode } from 'react';
 
 import { BaseTxHistory, FormatBalance, FormatTime, FormatHash } from '@acala-dapp/react-components';
-import { TableItem, Status } from '@acala-dapp/ui-components';
+import { TableConfig, Status } from '@acala-dapp/ui-components';
 import { ExtrinsicHistoryData, useConstants } from '@acala-dapp/react-hooks';
 import { Fixed18 } from '@acala-network/app-util';
 import { DepositContext } from './Provider';
@@ -16,7 +16,7 @@ export const Transaction: FC = () => {
   const { dexBaseCurrency } = useConstants();
   const { action } = useContext(DepositContext);
 
-  const config = useRef<TableItem<ExtrinsicHistoryData>[]>([
+  const config = useRef<TableConfig[]>([
     {
       align: 'left',
       dataIndex: 'hash',

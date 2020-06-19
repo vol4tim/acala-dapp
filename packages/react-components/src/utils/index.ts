@@ -4,8 +4,11 @@ import duration from 'dayjs/plugin/duration';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18 } from '@acala-network/app-util';
-import { ApiPromise } from '@polkadot/api';
+import { ApiRx, ApiPromise } from '@polkadot/api';
 import { TimestampedValue } from '@open-web3/orml-types/interfaces';
+
+export * from './token';
+export * from './account';
 
 dayjs.extend(duration);
 
@@ -30,22 +33,40 @@ export const padDecimalPlaces = (origin: number | string, dp: number): string =>
   return [i, d].join('.');
 };
 
-export const thousand = (num: number): string => {
-  return num.toLocaleString(undefined, { maximumSignificantDigits: 18, minimumFractionDigits: 5 });
+export const effectiveDecimal = (origin: number | string, dp: number): string => {
+  let _origin = origin.toString();
+
+  // transfer scientific notation to number
+  if (_origin.includes('e')) {
+    _origin = Number(origin).toFixed(18).toString();
+  }
+
+  let [i, d] = _origin.split('.');
+
+  if (!d) {
+    d = ''.padEnd(dp, '0');
+  } else {
+    let count = dp;
+    let ignoreZero = true;
+
+    d = d.split('').reduce((acc, cur) => {
+      ignoreZero = ignoreZero !== false && cur === '0';
+
+      if (count <= 0) return acc;
+
+      if (ignoreZero) return acc + cur;
+
+      count -= 1;
+
+      return acc + cur;
+    }, '');
+  }
+
+  return [i, d].join('.');
 };
 
-export const formatCurrency = (currency: CurrencyId | string | undefined, upper = true): string => {
-  if (!currency) {
-    return '';
-  }
-
-  const inner = currency.toString();
-
-  if (inner.toUpperCase() === 'AUSD') {
-    return upper ? 'aUSD' : 'ausd';
-  }
-
-  return upper ? inner.toUpperCase() : inner.toLowerCase();
+export const thousand = (num: number): string => {
+  return num.toLocaleString(undefined, { maximumSignificantDigits: 18, minimumFractionDigits: 5 });
 };
 
 export const formatHash = (hash: string): string => {
@@ -91,10 +112,10 @@ export const getValueFromTimestampValue = (origin: TimestampedValue): Codec => {
   return origin.value;
 };
 
-export const getCurrencyIdFromName = (api: ApiPromise, name: string): CurrencyId => {
-  const CurrencyId = api.registry.createType('CurrencyId' as any);
+export const getCurrencyIdFromName = (api: ApiRx | ApiPromise, name: string): CurrencyId => {
+  const CurrencyId = api.registry.createClass('CurrencyId' as any);
 
-  return new CurrencyId(name);
+  return new CurrencyId(api.registry, name);
 };
 
 export const formatDuration = (duration: number): number => {

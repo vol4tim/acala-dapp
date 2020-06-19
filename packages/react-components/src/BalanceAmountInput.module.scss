@@ -1,0 +1,62 @@
+.root {
+  box-sizing: border-box;
+  width: 100%;
+  height: 96px;
+  border: 1px solid #cccccc;
+  display: flex;
+
+  &:hover, &.focused {
+    border-color: #173dc9;
+  }
+
+  &.error {
+    border-color: #ff5500 !important;
+  }
+
+  .switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    cursor: pointer;
+  }
+
+  .inputArea {
+    flex: 1;
+  }
+
+  .balanceInput {
+    height: 48px !important;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .amountDisplay {
+    height: 48px;
+    display: flex;
+    padding-right: 16px;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+  }
+
+  .amountInput {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+
+  .balanceDisplay {
+    height: 46px !important;
+    border: none;
+
+    & > input:disabled {
+      background: #ffffff;
+      font-size: 16px;
+    }
+  }
+}

@@ -1,6 +1,7 @@
 @import './styles/index.scss';
 
 .root {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   max-height: 80%;
@@ -11,13 +12,19 @@
   outline: none;
 
   .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     font-size: 24px;
     line-height: 28px;
+
+    .close {
+      cursor: pointer;
+    }
   }
 
   .content {
     margin: 16px 0;
-    overflow: auto;
   }
 }
 

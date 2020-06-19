@@ -9,4 +9,20 @@
       margin-left: 20px;
     }
   }
+
+  .balanceArea {
+    display: flex;
+    flex-direction: column;
+    .balance {
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: bold;
+      color: #333333;
+    }
+    .amount {
+      font-size: 16px;
+      line-height: 19px;
+      color: #999999;
+    }
+  }
 }

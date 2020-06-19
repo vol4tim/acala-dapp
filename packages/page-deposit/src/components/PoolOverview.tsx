@@ -2,15 +2,15 @@ import React, { FC, memo, useContext, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Card, TableItem, Table } from '@acala-dapp/ui-components';
-import { DexPoolSize, DexExchangeRate, DexReward, DexRewardRatio, DexUserShare } from '@acala-dapp/react-components';
+import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
+import { DexPoolSize, DexReward, DexRewardRatio, DexUserShare } from '@acala-dapp/react-components';
 
 import { DepositContext } from './Provider';
 import { AccountDexTokens } from './AccountDexTokens';
 
 export const PoolOverview: FC = memo(() => {
   const { enabledCurrencyIds } = useContext(DepositContext);
-  const tableConfig: TableItem<CurrencyId>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
@@ -18,15 +18,6 @@ export const PoolOverview: FC = memo(() => {
         <AccountDexTokens token={token} />
       ),
       title: 'Token Pair',
-      width: 3
-    },
-    {
-      align: 'left',
-      /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => (
-        <DexExchangeRate supply={token} />
-      ),
-      title: 'Exchange Rate',
       width: 3
     },
     {

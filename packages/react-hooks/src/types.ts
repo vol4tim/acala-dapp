@@ -2,6 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
+import { CurrencyId, AccountId } from '@acala-network/types/interfaces';
+
 export type CallParam = any;
 
 export type CallParams = [] | [CallParam] | [CallParam, CallParam] | [CallParam, CallParam, CallParam] | any[];
@@ -13,3 +15,7 @@ export interface CallOptions <T> {
   transform?: (value: any) => T;
   withParams?: boolean;
 }
+
+export type CurrencyLike = CurrencyId | string;
+
+export type AccountLike = AccountId | string;

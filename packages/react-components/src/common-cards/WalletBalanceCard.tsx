@@ -1,7 +1,7 @@
 import React, { FC, memo, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Table, TableItem, Card } from '@acala-dapp/ui-components';
+import { Table, TableConfig, Card } from '@acala-dapp/ui-components';
 import { useAccounts, useConstants } from '@acala-dapp/react-hooks';
 
 import { Token } from '../Token';
@@ -25,18 +25,18 @@ export const WalletBalanceCard: FC<Props> = memo(({
   showCell = ['token', 'balance', 'amount']
 }) => {
   const { active } = useAccounts();
-  const { allCurrencyIds: allToken } = useConstants();
+  const { allCurrencies: allToken } = useConstants();
 
   if (!active) {
     return null;
   }
 
-  const _tableConfig: TableItem<TableData>[] = [
+  const _tableConfig: TableConfig[] = [
     {
       align: 'left',
       key: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <Token token={token} />,
+      render: (token: CurrencyId): ReactNode => <Token currency={token} />,
       title: 'Token',
       width: 1
     },
@@ -57,7 +57,7 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'right',
       key: 'price',
       /* eslint-disable-next-line react/display-name */
-      render: (token): ReactNode => <Price token={token} />,
+      render: (token): ReactNode => <Price currency={token} />,
       title: 'Price',
       width: 2
     },
@@ -78,7 +78,7 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'right',
       key: 'action',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <TransferButton token={token} />,
+      render: (token: CurrencyId): ReactNode => <TransferButton currency={token} />,
       title: 'Action',
       width: 2
     }

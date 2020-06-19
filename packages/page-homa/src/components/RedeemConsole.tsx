@@ -27,6 +27,8 @@ export const RedeemConsole: FC = () => {
   }, [stakingPoolHelper]);
 
   const freeLiquidityCurrencyAmountInTarget = useMemo((): number => {
+    if (!stakingPoolHelper) return 0;
+
     const _result = freeList.find((item): boolean => item.era === era);
 
     if (!_result) {
@@ -34,7 +36,7 @@ export const RedeemConsole: FC = () => {
     }
 
     return _result.free.div(stakingPoolHelper.liquidExchangeRate).toNumber();
-  }, [freeList, stakingPoolHelper.liquidExchangeRate, era]);
+  }, [freeList, stakingPoolHelper, era]);
 
   const getMaxLiquidCurrencyAmount = (): number => {
     if (redeemType === 'Immediately') {
@@ -204,7 +206,7 @@ export const RedeemConsole: FC = () => {
       </Grid>
       <Grid item>
         <BalanceInput
-          error={!!form.errors.amount}
+          error={form.errors.amount}
           id='amount'
           name='amount'
           onChange={form.handleChange}

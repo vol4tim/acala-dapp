@@ -5,26 +5,26 @@ import Tooltip from '@material-ui/core/Tooltip';
 import { Fixed18 } from '@acala-network/app-util';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
-import { thousand, padDecimalPlaces } from '../utils';
+import { thousand, effectiveDecimal } from '../utils';
 import classes from './format.module.scss';
 
-interface Props extends BareProps {
+export interface FormatFixed18Props extends BareProps {
   data?: Fixed18;
   format?: 'percentage' | 'number' | 'thousand';
   prefix?: string;
   primary?: boolean;
   withTooltip?: boolean;
-  withpadDecimalPlaces?: boolean;
+  effectiveDecimalLength?: number;
 }
 
-export const FormatFixed18: FC<Props> = ({
+export const FormatFixed18: FC<FormatFixed18Props> = ({
   className,
   data,
+  effectiveDecimalLength = 2,
   format = 'thousand',
   prefix,
   primary = false,
-  withTooltip = true,
-  withpadDecimalPlaces = false
+  withTooltip = true
 }) => {
   if (!data) {
     return null;
@@ -38,11 +38,11 @@ export const FormatFixed18: FC<Props> = ({
     }
 
     if (format === 'number') {
-      _text = withpadDecimalPlaces ? padDecimalPlaces(data.toString(6, 3), 6) : data.toString();
+      _text = effectiveDecimal(data.toString(18, 3), effectiveDecimalLength);
     }
 
     if (format === 'thousand') {
-      _text = withpadDecimalPlaces ? padDecimalPlaces(thousand(data.toNumber(6, 3)), 6) : thousand(data.toNumber(6, 3));
+      _text = effectiveDecimal(thousand(data.toNumber(18, 3)), effectiveDecimalLength);
     }
 
     if (format === 'percentage') {
@@ -75,9 +75,7 @@ export const FormatFixed18: FC<Props> = ({
         placement='left'
         title={data.toString(18, 3)}
       >
-        {
-          inner()
-        }
+        {inner()}
       </Tooltip>
     );
   }

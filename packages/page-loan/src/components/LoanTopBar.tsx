@@ -1,6 +1,6 @@
 import React, { FC, memo, useContext, useMemo } from 'react';
 import clsx from 'clsx';
-import { Token, LoanCollateralRate } from '@acala-dapp/react-components';
+import { TokenImage, TokenName, CollateralRate } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { ReactComponent as OverviewIcon } from '../assets/overview.svg';
@@ -28,21 +28,17 @@ const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
       }
       onClick={(): void => setCurrentTab(token)}
     >
-      <Token
-        className={classes.icon}
-        icon
-        name={false}
-        token={token}
-      />
+      <div className={classes.icon}>
+        <TokenImage currency={token} />
+      </div>
       <div className={classes.content}>
-        <Token
+        <TokenName
           className={classes.token}
-          icon={false}
-          token={token}
+          currency={token}
         />
-        <LoanCollateralRate
+        <CollateralRate
           className={classes.collateralRate}
-          token={token}
+          currency={token}
           withTooltip={false}
         />
       </div>

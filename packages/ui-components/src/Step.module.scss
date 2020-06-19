@@ -1,28 +1,56 @@
 @import './styles/index.scss';
 
 .root {
+  position: relative;
   display: flex;
+  justify-content: space-between;
   list-style: none;
+    background: #ffffff;
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    top: 16px;
+    left: 0;
+    background: #d8d8d8;
+  }
 
   .item {
     position: relative;
+    z-index: 1;
     display: flex;
-    flex: 1;
+    flex-direction: column;
+    position: relative;
     flex-direction: column;
     align-items: center;
+    max-width: 200px;
+    min-width: 200px;
+    background: inherit;
 
-    &:after {
+    &::before, &::after {
       content: '';
       position: absolute;
-      width: 80%;
+      width: 68px;
       height: 1px;
       top: 16px;
-      left: 0;
       background: #d8d8d8;
-      transform: translate3d(-50%, 0, 0);
     }
 
-    &:first-child:after {
+    &::before {
+      left: 0;
+    }
+
+    &::after {
+      right: 0;
+    }
+
+    &:first-child::before {
+      display: none;
+    }
+
+    &:last-child::after {
       display: none;
     }
 
@@ -41,6 +69,7 @@
     &.done {
       .point {
         border-color: $color-primary;
+        color: $color-primary;
 
         & path {
           fill: $color-primary;
@@ -60,6 +89,7 @@
     text-align: center;
     border-radius: 100%;
     border: 1px solid #999999;
+    color: #999999;
   }
 
   .text {

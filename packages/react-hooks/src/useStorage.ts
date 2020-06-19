@@ -1,5 +1,7 @@
 import { useAccounts } from './useAccounts';
 import { useIsAppReady } from './useIsAppReady';
+import { useCallback } from 'react';
+import { useMemorized } from './useMemorized';
 
 interface Options {
   customPrefix?: string;
@@ -22,12 +24,13 @@ const getPrefixKey = (key: string, options: Options & { address: string }): stri
 };
 
 export const useStorage = (
-  options: Options = { customPrefix: '', useAccountPrefix: true, useCustomPrefix: false }
+  _options: Options = { customPrefix: '', useAccountPrefix: true, useCustomPrefix: false }
 ): { getStorage: Get; setStorage: Set } => {
-  const isReady = useIsAppReady();
+  const options = useMemorized(_options);
+  const { appReadyStatus: isReady } = useIsAppReady();
   const { active: activeAccount } = useAccounts();
 
-  const getStorage: Get = (key) => {
+  const getStorage: Get = useCallback((key) => {
     if (options.useAccountPrefix) {
       if (isReady && activeAccount) {
         const _key = getPrefixKey(key, { ...options, address: activeAccount.address });
@@ -41,9 +44,9 @@ export const useStorage = (
     }
 
     return null;
-  };
+  }, [activeAccount, isReady, options]);
 
-  const setStorage: Set = (key, value) => {
+  const setStorage: Set = useCallback((key, value) => {
     if (options.useAccountPrefix) {
       if (isReady && activeAccount) {
         const _key = getPrefixKey(key, { ...options, address: activeAccount.address });
@@ -55,7 +58,7 @@ export const useStorage = (
 
       window.localStorage.setItem(_key, value);
     }
-  };
+  }, [activeAccount, isReady, options]);
 
   return { getStorage, setStorage };
 };

@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react';
-import { Card, TableItem, Table } from '@acala-dapp/ui-components';
+import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
 import { useApi } from '@acala-dapp/react-hooks';
 import { tokenEq } from '../utils';
 import { AirDropAmount } from '../AirDropAmount';
@@ -8,7 +8,7 @@ import { AirDropCurrencyId } from '@acala-network/types/interfaces';
 export const AirDrop: FC = () => {
   const { api } = useApi();
   const keys = (api.registry.createType('AirDropCurrencyId' as any) as AirDropCurrencyId).defKeys;
-  const tableConfig: TableItem<string>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       key: 'token',
@@ -29,7 +29,7 @@ export const AirDrop: FC = () => {
       header='AirDrop'
       padding={false}
     >
-      <Table<string[]>
+      <Table<string>
         config={tableConfig}
         data={keys}
         showHeader

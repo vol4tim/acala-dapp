@@ -1,10 +1,11 @@
 import React, { FC, useContext } from 'react';
+
 import { Grid } from '@acala-dapp/ui-components';
+
 import { LoanContext } from './LoanProvider';
-import { LiquidationCard } from './LiquidationCard';
-import { CollateralizationCard } from './CollateralizationCard';
-import { BorrowedConsole } from './BorrowedConsole';
-import { CollateralConsole } from './CollateralConsole';
+import { DebitConsole, CollateralConsole } from './OperatorConsole';
+import { LiquidationPriceCard } from './LiquidationPriceCard';
+import { LiquidationRatioCard } from './LiquidationRatioCard';
 
 export const LoanConsole: FC = () => {
   const { currentTab } = useContext(LoanContext);
@@ -12,26 +13,27 @@ export const LoanConsole: FC = () => {
   return (
     <Grid container
       direction='column'>
-      <Grid container
+      <Grid alignItems='stretch'
+        container
         item>
         <Grid item
           xs={6}>
-          <LiquidationCard token={currentTab} />
+          <LiquidationPriceCard currency={currentTab} />
         </Grid>
         <Grid item
           xs={6}>
-          <CollateralizationCard token={currentTab} />
+          <LiquidationRatioCard currency={currentTab} />
         </Grid>
       </Grid>
       <Grid container
         item>
         <Grid item
           xs={6}>
-          <BorrowedConsole token={currentTab} />
+          <DebitConsole currency={currentTab} />
         </Grid>
         <Grid item
           xs={6}>
-          <CollateralConsole token={currentTab} />
+          <CollateralConsole currency={currentTab} />
         </Grid>
       </Grid>
     </Grid>

@@ -1,0 +1,16 @@
+.header {
+  border-top: 6px solid #ffffff;
+  overflow: hidden;
+
+  &.SAFE {
+    border-color: #8fce65;
+  }
+
+  &.WARNING {
+    border-color: #f7b500;
+  }
+
+  &.DANGEROUS {
+    border-color: #fa0000;
+  }
+}

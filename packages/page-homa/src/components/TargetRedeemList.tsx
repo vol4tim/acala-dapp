@@ -1,7 +1,9 @@
-import React, { FC, useContext, ReactNode } from 'react';
-import { formatDuration, formatCurrency } from '@acala-dapp/react-components';
+import React, { FC, useContext } from 'react';
+
+import { formatDuration, getTokenName } from '@acala-dapp/react-components';
 import { Dropdown, DropdownConfig } from '@acala-dapp/ui-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
+
 import classes from './TargetRedeemList.module.scss';
 import { StakingPoolContext } from './StakingPoolProvider';
 
@@ -18,15 +20,17 @@ export const TargetRedeemList: FC<Props> = ({
   const { eraDuration, freeList, stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
 
   const config: DropdownConfig[] = freeList.map(({ era, free }): DropdownConfig => {
+    if (!stakingPoolHelper || !stakingPool) return { render: (): null => null, value: '' };
+
     const duration = formatDuration((era - stakingPoolHelper.currentEra) * eraDuration);
 
     return {
       /* eslint-disable-next-line react/display-name */
-      render: (): ReactNode => {
+      render: (): JSX.Element => {
         return (
           <div className={classes.item}>
             <span>
-              {`at era ${era}(≈ ${duration} days later) has ${free.div(stakingPoolHelper?.liquidExchangeRate)} ${formatCurrency(stakingPool?.liquidCurrency)} to redeem`}</span>
+              {`at era ${era}(≈ ${duration} days later) has ${free.div(stakingPoolHelper.liquidExchangeRate)} ${getTokenName(stakingPool.liquidCurrency)} to redeem`}</span>
           </div>
         );
       },

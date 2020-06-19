@@ -1,0 +1,29 @@
+.otherInfo {
+  padding: 0;
+
+  .content {
+    display: flex;
+    padding: 12px 0;
+    height: 38px;
+  }
+
+  .item {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 24px;
+
+    font-size: 16px;
+    line-height: 19px;
+    color: #333333;
+
+    &:first-child {
+      border-right: 1px solid #ecf0f2;
+    }
+  }
+
+  .data {
+    font-weight: bold;
+  }
+}

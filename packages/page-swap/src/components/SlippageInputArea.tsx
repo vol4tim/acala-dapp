@@ -21,6 +21,8 @@ export const SlippageInputArea: FC<Props> = memo(({ onChange, slippage = 0.005 }
   const suggestedIndex = 1;
   const validator = useFormValidator({
     custom: {
+      equalMax: false,
+      equalMin: true,
       max: SLIPPAGE_MAX,
       min: SLIPPAGE_MIN,
       type: 'number'

@@ -6,8 +6,7 @@
     "packages/*"
   ],
   "resolutions": {
-    "@polkadot/api": "~1.10.1",
-    "**/@polkadot/api": "~1.10.1",
+    "@polkadot/api": "^1.15.1",
     "@acala-network/api": "beta"
   },
   "scripts": {

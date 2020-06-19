@@ -1,40 +1,35 @@
 import React, { FC, memo, ReactNode, useMemo } from 'react';
 
-import { DerivedPrice } from '@acala-network/api-derive';
-import { convertToFixed18 } from '@acala-network/app-util';
+import { Fixed18 } from '@acala-network/app-util';
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { TimestampedValue } from '@open-web3/orml-types/interfaces';
 
-import { Table, TableItem, Card } from '@acala-dapp/ui-components';
-import { usePrice } from '@acala-dapp/react-hooks';
+import { Table, TableConfig, Card } from '@acala-dapp/ui-components';
+import { useAllPrices } from '@acala-dapp/react-hooks';
 
-import { formatCurrency, getValueFromTimestampValue } from '../utils';
+import { getTokenName } from '../utils';
 import { FormatFixed18 } from '../format';
 
-type TableData = DerivedPrice;
-
 export const PricesFeedCard: FC = memo(() => {
-  const data = usePrice() as DerivedPrice[];
+  const data = useAllPrices();
 
-  const tableConfig: TableItem<TableData>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       render (data: CurrencyId): ReactNode {
-        return `${formatCurrency(data)} in USD`;
+        return `${getTokenName(data)} in USD`;
       },
       title: 'Currency'
     },
     {
       align: 'right',
       dataIndex: 'price',
-      render (data: TimestampedValue): ReactNode {
+      render (data: Fixed18): ReactNode {
         return (
           <FormatFixed18
             className='ac-font-medium'
-            data={convertToFixed18(getValueFromTimestampValue(data))}
+            data={data}
             prefix='$'
-            withpadDecimalPlaces
           />
         );
       },

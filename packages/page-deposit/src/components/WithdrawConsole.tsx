@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 import { Vec } from '@polkadot/types';
 import { Card } from '@acala-dapp/ui-components';
 import { CurrencyId, Share } from '@acala-network/types/interfaces';
-import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, DexPoolSize, DexUserShare } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, DexPoolSize, DexUserShare, BalanceInputProps } from '@acala-dapp/react-components';
 import { useFormValidator, useDexShare } from '@acala-dapp/react-hooks';
 import { convertToFixed18 } from '@acala-network/app-util';
 
@@ -16,7 +16,7 @@ import { AccountDexTokens } from './AccountDexTokens';
 import { useDexWithdrawShare } from './useDexWithdrawShare';
 
 interface InputAreaProps {
-  error: boolean;
+  error?: BalanceInputProps['error'];
   id: string;
   name: string;
   currencies?: Vec<CurrencyId>;
@@ -43,7 +43,7 @@ const InputArea: FC<InputAreaProps> = memo(({
       <div className={classes.inputAreaTitle}>
         <p>Pool Shares</p>
         <p className={classes.inputAreaBalance}>
-          Balance: {share ? convertToFixed18(share).toString() : ''}
+          Available: {share ? convertToFixed18(share).toString() : ''}
         </p>
       </div>
       <BalanceInput
@@ -109,7 +109,7 @@ export const WithdrawConsole: FC = memo(() => {
       <div className={classes.main}>
         <InputArea
           currencies={enabledCurrencyIds}
-          error={!!form.errors.share}
+          error={form.errors.share}
           id='share'
           name='share'
           onChange={form.handleChange}

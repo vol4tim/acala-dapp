@@ -1,21 +1,22 @@
-import { get } from 'lodash';
-import { CallParams } from './types';
-
 import { useEffect, useContext, useMemo } from 'react';
+import { get } from 'lodash';
+import { ApiRx } from '@polkadot/api';
+
+import { globalStoreContext } from '@acala-dapp/react-environment';
 
 import { useIsAppReady } from './useIsAppReady';
-import { globalStoreContext } from '@acala-dapp/react-environment';
 import { useApi } from './useApi';
-import { ApiPromise } from '@polkadot/api';
+import { CallParams } from './types';
+import { Observable } from 'rxjs';
 
 class Tracker {
-  private trackerList: {[k in string]: { refCount: number; subscriber: () => Promise<void> }}
+  private trackerList: {[k in string]: { refCount: number; subscriber: Observable<unknown> }}
 
   constructor () {
     this.trackerList = {};
   }
 
-  subscribe (api: ApiPromise, path: string, params: CallParams, key: string, updateFn: (key: string, valeu: any) => void): void {
+  subscribe (api: ApiRx, path: string, params: CallParams, key: string, updateFn: (key: string, valeu: any) => void): void {
     if (!api || !path) {
       return;
     }
@@ -32,10 +33,10 @@ class Tracker {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-    // @ts-ignore We tried to get the typings right, close but no cigar...
-    const subscriber = fn(...params, (result) => {
-      updateFn(key, result);
+    const subscriber = fn(...params).subscribe({
+      next: (result: any) => {
+        updateFn(key, result);
+      }
     });
 
     this.trackerList[key] = {
@@ -44,7 +45,7 @@ class Tracker {
     };
   }
 
-  unSubscribe (key: string): void {
+  unsubscribe (key: string): void {
     if (this.trackerList[key]) {
       this.trackerList[key].refCount -= 1;
     }
@@ -67,7 +68,7 @@ export function useCall <T> (path: string, params: CallParams = []): T | undefin
     }
 
     return (): void => {
-      tracker.unSubscribe(key);
+      tracker.unsubscribe(key);
     };
   }, [appReadyStatus, api, path, params, key, setStore]);
 

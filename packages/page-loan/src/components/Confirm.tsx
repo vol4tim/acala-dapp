@@ -1,159 +1,126 @@
-import React, { FC, useContext, useMemo, ReactNode } from 'react';
+import React, { FC, useContext, useMemo, ReactNode, useCallback } from 'react';
 
 import { FormatBalance, FormatFixed18, TxButton, numToFixed18Inner } from '@acala-dapp/react-components';
 import { createProviderContext } from './CreateProvider';
-import { useConstants } from '@acala-dapp/react-hooks';
-import { Fixed18, stableCoinToDebit, convertToFixed18 } from '@acala-network/app-util';
+import { useConstants, useLoanHelper } from '@acala-dapp/react-hooks';
+import { Fixed18, stableCoinToDebit, calcCollateralRatio } from '@acala-network/app-util';
 import { List, Button } from '@acala-dapp/ui-components';
 import classes from './Confirm.module.scss';
 import { LoanContext } from './LoanProvider';
 
 export const Confirm: FC = () => {
   const {
-    currentLoanType,
-    currentUserLoan,
     deposit,
     generate,
-    getUserLoanHelper,
     selectedToken,
     setStep
   } = useContext(createProviderContext);
   const { cancelCurrentTab } = useContext(LoanContext);
   const { stableCurrency } = useConstants();
-  const loanHelper = useMemo(() => {
-    return getUserLoanHelper(currentUserLoan, currentLoanType, deposit, generate);
-  }, [getUserLoanHelper, currentUserLoan, currentLoanType, deposit, generate]);
+  const helper = useLoanHelper(selectedToken);
 
-  const listConfig = [
-    {
-      key: 'depositing',
-      /* eslint-disable-next-line react/display-name */
-      render: (): ReactNode => {
-        return (
-          <FormatBalance
-            balance={deposit}
-            currency={selectedToken}
-          />
-        );
-      },
-      title: 'Depositing'
-    },
-    {
-      key: 'borrowing',
-      /* eslint-disable-next-line react/display-name */
-      render: (): ReactNode => {
-        return (
-          <FormatBalance
-            balance={generate}
-            currency={stableCurrency}
-          />
-        );
-      },
-      title: 'Borrowing'
-    },
-    {
-      key: 'collateralizationRatio',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: Fixed18): ReactNode => {
-        return (
-          <FormatFixed18
-            data={data}
-            format='percentage'
-          />
-        );
-      },
-      title: 'Collateralization Ratio'
-    },
-    {
-      key: 'liquidationRatio',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: Fixed18): ReactNode => {
-        return (
-          <FormatFixed18
-            data={data}
-            format='percentage'
-          />
-        );
-      },
-      title: 'Liquidation Ratio'
-    },
-    {
-      key: 'liquidationPenalty',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: Fixed18): ReactNode => {
-        return (
-          <FormatFixed18
-            data={data}
-            format='percentage'
-          />
-        );
-      },
-      title: 'Liquidation Fee'
-    },
-    {
-      key: 'liuqidationPrice',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: Fixed18): ReactNode => {
-        return (
-          <FormatFixed18
-            data={data}
-            prefix='$'
-          />
-        );
-      },
-      title: 'Liquidation Price'
-    },
-    {
-      key: 'interestRate',
-      /* eslint-disable-next-line react/display-name */
-      render: (data: Fixed18): ReactNode => {
-        return (
-          <FormatFixed18
-            data={data}
-            format='percentage'
-          />
-        );
-      },
-      title: 'Interest Rate'
-    }
-  ];
+  const data = useMemo(() => {
+    if (!helper) return {};
 
-  const data = {
-    collateralizationRatio: loanHelper?.collateralRatio,
-    interestRate: loanHelper?.stableFeeAPR,
-    liquidationPenalty: convertToFixed18(currentLoanType?.liquidationPenalty || 0),
-    liquidationRatio: loanHelper?.liquidationRatio,
-    liuqidationPrice: loanHelper?.liquidationPrice
-  };
+    return {
+      borrowing: generate,
+      collateralRatio: calcCollateralRatio(
+        helper.collaterals.add(Fixed18.fromNatural(deposit || 0)).mul(helper.collateralPrice),
+        helper.debitAmount.add(Fixed18.fromNatural(generate || 0))
+      ),
+      depositing: deposit,
+      interestRate: helper.stableFeeAPR
+    };
+  }, [helper, deposit, generate]);
 
-  const checkDisabled = (): boolean => {
-    return false;
-  };
-
-  const getParams = (): string[] => {
-    const _params = [
-      selectedToken.toString(),
-      numToFixed18Inner(deposit),
-      '0'
+  const listConfig = useMemo(() => {
+    return [
+      {
+        key: 'depositing',
+        /* eslint-disable-next-line react/display-name */
+        render: (data: number): ReactNode => {
+          return (
+            <FormatBalance
+              balance={data}
+              currency={selectedToken}
+            />
+          );
+        },
+        title: 'Depositing'
+      },
+      {
+        key: 'borrowing',
+        /* eslint-disable-next-line react/display-name */
+        render: (data: number): ReactNode => {
+          return (
+            <FormatBalance
+              balance={data}
+              currency={stableCurrency}
+            />
+          );
+        },
+        title: 'Borrowing'
+      },
+      {
+        key: 'collateralRatio',
+        /* eslint-disable-next-line react/display-name */
+        render: (data: Fixed18): JSX.Element => {
+          return (
+            <FormatFixed18
+              data={data}
+              format='percentage'
+            />
+          );
+        },
+        title: 'Collateralization Ratio'
+      },
+      {
+        key: 'interestRate',
+        /* eslint-disable-next-line react/display-name */
+        render: (data: Fixed18): JSX.Element => {
+          return (
+            <FormatFixed18
+              data={data}
+              format='percentage'
+            />
+          );
+        },
+        title: 'Interest Rate'
+      }
     ];
+  }, [selectedToken, stableCurrency]);
 
-    if (currentLoanType && loanHelper) {
-      _params[2] = stableCoinToDebit(
+  const isDisabled = useMemo((): boolean => {
+    return false;
+  }, []);
+
+  const params = useMemo<string[]>((): string[] => {
+    if (!helper) return [];
+
+    return [
+      // token name
+      selectedToken.toString(),
+      // collateral amount
+      numToFixed18Inner(deposit),
+      // debit amount
+      stableCoinToDebit(
         Fixed18.fromNatural(generate),
-        loanHelper.debitExchangeRate
-      ).innerToString();
-    }
+        helper.debitExchangeRate
+      ).innerToString()
+    ];
+  }, [helper, selectedToken, deposit, generate]);
 
-    return _params;
-  };
-
-  const handleSuccess = (): void => {
+  const handleSuccess = useCallback((): void => {
     setStep('success');
-  };
+  }, [setStep]);
 
-  const handlePrevious = (): void => {
+  const handlePrevious = useCallback((): void => {
     setStep('generate');
-  };
+  }, [setStep]);
+
+  if (!helper) {
+    return null;
+  }
 
   return (
     <div className={classes.root}>
@@ -178,10 +145,10 @@ export const Confirm: FC = () => {
           Prev
         </Button>
         <TxButton
-          disabled={checkDisabled()}
+          disabled={isDisabled}
           method='adjustLoan'
           onSuccess={handleSuccess}
-          params={getParams()}
+          params={params}
           section='honzon'
           size='small'
         >

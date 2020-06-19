@@ -2,7 +2,7 @@ import React, { FC, useContext, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Section, Card, Table, TableItem } from '@acala-dapp/ui-components';
+import { Section, Card, Table, TableConfig } from '@acala-dapp/ui-components';
 import { Token, DexExchangeRate, DexPoolSize } from '@acala-dapp/react-components';
 
 import { SwapContext } from './SwapProvider';
@@ -11,14 +11,14 @@ import classes from './AllMarkets.module.scss';
 export const AllMarkets: FC = () => {
   const { dexBaseCurrency, supplyCurrencies } = useContext(SwapContext);
   const _supplyCurrencies = supplyCurrencies.filter((item: string | CurrencyId) => item.toString() !== dexBaseCurrency.toString());
-  const tableConfig: TableItem<string | CurrencyId>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => (
         <Token
+          currency={token}
           icon
-          token={token}
         />
       ),
       title: 'Token Pair',

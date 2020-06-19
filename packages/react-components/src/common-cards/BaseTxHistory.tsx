@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
-import { Card, Table, TableItem } from '@acala-dapp/ui-components';
-import { useHistory, useAccounts, ExtrinsicHistoryData } from '@acala-dapp/react-hooks';
+import { Card, Table, TableConfig } from '@acala-dapp/ui-components';
+import { useHistory, useAccounts } from '@acala-dapp/react-hooks';
 import Pagination from '@material-ui/lab/Pagination';
 
 import classes from './BaseTxHistory.module.scss';
@@ -9,10 +9,10 @@ import { Box } from '@material-ui/core';
 interface Props {
   section: string;
   method: string | string[];
-  config?: TableItem<any>[];
+  config?: TableConfig[];
 }
 
-const defaultTableConfig: TableItem<ExtrinsicHistoryData>[] = [
+const defaultTableConfig: TableConfig[] = [
   {
     key: 'tx',
     render: (data): string => {

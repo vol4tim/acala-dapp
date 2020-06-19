@@ -1,7 +1,7 @@
 import React, { FC, useContext, ReactNode } from 'react';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Card, Table, TableItem } from '@acala-dapp/ui-components';
+import { Card, Table, TableConfig } from '@acala-dapp/ui-components';
 import { Token, UserBalance } from '@acala-dapp/react-components';
 
 import { StakingPoolContext } from './StakingPoolProvider';
@@ -13,13 +13,13 @@ interface TableData {
 export const StakingTokeBalances: FC = () => {
   const { stakingPool } = useContext(StakingPoolContext);
 
-  const tableConfig: TableItem<TableData>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
       render: (data: CurrencyId): ReactNode => {
-        return <Token token={data} />;
+        return <Token currency={data} />;
       },
       title: 'token'
     },

@@ -1,4 +1,6 @@
-import React, { FC, memo } from 'react';
+import React, { FC } from 'react';
+import clsx from 'clsx';
+
 import { BareProps } from './types';
 import classes from './Page.module.scss';
 
@@ -6,35 +8,41 @@ interface TitleProps extends BareProps {
   title: string;
 }
 
-const Title: FC<TitleProps> = memo(({ title }) => {
+/**
+ * @name Page.Title
+ * @description display title in page
+ */
+const Title: FC<TitleProps> = ({ title }) => {
   return (
     <div className={classes.pageTitle}>
       <p className='page-title--content'>{title}</p>
     </div>
   );
-});
+};
 
-Title.displayName = 'PageTitle';
-
-const _Page: FC<BareProps> = memo(({ children }) => {
+/**
+ * @name Page
+ * @description page
+ */
+const _Page: FC<BareProps> = ({ children }) => {
   return (
     <div className={classes.page}>
       {children}
     </div>
   );
-});
+};
 
-_Page.displayName = 'Page';
-
-const Content: FC<BareProps> = memo(({ children }) => {
+/**
+ * @name Page.Content
+ * @description dispaly content in page
+ */
+const Content: FC<BareProps> = ({ children }) => {
   return (
     <div className={classes.pageContent}>
       {children}
     </div>
   );
-});
-
-Content.displayName = 'PageContent';
+};
 
 interface PageType extends FC<BareProps> {
   Title: typeof Title;
@@ -45,5 +53,15 @@ const Page = _Page as unknown as PageType;
 
 Page.Title = Title;
 Page.Content = Content;
+
+/**
+ * @name SubTitle
+ * @description display sub title in page
+ */
+export const SubTitle: FC<BareProps> = ({ children, className }) => {
+  return (
+    <p className={clsx(classes.subTitle, className)}>{children}</p>
+  );
+};
 
 export { Page };

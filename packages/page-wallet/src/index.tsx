@@ -3,8 +3,9 @@ import React, { FC } from 'react';
 import { Page, Grid } from '@acala-dapp/ui-components';
 
 import { UserCard } from './components/UserCard';
-import { WalletBalanceCard, AirDrop } from '@acala-dapp/react-components';
+import { AirDrop } from '@acala-dapp/react-components';
 import { Transaction } from './components/Transaction';
+import { WalletBalance } from './components/WalletBalance';
 
 const PageWallet: FC = () => {
   return (
@@ -17,11 +18,7 @@ const PageWallet: FC = () => {
             <UserCard />
           </Grid>
           <Grid item>
-            <WalletBalanceCard
-              showCell={['token', 'amount', 'price', 'balance', 'action']}
-              showHeader
-              title='Balance'
-            />
+            <WalletBalance />
           </Grid>
           <Grid item>
             <AirDrop />

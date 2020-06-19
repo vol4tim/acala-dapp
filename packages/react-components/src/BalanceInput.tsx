@@ -1,34 +1,44 @@
-import React, { FC, memo, FocusEventHandler, useState, ReactNode } from 'react';
+import React, { FC, memo, FocusEventHandler, useState, ReactNode, ChangeEventHandler, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
+import { FormikErrors } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { useApi } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
-import { Token } from './Token';
+import { TokenName } from './Token';
 import { TokenSelector } from './TokenSelector';
 import { getCurrencyIdFromName } from './utils';
 import classes from './BalanceInput.module.scss';
-import { Button } from '@acala-dapp/ui-components';
+import { Button, Condition } from '@acala-dapp/ui-components';
 
-interface Props extends BareProps {
+type BalanceInputSize = 'large' | 'middle';
+
+export interface BalanceInputProps extends BareProps {
   currencies?: (CurrencyId | string)[];
   enableTokenSelect?: boolean;
-  error?: boolean;
+  error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
   id?: string;
   name?: string;
   onChange?: any;
   onTokenChange?: (token: CurrencyId) => void;
+  onFocus?: FocusEventHandler<HTMLInputElement>;
+  onBlur?: FocusEventHandler<HTMLInputElement>;
   placeholder?: string;
   token: CurrencyId | string;
   tokenPosition?: 'left' | 'right';
   value?: number;
   showMaxBtn?: boolean;
+  showIcon?: boolean;
+  size?: BalanceInputSize;
   onMax?: () => void;
+  withHover?: boolean;
+  withFocused?: boolean;
+  withError?: boolean;
 }
 
-export const BalanceInput: FC<Props> = memo(({
+export const BalanceInput: FC<BalanceInputProps> = memo(({
   className,
   currencies,
   disabled = false,
@@ -36,96 +46,118 @@ export const BalanceInput: FC<Props> = memo(({
   error,
   id,
   name,
+  onBlur,
   onChange,
+  onFocus,
   onMax,
   onTokenChange,
   placeholder,
+  showIcon = true,
   showMaxBtn = false,
+  size = 'large',
   token,
   tokenPosition = 'right',
-  value
+  value,
+  withError = true,
+  withFocused = true,
+  withHover = true
 }) => {
   const { api } = useApi();
   const [focused, setFocused] = useState<boolean>(false);
 
-  if (typeof token === 'string') {
-    token = getCurrencyIdFromName(api, token);
-  }
+  const _token = useMemo(() => {
+    if (typeof token === 'string') return getCurrencyIdFromName(api, token);
 
-  const renderToken = (): ReactNode => {
-    if (enableTokenSelect) {
-      return (
-        <TokenSelector
-          className={
-            clsx(
-              classes.tokenSelector,
-              classes[tokenPosition]
-            )
-          }
-          currencies={currencies}
-          onChange={onTokenChange}
-          value={token as CurrencyId}
-        />
-      );
-    }
+    return token;
+  }, [api, token]);
 
+  const renderToken = useCallback((): ReactNode => {
     return (
-      <Token
-        className={classes.token}
-        token={token}
+      <Condition
+        condition={enableTokenSelect}
+        match={(
+          <TokenSelector
+            className={
+              clsx(
+                classes.tokenSelector,
+                classes[tokenPosition],
+                {
+                  [classes.showIcon]: showIcon
+                }
+              )
+            }
+            currencies={currencies}
+            onChange={onTokenChange}
+            showIcon={showIcon}
+            value={_token}
+          />
+        )}
+        or={(
+          <TokenName
+            className={classes.token}
+            currency={_token}
+          />
+        )}
       />
     );
-  };
+  }, [enableTokenSelect, tokenPosition, currencies, onTokenChange, showIcon, _token]);
 
-  const onFocus: FocusEventHandler<HTMLInputElement> = () => {
+  const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);
-  };
+    onFocus && onFocus(event);
+  }, [setFocused, onFocus]);
 
-  const onBlur: FocusEventHandler<HTMLInputElement> = () => {
+  const _onBlur: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(false);
-  };
+    onBlur && onBlur(event);
+  }, [setFocused, onBlur]);
+
+  const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
+    if (onChange) onChange(e);
+  }, [onChange]);
+
+  const rootClasses = useMemo<string>((): string => clsx(
+    className,
+    classes.root,
+    classes[size],
+    {
+      [classes.hover]: withHover,
+      [classes.error]: withError && !!error,
+      [classes.focused]: withFocused && focused
+    }
+  ), [className, error, focused, size, withError, withHover, withFocused]);
 
   return (
-    <div className={
-      clsx(
-        className,
-        classes.root,
-        {
-          [classes.error]: error,
-          [classes.focused]: focused
-        }
-      )
-    }>
-      {
-        tokenPosition === 'left' ? renderToken() : null
-      }
+    <div className={rootClasses}>
+      <Condition condition={tokenPosition === 'left'}>
+        {renderToken}
+      </Condition>
       <input
         className={classes.input}
         disabled={disabled}
         id={id}
         name={name}
-        onBlur={onBlur}
-        onChange={onChange}
-        onFocus={onFocus}
+        onBlur={_onBlur}
+        onChange={_onChange}
+        onFocus={_onFocus}
         placeholder={placeholder}
         type='number'
         value={value}
       />
-      {
-        showMaxBtn ? (
-          <Button
-            className={classes.maxBtn}
-            color='primary'
-            onClick={onMax}
-            type='ghost'
-          >
-            MAX
-          </Button>
-        ) : null
-      }
-      {
-        tokenPosition === 'right' ? renderToken() : null
-      }
+      <Condition condition={showMaxBtn}>
+        <Button
+          className={classes.maxBtn}
+          color='primary'
+          onClick={onMax}
+          type='ghost'
+        >
+          MAX
+        </Button>
+      </Condition>
+      <Condition condition={tokenPosition === 'right'}>
+        {renderToken()}
+      </Condition>
+      <p className={clsx(classes.error, { [classes.show]: !!error })}>{error ? error.toString() : ''}</p>
     </div>
   );
 });

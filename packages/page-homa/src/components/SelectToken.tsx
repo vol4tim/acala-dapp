@@ -2,7 +2,7 @@ import React, { FC, memo, useContext } from 'react';
 import { noop } from 'lodash';
 
 import { Dropdown } from '@acala-dapp/ui-components';
-import { formatCurrency } from '@acala-dapp/react-components';
+import { getTokenName } from '@acala-dapp/react-components';
 
 import classes from './SelectToken.module.scss';
 import { StakingPoolContext } from './StakingPoolProvider';
@@ -17,7 +17,7 @@ export const SelectToken: FC = memo(() => {
           return '';
         }
 
-        return `${formatCurrency(stakingPool.stakingCurrency)}/${formatCurrency(stakingPool.liquidCurrency)}`;
+        return `${getTokenName(stakingPool.stakingCurrency)}/${getTokenName(stakingPool.liquidCurrency)}`;
       },
       value: DEFAULT_VALUE
     }

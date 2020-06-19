@@ -1,5 +1,5 @@
-import { DerivedUserLoan, DerivedLoanType, DerivedLoanOverView, DerivedPrice } from '@acala-network/api-derive';
-import { tokenEq, getValueFromTimestampValue } from '@acala-dapp/react-components';
+import { DerivedUserLoan, DerivedLoanType, DerivedLoanOverView } from '@acala-network/api-derive';
+import { tokenEq } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { LoanHelper, convertToFixed18, Fixed18, stableCoinToDebit } from '@acala-network/app-util';
 
@@ -7,18 +7,8 @@ import { useApi } from './useApi';
 import { useAccounts } from './useAccounts';
 import { useCallback, useMemo } from 'react';
 import { useCall } from './useCall';
-import { usePrice } from './usePrice';
+import { usePrice } from './priceHooks';
 import { useConstants } from './useConstants';
-
-export const filterEmptyLoan = (loans: DerivedUserLoan[] | null): DerivedUserLoan[] => {
-  if (!loans) {
-    return [];
-  }
-
-  return loans.filter((item) => {
-    return !(item.collaterals.isEmpty && item.debits.isEmpty);
-  });
-};
 
 interface UseAllLoansReturnType {
   loanOverviews: DerivedLoanOverView[];
@@ -40,8 +30,8 @@ export const useAllLoans = (): UseAllLoansReturnType => {
 };
 
 interface UseLoanRetrunType {
-  collateralPrice: DerivedPrice | undefined;
-  stableCoinPrice: DerivedPrice | undefined;
+  collateralPrice: Fixed18 | undefined;
+  stableCoinPrice: Fixed18 | undefined;
   currentLoanType: DerivedLoanType | undefined;
   currentUserLoan: DerivedUserLoan | undefined;
   currentUserLoanHelper: LoanHelper | null;
@@ -53,10 +43,11 @@ interface UseLoanRetrunType {
 export const useLoan = (token: CurrencyId | string): UseLoanRetrunType => {
   const { api } = useApi();
   const { active } = useAccounts();
+  const { stableCurrency } = useConstants();
   const loans = useCall<DerivedUserLoan[]>('derive.loan.allLoans', [active ? active.address : '']) || [];
   const loanTypes = useCall<DerivedLoanType[]>('derive.loan.allLoanTypes', []) || [];
-  const prices = usePrice() as DerivedPrice[] || [];
-  const { stableCurrency } = useConstants();
+  const stableCoinPrice = usePrice(stableCurrency);
+  const collateralPrice = usePrice(token);
 
   const minmumDebitValue = useMemo<Fixed18>(() => convertToFixed18(api.consts.cdpEngine.minimumDebitValue), [api]);
 
@@ -67,18 +58,6 @@ export const useLoan = (token: CurrencyId | string): UseLoanRetrunType => {
   const currentLoanType = useMemo<DerivedLoanType | undefined>(() => {
     return loanTypes.find((item): boolean => tokenEq(item.token, token));
   }, [loanTypes, token]);
-
-  const stableCoinPrice = useMemo<DerivedPrice | undefined>(() => {
-    return prices.find((item): boolean => tokenEq(item.token, stableCurrency));
-  }, [prices, stableCurrency]);
-
-  const collateralPrice = useMemo<DerivedPrice | undefined>(() => {
-    if (!token) {
-      return;
-    }
-
-    return prices.find((item): boolean => tokenEq(item.token, token));
-  }, [prices, token]);
 
   const getUserLoanHelper = useCallback((loan?: DerivedUserLoan, loanType?: DerivedLoanType, collateral?: number, debitAmount?: number): LoanHelper | null => {
     if (!loan || !loanType || !stableCoinPrice || !collateralPrice) {
@@ -96,7 +75,7 @@ export const useLoan = (token: CurrencyId | string): UseLoanRetrunType => {
       : convertToFixed18(loan.debits);
 
     return new LoanHelper({
-      collateralPrice: getValueFromTimestampValue(collateralPrice.price),
+      collateralPrice: collateralPrice,
       collaterals: _collateral,
       debitExchangeRate: loanType.debitExchangeRate,
       debits: _debit,
@@ -104,7 +83,7 @@ export const useLoan = (token: CurrencyId | string): UseLoanRetrunType => {
       globalStableFee: loanType.globalStabilityFee,
       liquidationRatio: loanType.liquidationRatio,
       requiredCollateralRatio: loanType.requiredCollateralRatio,
-      stableCoinPrice: getValueFromTimestampValue(stableCoinPrice.price),
+      stableCoinPrice: stableCoinPrice,
       stableFee: loanType.stabilityFee
     });
   }, [collateralPrice, stableCoinPrice]);

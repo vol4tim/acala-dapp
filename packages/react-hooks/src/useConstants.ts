@@ -5,13 +5,16 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 import { Vec } from '@polkadot/types';
 
 import { useApi } from './useApi';
+import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
 interface HooksReturnType {
-  allCurrencyIds: CurrencyId[];
+  allCurrencies: CurrencyId[];
   dexBaseCurrency: CurrencyId;
   dexCurrencies: Vec<CurrencyId>;
+  loanCurrencies: Vec<CurrencyId>;
   expectedBlockTime: number;
   nativeCurrency: CurrencyId;
+  minmumDebitValue: Fixed18;
   stableCurrency: CurrencyId;
 }
 
@@ -19,13 +22,15 @@ export const useConstants = (): HooksReturnType => {
   const { api } = useApi();
 
   // all currencies id
-  const allCurrencyIds = useMemo((): CurrencyId[] => {
+  const allCurrencies = useMemo((): CurrencyId[] => {
     const tokenList = api.registry.createType('CurrencyId' as any).defKeys as string[];
 
     return tokenList.map((name: string): CurrencyId => {
       return api.registry.createType('CurrencyId' as any, name) as CurrencyId;
     });
   }, [api]);
+
+  const loanCurrencies = useMemo(() => api.consts.cdpEngine.collateralCurrencyIds as Vec<CurrencyId>, [api]);
 
   // all currencies in dex
   const dexCurrencies = useMemo(() => api.consts.dex.enabledCurrencyIds as Vec<CurrencyId>, [api]);
@@ -42,11 +47,16 @@ export const useConstants = (): HooksReturnType => {
   // expect block time
   const expectedBlockTime = useMemo(() => api.consts.babe.expectedBlockTime.toNumber(), [api]);
 
+  // loan minmum debit value
+  const minmumDebitValue = useMemo<Fixed18>(() => convertToFixed18(api.consts.cdpEngine.minimumDebitValue), [api]);
+
   return {
-    allCurrencyIds,
+    allCurrencies,
     dexBaseCurrency,
     dexCurrencies,
     expectedBlockTime,
+    loanCurrencies,
+    minmumDebitValue,
     nativeCurrency,
     stableCurrency
   };

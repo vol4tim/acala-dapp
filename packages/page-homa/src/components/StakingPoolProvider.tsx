@@ -17,10 +17,12 @@ export const StakingPoolProvider: FC = memo(({ children }) => {
   const { isInitialized, setEnd } = useInitialize();
 
   useEffect(() => {
-    if (result?.stakingPool) {
+    if (!result) return;
+
+    if (result.stakingPool) {
       setEnd();
     }
-  }, [result, result?.stakingPool, setEnd]);
+  }, [result, setEnd]);
 
   return (
     <StakingPoolContext.Provider value={{ ...result, action, setAction }}>

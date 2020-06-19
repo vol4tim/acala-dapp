@@ -1,8 +1,7 @@
 import React, { FC, useRef, ReactNode } from 'react';
 
 import { BaseTxHistory, FormatBalance, FormatTime, FormatHash } from '@acala-dapp/react-components';
-import { TableItem, Status } from '@acala-dapp/ui-components';
-import { ExtrinsicHistoryData } from '@acala-dapp/react-hooks';
+import { TableConfig, Status } from '@acala-dapp/ui-components';
 import { Fixed18 } from '@acala-network/app-util';
 
 interface ActionProps {
@@ -36,7 +35,7 @@ const Action: FC<ActionProps> = ({
 };
 
 export const Transaction: FC = () => {
-  const config = useRef<TableItem<ExtrinsicHistoryData>[]>([
+  const config = useRef<TableConfig[]>([
     {
       align: 'left',
       dataIndex: 'hash',

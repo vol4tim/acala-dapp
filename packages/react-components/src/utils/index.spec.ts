@@ -1,4 +1,4 @@
-import { padDecimalPlaces, thousand, formatCurrency, formatHash, formatBalance } from './index';
+import { padDecimalPlaces, thousand, getTokenName, formatHash, formatBalance, effectiveDecimal } from './index';
 import { Fixed18 } from '@acala-network/app-util';
 
 describe('test utils', () => {
@@ -13,6 +13,16 @@ describe('test utils', () => {
     expect(padDecimalPlaces(12, 10)).toEqual('12');
   });
 
+  test('effectiveDecimal should work', () => {
+    expect(effectiveDecimal(12.012345, 3)).toEqual('12.0123');
+    expect(effectiveDecimal('12.04', 3)).toEqual('12.04');
+    expect(effectiveDecimal(12.000000000001, 1)).toEqual('12.000000000001');
+    expect(effectiveDecimal(1.2e-8, 2)).toEqual('0.000000012');
+    expect(effectiveDecimal(1, 2)).toEqual('1.00');
+    expect(effectiveDecimal(1.101, 2)).toEqual('1.10');
+  });
+
+
   test('thousand notation should work', () => {
     expect(thousand(100)).toEqual('100');
     expect(thousand(1000)).toEqual('1,000');
@@ -22,10 +32,10 @@ describe('test utils', () => {
     expect(thousand(1000000.0005)).toEqual('1,000,000.0005');
   });
 
-  test('formatCurrency should work', () => {
-    expect(formatCurrency('AUSD')).toEqual('aUSD');
-    expect(formatCurrency('ausd')).toEqual('aUSD');
-    expect(formatCurrency('aca')).toEqual('ACA');
+  test('getTokenName should work', () => {
+    expect(getTokenName('AUSD')).toEqual('aUSD');
+    expect(getTokenName('ausd')).toEqual('aUSD');
+    expect(getTokenName('aca')).toEqual('ACA');
   });
 
   test('formatHash should work', () => {

@@ -1,11 +1,9 @@
-import React, { FC, useContext, useState, useEffect, ReactNode } from 'react';
-import { Card, TableItem, Table, Button, Step } from '@acala-dapp/ui-components';
-import { useAllLoans, useLoan, useConstants, filterEmptyLoan } from '@acala-dapp/react-hooks';
-import { DerivedUserLoan } from '@acala-network/api-derive';
+import React, { FC, useContext, useEffect, ReactNode } from 'react';
+import { Card, TableConfig, Table, Button, Step } from '@acala-dapp/ui-components';
+import { useConstants, useAllUserLoans, useInitialize } from '@acala-dapp/react-hooks';
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Token, LoanInterestRate, FormatBalance, LoanCollateralRate, formatCurrency } from '@acala-dapp/react-components';
+import { Token, getTokenName, StableFeeAPR, CollateralRate, Collateral, DebitAmount } from '@acala-dapp/react-components';
 import { ReactComponent as GuideBG } from '../assets/guide-bg.svg';
-import { convertToFixed18 } from '@acala-network/app-util';
 
 import { LoanContext } from './LoanProvider';
 import classes from './Overview.module.scss';
@@ -53,76 +51,65 @@ export const Guide: FC = () => {
   );
 };
 
-const DebitAmount: FC<{ token: CurrencyId | string }> = ({ token }) => {
-  const { currentUserLoanHelper } = useLoan(token);
-
-  return (
-    <FormatBalance balance={currentUserLoanHelper?.debitAmount} />
-  );
-};
-
 export const Overview: FC = () => {
-  const [empty, setEmpty] = useState<boolean | null>(null);
+  const { isInitialized, setEnd } = useInitialize();
 
-  const { loans } = useAllLoans();
+  const loans = useAllUserLoans(true);
   const { setCurrentTab } = useContext(LoanContext);
   const { stableCurrency } = useConstants();
 
-  const tableConfig: TableItem<DerivedUserLoan>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyId): ReactNode => (
-        <Token token={token} />
+        <Token
+          currency={token}
+          icon
+        />
       ),
       title: 'Token',
       width: 1
     },
     {
-      align: 'right',
+      align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <LoanInterestRate token={token} />,
-      title: 'Rate',
+      render: (token: CurrencyId): ReactNode => <StableFeeAPR currency={token} />,
+      title: 'Interest Rate',
       width: 1
     },
     {
       align: 'right',
+      dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (data: DerivedUserLoan): ReactNode => (
-        <FormatBalance
-          balance={convertToFixed18(data.collaterals)}
-          currency={data.token}
-        />
-      ),
+      render: (token: CurrencyId): ReactNode => <Collateral currency={token} />,
       title: 'Deposit',
       width: 1
     },
     {
       align: 'right',
+      dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (data: DerivedUserLoan): ReactNode => {
-        return <DebitAmount token={data.token} />;
-      },
-      title: `Debit ${formatCurrency(stableCurrency)}`,
+      render: (token: CurrencyId): ReactNode => <DebitAmount currency={token} />,
+      title: `Debit ${getTokenName(stableCurrency)}`,
       width: 2
     },
     {
       align: 'right',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <LoanCollateralRate token={token} />,
+      render: (token: CurrencyId): ReactNode => <CollateralRate currency={token} />,
       title: 'Current Ratio',
       width: 2
     },
     {
       align: 'right',
+      dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (data: DerivedUserLoan): ReactNode => {
-        const handleClick = (): void => {
-          setCurrentTab(data.token);
-        };
+      render: (token: CurrencyId): ReactNode => {
+        const handleClick = (): void => setCurrentTab(token);
 
         return (
           <Button
@@ -134,23 +121,23 @@ export const Overview: FC = () => {
           </Button>
         );
       },
-      title: '',
+      title: 'Action',
       width: 2
     }
   ];
 
   useEffect(() => {
-    if (loans !== null) {
-      setEmpty(!filterEmptyLoan(loans).length);
+    if (loans !== undefined) {
+      setEnd();
     }
-  }, [loans]);
+  }, [loans, setEnd]);
 
   // wait loading data
-  if (empty === null) {
+  if (!isInitialized) {
     return null;
   }
 
-  if (empty) {
+  if (loans && loans.length === 0) {
     return <Guide />;
   }
 
@@ -163,7 +150,7 @@ export const Overview: FC = () => {
         loans && (
           <Table
             config={tableConfig}
-            data={filterEmptyLoan(loans)}
+            data={loans}
             showHeader
           />
         )

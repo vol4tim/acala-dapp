@@ -1,33 +1,37 @@
-import React, { FC, useContext } from 'react';
-import { Card, Step } from '@acala-dapp/ui-components';
+import React, { FC, useContext, useMemo } from 'react';
+
+import { Card, Step, Condition, Grid, SubTitle } from '@acala-dapp/ui-components';
+import { useConstants } from '@acala-dapp/react-hooks';
+import { TokenName } from '@acala-dapp/react-components';
+
 import { SelectCollateral } from './SelectCollateral';
 import classes from './CreateConsole.module.scss';
 import { Generate } from './Generate';
 import { CreateProvider, createProviderContext } from './CreateProvider';
-import { useConstants } from '@acala-dapp/react-hooks';
 import { Confirm } from './Confirm';
 import { Success } from './Success';
+import { CreateOverview } from './CreateOverview';
 
-const Inner: FC = () => {
+const stepConfig = [
+  {
+    index: 'select',
+    text: 'Select Collateral'
+  },
+  {
+    index: 'generate',
+    text: 'Generate aUSD'
+  },
+  {
+    index: 'confirm',
+    text: 'Confirmation'
+  }
+];
+
+const Main: FC = () => {
   const { selectedToken, step } = useContext(createProviderContext);
   const { stableCurrency } = useConstants();
 
-  const stepConfig = [
-    {
-      index: 'select',
-      text: 'Select Collateral'
-    },
-    {
-      index: 'generate',
-      text: 'Generate aUSD'
-    },
-    {
-      index: 'confirm',
-      text: 'Confirm'
-    }
-  ];
-
-  const renderTips = (): string => {
+  const tips = useMemo((): string => {
     if (step === 'select') {
       return 'Each collateral type has its own unique risk profiles.';
     }
@@ -41,35 +45,70 @@ const Inner: FC = () => {
     }
 
     return '';
-  };
+  }, [selectedToken, stableCurrency, step]);
 
   return (
-    <Card
-      className={classes.root}
-      padding={false}
-    >
-      {
-        step !== 'success' ? (
-          <>
-            <Step
-              config={stepConfig}
-              current={step}
-            />
-            <p className={classes.tips}>{renderTips()}</p>
-            {step === 'select' ? <SelectCollateral /> : null}
-            {step === 'generate' ? <Generate /> : null}
-            {step === 'confirm' ? <Confirm /> : null}
-          </>
-        ) : <Success />
-      }
+    <Card className={classes.root}
+      overflowHidden
+      padding={false}>
+      <Condition condition={step !== 'success'}>
+        <Step
+          config={stepConfig}
+          current={step}
+        />
+        <p className={classes.tips}>{tips}</p>
+      </Condition>
+      <Condition condition={step === 'select'}>
+        <SelectCollateral />
+      </Condition>
+      <Condition condition={step === 'generate'}>
+        <Generate />
+      </Condition>
+      <Condition condition={step === 'confirm'}>
+        <Confirm />
+      </Condition>
+      <Condition condition={step === 'success'}>
+        <Success />
+      </Condition>
     </Card>
   );
 };
 
-export const CreateConsole: FC = () => {
+const Inner: FC = () => {
+  const { selectedToken, step } = useContext(createProviderContext);
+
   return (
-    <CreateProvider>
-      <Inner />
-    </CreateProvider>
+    <Grid container
+      direction='column'
+    >
+      <Condition condition={step !== 'select'}>
+        <Grid item>
+          <SubTitle>
+            <span style={{ marginRight: 8 }}>Collateration</span>
+            <TokenName currency={selectedToken} />
+          </SubTitle>
+        </Grid>
+      </Condition>
+      <Grid container
+        direction='row'
+        item>
+        <Grid item
+          xs={new Set(['select', 'success']).has(step) ? 12 : 6}>
+          <Main />
+        </Grid>
+        <Condition condition={step !== 'select' && step !== 'success' }>
+          <Grid item
+            xs={6}>
+            <CreateOverview />
+          </Grid>
+        </Condition>
+      </Grid>
+    </Grid>
   );
 };
+
+export const CreateConsole: FC = () => (
+  <CreateProvider>
+    <Inner />
+  </CreateProvider>
+);

@@ -40,13 +40,13 @@ const InputArea: FC<InputAreaProps> = memo(({
     <div className={classes.inputAreaRoot}>
       <div className={classes.inputAreaTitle}>
         <p>Deposit</p>
-        <div className={classes.inputAreaBalance}>Balance: <UserBalance token={token} /></div>
+        <div className={classes.inputAreaBalance}>Available: <UserBalance token={token} /></div>
       </div>
       <BalanceInput
         currencies={currencies}
         disabled={disabled}
         enableTokenSelect
-        error={!!error}
+        error={error}
         id={id}
         name={name}
         onChange={onChange}

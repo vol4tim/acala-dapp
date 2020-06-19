@@ -7,8 +7,6 @@ import { convertToFixed18 } from '@acala-network/app-util';
 import { useCall, useAccounts, usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { FormatFixed18, FormatBalance } from './format';
-import { DerivedPrice } from '@acala-network/api-derive';
-import { getValueFromTimestampValue } from './utils';
 
 interface Props extends BareProps {
   account?: AccountId | string;
@@ -28,14 +26,14 @@ export const UserBalance: FC<Props> = memo(({
   const _account = account !== undefined ? account : active ? active.address : '';
   // FIXME: need fix api-derive type
   const result = useCall<Balance>('derive.currencies.balance', [_account, token]);
-  const price = usePrice(token) as DerivedPrice;
+  const price = usePrice(token);
 
   if (!result || !price) {
     return null;
   }
 
   if (withPrice) {
-    const _amount = convertToFixed18(getValueFromTimestampValue(price.price)).mul(convertToFixed18(result));
+    const _amount = price.mul(convertToFixed18(result));
 
     return (
       <FormatFixed18
@@ -43,7 +41,6 @@ export const UserBalance: FC<Props> = memo(({
         data={_amount}
         format='thousand'
         prefix='$'
-        withpadDecimalPlaces
       />
     );
   }

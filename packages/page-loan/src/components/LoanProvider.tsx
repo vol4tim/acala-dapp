@@ -1,12 +1,17 @@
 import React, { createContext, FC, useState, useRef, useEffect, useCallback } from 'react';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { useInitialize, useAllLoans } from '@acala-dapp/react-hooks';
+import { useInitialize, useEmergencyShutdown, useAllUserLoans } from '@acala-dapp/react-hooks';
 import { PageLoading } from '@acala-dapp/ui-components';
 
 type LoanTab = 'overview' | 'create' | (CurrencyId | string);
 
 interface LoanContextData {
+  // for emergency shutdown
+  isShutdown: boolean;
+  canRefund: boolean;
+
+  // for use loan select
   currentTab: LoanTab;
   setCurrentTab: (tab: LoanTab) => void;
   cancelCurrentTab: () => void;
@@ -21,8 +26,9 @@ export const LoanProvider: FC<BareProps> = ({
 }) => {
   const prevTabRef = useRef<LoanTab>('overview');
   const [currentTab, _setCurrentTab] = useState<LoanTab>('overview');
-  const { loans } = useAllLoans();
+  const loans = useAllUserLoans();
   const { isInitialized, setEnd } = useInitialize();
+  const { canRefund, isShutdown } = useEmergencyShutdown();
 
   const setCurrentTab = useCallback((tab: LoanTab) => {
     prevTabRef.current = currentTab;
@@ -42,17 +48,18 @@ export const LoanProvider: FC<BareProps> = ({
     setCurrentTab(prevTabRef.current);
   }, [setCurrentTab]);
 
+  // handle init status
   useEffect(() => {
-    if (loans.length !== 0) {
-      setEnd();
-    }
+    if (loans) setEnd();
   }, [loans, setEnd]);
 
   return (
     <LoanContext.Provider
       value={{
+        canRefund,
         cancelCurrentTab,
         currentTab,
+        isShutdown,
         setCurrentTab,
         showCreate,
         showOverview

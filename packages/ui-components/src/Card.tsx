@@ -10,29 +10,40 @@ interface Props extends BareProps {
   header?: ReactNode;
   divider?: boolean;
   padding?: boolean;
+  overflowHidden?: boolean;
 }
 
 export const Card: React.FC<Props> = memo(({
   children,
   className,
   contentClassName,
+  divider = true,
   header,
   headerClassName,
+  overflowHidden = false,
   padding = true
 }) => {
+  const rootClassName = clsx(
+    classes.root,
+    className,
+    {
+      [classes.overflowHidden]: overflowHidden
+    }
+  );
+
+  const _contentClassName = clsx(
+    contentClassName,
+    classes.content,
+    {
+      [classes.padding]: padding,
+      [classes.noTitleContent]: !header && padding
+    }
+  );
+
   return (
-    <section className={clsx(classes.root, className)}>
-      { header ? <div className={clsx(headerClassName, classes.title)}>{header}</div> : null }
-      <div className={
-        clsx(
-          contentClassName,
-          classes.content,
-          {
-            [classes.padding]: padding,
-            [classes.noTitleContent]: !header && padding
-          }
-        )
-      }>
+    <section className={rootClassName}>
+      { header ? <div className={clsx(headerClassName, classes.title, { [classes.divider]: divider })}>{header}</div> : null }
+      <div className={_contentClassName}>
         {children}
       </div>
     </section>

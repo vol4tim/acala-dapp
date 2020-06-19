@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from 'react';
-import { Card, Table, TableItem } from '@acala-dapp/ui-components';
+import { Card, Table, TableConfig } from '@acala-dapp/ui-components';
 import { useCouncilMembers } from '@acala-dapp/react-hooks';
 import { FormatHash } from '@acala-dapp/react-components';
 import { useProposals } from '@acala-dapp/react-hooks/useProposals';
@@ -14,7 +14,7 @@ export const CouncilMotions: FC<Props> = ({ council }) => {
   const { proposals, votes } = useProposals(council);
   const members = useCouncilMembers(council);
 
-  const tableConfig: TableItem<any>[] = [
+  const tableConfig: TableConfig[] = [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */

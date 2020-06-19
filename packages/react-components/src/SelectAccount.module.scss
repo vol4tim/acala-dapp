@@ -1,8 +1,10 @@
 .root {
   .list {
+    max-height: 500px;
     list-style: none;
     border-radius: 2px;
     border: 1px solid #ecf0f2;
+    overflow: auto;
   }
 
   .item {

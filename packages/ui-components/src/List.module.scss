@@ -11,7 +11,8 @@
   padding: 12.5px 24px;
   border-bottom: 1px solid #ecf0f2;
   font-size: 16px;
-  line-height: 24px;
+  line-height: 19px;
+  color: #333333;
 
   &:last-child {
     border-bottom: none;
@@ -22,6 +23,6 @@
   }
 
   .itemValue {
-    font-weight: 500;
+    font-weight: bold;
   }
 }

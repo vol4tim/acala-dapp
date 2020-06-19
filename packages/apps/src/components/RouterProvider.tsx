@@ -23,8 +23,6 @@ export const RouterProvider: FC<Props> = ({ config }) => {
     }
   });
 
-  console.log('router rerender');
-
   return (
     <BrowserRouter>
       <Routes config={config} />

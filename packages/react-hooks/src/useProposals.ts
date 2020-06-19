@@ -3,6 +3,8 @@ import { Proposal, Hash, Votes } from '@polkadot/types/interfaces';
 import { Vec, Option } from '@polkadot/types';
 
 import { useApi } from './useApi';
+import { switchMap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 
 interface HooksReturnType {
   proposals: Option<Proposal>[];
@@ -14,17 +16,22 @@ export const useProposals = (council: string): HooksReturnType => {
   const [proposals, setProposals] = useState<Option<Proposal>[]>([]);
   const [votes, setVotes] = useState<Option<Votes>[]>([]);
 
-  useEffect((): void => {
-    if (api && api.query[council]) {
-      api.query[council].proposals((proposals: Vec<Hash>) => {
-        api.query[council].proposalOf.multi(proposals, (result) => {
-          setProposals(result as Option<Proposal>[]);
-        });
-        api.query[council].voting.multi(proposals, (result) => {
-          setVotes(result as Option<Votes>[]);
-        });
-      });
-    }
+  useEffect(() => {
+    if (!api || !api.query[council]) return;
+
+    const subscriber = api.query[council].proposals<Vec<Hash>>().pipe(
+      switchMap((result) => {
+        return combineLatest(
+          combineLatest(result.map((proposal) => api.query[council].proposalOf<Option<Proposal>>(proposal))),
+          combineLatest(result.map((proposal) => api.query[council].voting<Option<Votes>>(proposal)))
+        );
+      })
+    ).subscribe(([proposals, votes]) => {
+      setProposals(proposals);
+      setVotes(votes);
+    });
+
+    return (): void => subscriber.unsubscribe();
   }, [api, council]);
 
   return { proposals, votes };

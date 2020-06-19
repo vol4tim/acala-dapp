@@ -6,12 +6,24 @@ interface Props extends GridProps{
 }
 
 export const Grid: FC<Props> = ({ children, spacing = 3, ...other }) => {
-  return (
-    <MuiGrid
-      spacing={spacing}
-      {...other}
-    >
-      {children}
-    </MuiGrid>
-  );
+  const props: GridProps = other;
+
+  if (props.container) {
+    props.spacing = spacing;
+  }
+
+  if (props.container && props.item) {
+    const { item, lg, md, xs, ...other } = props;
+
+    return (
+      <MuiGrid item={item}
+        lg={lg}
+        md={md}
+        xs={xs}>
+        <MuiGrid {...other}>{children}</MuiGrid>
+      </MuiGrid>
+    );
+  }
+
+  return <MuiGrid {...props}>{children}</MuiGrid>;
 };

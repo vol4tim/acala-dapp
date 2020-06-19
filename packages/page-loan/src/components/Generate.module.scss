@@ -7,18 +7,24 @@
     line-height: 19px;
 
     .console {
-      margin-top: -24px;
       flex: 1;
     }
 
     .title {
       margin: 24px 0 12px 0;
+      font-weight: 500;
+
+      &:first-child {
+        margin-top: 0;
+      }
     }
 
     .addon {
       display: flex;
       justify-content: space-between;
       margin-top: 8px;
+      font-size: 14px;
+      line-height: 16px;
       color: #999999;
     }
 
