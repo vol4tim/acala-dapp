@@ -1,24 +1,25 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import AccountId from '@polkadot/types/generic/AccountId';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { useBalance, useAmount, useTotalAmount } from '@acala-dapp/react-hooks';
+import { useBalance, useAmount, useTotalAmount, usePrice } from '@acala-dapp/react-hooks';
 
 import { FormatBalance, FormatFixed18, FormatFixed18Props, FormatBalanceProps } from './format';
 import { AccountLike, CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
-interface AssetBalanceProps extends FormatBalanceProps {
+interface UserAssetBalanceProps extends FormatBalanceProps {
   account?: AccountLike;
   currency: CurrencyLike;
   showCurrency?: boolean;
 }
 
 /**
- * @name AssetBalance
+ * @name UserAssetBalance
  * @description display user asset balance
  */
-export const AssetBalance: FC<AssetBalanceProps> = ({ account, currency, showCurrency, ...other }) => {
+export const UserAssetBalance: FC<UserAssetBalanceProps> = ({ account, currency, showCurrency, ...other }) => {
   const balance = useBalance(currency, account);
 
   if (!balance) {
@@ -34,16 +35,17 @@ export const AssetBalance: FC<AssetBalanceProps> = ({ account, currency, showCur
   );
 };
 
-interface AssetAmountProps extends FormatFixed18Props{
+interface UserAssetAmountProps extends FormatFixed18Props{
   account?: AccountId | string;
+  quantity?: number;
   currency: CurrencyId | string;
 }
 
 /**
- * @name AssetAmount
+ * @name UserAssetAmount
  * @description display user asset amount in USD
  */
-export const AssetAmount: FC<AssetAmountProps> = ({
+export const UserAssetAmount: FC<UserAssetAmountProps> = ({
   account,
   currency,
   prefix = '≈ US $',
@@ -51,9 +53,7 @@ export const AssetAmount: FC<AssetAmountProps> = ({
 }) => {
   const amount = useAmount(currency, account);
 
-  if (!amount) {
-    return null;
-  }
+  if (!amount) return null;
 
   return (
     <FormatFixed18
@@ -64,15 +64,15 @@ export const AssetAmount: FC<AssetAmountProps> = ({
   );
 };
 
-export interface TotalAssetAmountProps extends FormatFixed18Props {
+export interface TotalUserAssetAmountProps extends FormatFixed18Props {
   account?: AccountId | string;
 }
 
 /**
- * @name TotalAssetAmount
+ * @name TotalUserAssetAmount
  * @description display the total asset amount in USD
  */
-export const TotalAssetAmount: FC<TotalAssetAmountProps> = ({
+export const TotalUserAssetAmount: FC<TotalUserAssetAmountProps> = ({
   account,
   ...other
 }) => {
@@ -82,6 +82,32 @@ export const TotalAssetAmount: FC<TotalAssetAmountProps> = ({
     <FormatFixed18
       data={amount}
       prefix='$'
+      {...other}
+    />
+  );
+};
+
+export interface AssetValueProps extends FormatFixed18Props {
+  quantity: number | Fixed18;
+  currency: CurrencyLike;
+}
+
+export const AssetValue: FC<AssetValueProps> = ({
+  currency,
+  quantity,
+  ...other
+}) => {
+  const price = usePrice(currency);
+  const result = useMemo(() => {
+    if (!price || !quantity) return Fixed18.ZERO;
+
+    return convertToFixed18(quantity).mul(price);
+  }, [price, quantity]);
+
+  return (
+    <FormatFixed18
+      data={result}
+      prefix='≈ $USA'
       {...other}
     />
   );

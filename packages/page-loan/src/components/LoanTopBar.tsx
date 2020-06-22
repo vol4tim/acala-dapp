@@ -6,7 +6,7 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 import { ReactComponent as OverviewIcon } from '../assets/overview.svg';
 import { ReactComponent as AddIcon } from '../assets/add.svg';
 import classes from './LoanTopBar.module.scss';
-import { useAllLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
+import { useAllUserLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
 import { LoanContext } from './LoanProvider';
 
 interface LoanItemProps {
@@ -91,12 +91,10 @@ const LoanAdd: FC = () => {
 };
 
 export const LoanTopBar: FC = () => {
-  const { loans } = useAllLoans();
+  const loans = useAllUserLoans();
 
   const checkIfNeedAdd = useMemo((): boolean => {
-    if (!loans) {
-      return false;
-    }
+    if (!loans) return false;
 
     return loans.length !== filterEmptyLoan(loans).length;
   }, [loans]);

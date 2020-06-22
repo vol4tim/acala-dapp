@@ -6,6 +6,7 @@ import PageHoma from '@acala-dapp/page-homa';
 import PageSwap from '@acala-dapp/page-swap';
 import PageWallet from '@acala-dapp/page-wallet';
 import PageGovernance from '@acala-dapp/page-governance';
+import PageOverview from '@acala-dapp/page-overview';
 
 import { MainLayout } from './layouts/Main';
 import { sideBarConfig } from './sidebar-config';
@@ -43,6 +44,10 @@ export const config: RouterConfigData[] = [
       {
         element: <PageGovernance />,
         path: 'governance'
+      },
+      {
+        element: <PageOverview />,
+        path: 'overview'
       },
       {
         path: '*',

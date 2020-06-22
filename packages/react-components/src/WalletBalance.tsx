@@ -4,7 +4,7 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Card } from '@acala-dapp/ui-components';
 import { useConstants } from '@acala-dapp/react-hooks';
-import { TokenImage, TokenName, AssetBalance, AssetAmount } from '@acala-dapp/react-components';
+import { TokenImage, TokenName, UserAssetBalance, UserAssetAmount } from '@acala-dapp/react-components';
 
 import classes from './WalletBalance.module.scss';
 
@@ -24,12 +24,12 @@ const Balance: FC<BalanceProps> = ({ currency }) => {
           className={classes.name}
           currency={currency}
         />
-        <AssetBalance
+        <UserAssetBalance
           className={classes.balance}
           currency={currency}
           decimalLength={2}
         />
-        <AssetAmount
+        <UserAssetAmount
           className={classes.amount}
           currency={currency}
           prefix='≈ US $'

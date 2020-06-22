@@ -37,16 +37,18 @@ export const useDexTotalReward = (): HooksReturnType => {
 
     const getReward$ = (currency: CurrencyId): Observable<Fixed18> => {
       return combineLatest([
-        api.query.dex.totalInterest<Balance>(currency),
+        api.query.dex.totalInterest<[Balance, Balance]>(currency),
         api.query.dex.withdrawnInterest<Balance>(currency, active.address),
         api.query.dex.shares<Balance>(currency, active.address),
         api.query.dex.totalShares<Balance>(currency)
       ]).pipe(
-        map(([_totalInterest, _withdrawnInterest, _shares, _totalShares]) => {
+        map(([[_totalInterest], _withdrawnInterest, _shares, _totalShares]) => {
           const totalInterest = convertToFixed18(_totalInterest);
           const withdrawnInterest = convertToFixed18(_withdrawnInterest);
           const shares = convertToFixed18(_shares);
           const totalShares = convertToFixed18(_totalShares);
+
+          if (totalShares.isZero()) return Fixed18.ZERO;
 
           return totalInterest.mul(shares.div(totalShares)).sub(withdrawnInterest);
         })
@@ -80,10 +82,7 @@ export const useDexTotalSystemReward = (): HooksReturnType => {
     if (!api) return;
 
     const getReward$ = (currency: CurrencyId): Observable<Fixed18> => {
-      return combineLatest([
-        api.query.dex.totalInterest<Balance>(currency),
-        api.query.dex.totalWithdrawnInterest<Balance>(currency)
-      ]).pipe(
+      return api.query.dex.totalInterest<[Balance, Balance]>(currency).pipe(
         map(([_totalInterest, _withdrawnInterest]) => {
           const totalInterest = convertToFixed18(_totalInterest);
           const withdrawnInterest = convertToFixed18(_withdrawnInterest);
@@ -141,6 +140,8 @@ export const useDexTotalDeposit = (): HooksReturnType => {
           const share = convertToFixed18(_shares);
           const totalShares = convertToFixed18(_totalShares);
           const ratio = share.div(totalShares);
+
+          if (!ratio.isFinity()) return Fixed18.ZERO;
 
           return price ? base.mul(ratio).add(other.mul(ratio).mul(price.price)) : Fixed18.ZERO;
         })

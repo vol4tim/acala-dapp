@@ -18,6 +18,11 @@ export const sideBarConfig: SideBarConfig = {
       path: 'loan'
     },
     {
+      icon: <LoanSVG />,
+      name: 'Overview',
+      path: 'overview'
+    },
+    {
       icon: <ExchangeSVG />,
       name: 'Swap',
       path: 'swap'

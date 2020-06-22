@@ -18,7 +18,7 @@ export class PriceStore extends BaseRxStore {
   private api!: ApiRx;
 
   run (): void {
-    const nativeCurrency = this.api.consts.currencies.nativeCurrencyId as CurrencyId;
+    const nativeCurrency = this.api.consts.currencies.nativeCurrencyId as unknown as CurrencyId;
     const allPrices$ = (this.api.derive as any).price.allPrices() as Observable<DerivedPrice[]>;
     const dex$ = (this.api.derive as any).dex.pool(nativeCurrency) as Observable<DerivedDexPool>;
 

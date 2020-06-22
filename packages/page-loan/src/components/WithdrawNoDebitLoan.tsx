@@ -1,6 +1,6 @@
 import React, { FC, useContext, useState, useEffect, ReactNode } from 'react';
 import { Card, TableConfig, Table, Button, Step } from '@acala-dapp/ui-components';
-import { useAllLoans, useLoan, useConstants, filterEmptyLoan } from '@acala-dapp/react-hooks';
+import { useAllUserLoans, useConstants, filterEmptyLoan, useLoanHelper } from '@acala-dapp/react-hooks';
 import { DerivedUserLoan } from '@acala-network/api-derive';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Token, FormatBalance, getTokenName, TxButton } from '@acala-dapp/react-components';
@@ -54,7 +54,7 @@ export const Guide: FC = () => {
 };
 
 const DebitAmount: FC<{ token: CurrencyId | string }> = ({ token }) => {
-  const { currentUserLoanHelper } = useLoan(token);
+  const currentUserLoanHelper = useLoanHelper(token);
 
   return (
     <FormatBalance balance={currentUserLoanHelper?.debitAmount} />
@@ -64,7 +64,7 @@ const DebitAmount: FC<{ token: CurrencyId | string }> = ({ token }) => {
 export const WithdrawNoDebitLoan: FC = () => {
   const [empty, setEmpty] = useState<boolean | null>(null);
 
-  const { loans } = useAllLoans();
+  const loans = useAllUserLoans();
   const { stableCurrency } = useConstants();
 
   const tableConfig: TableConfig[] = [

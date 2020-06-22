@@ -2,7 +2,7 @@ import React, { FC, useContext, useState, useCallback, useMemo, useRef, useEffec
 
 import { useUserLoan, useConstants, useAllUserLoans } from '@acala-dapp/react-hooks';
 import { Table, TableConfig, Radio, Button } from '@acala-dapp/ui-components';
-import { Token, tokenEq, AssetBalance, AssetAmount, Price, StableFeeAPR, RequiredCollateralRatio, LiquidationRatio, LiquidationPenalty } from '@acala-dapp/react-components';
+import { Token, tokenEq, UserAssetBalance, UserAssetAmount, Price, StableFeeAPR, RequiredCollateralRatio, LiquidationRatio, LiquidationPenalty } from '@acala-dapp/react-components';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import classes from './SelectCollateral.module.scss';
@@ -45,9 +45,9 @@ const Select: FC<SelectProps> = ({
 const Balance: FC<{ currency: CurrencyLike}> = ({ currency }) => {
   return (
     <div className={classes.balanceArea}>
-      <AssetBalance className={classes.balance}
+      <UserAssetBalance className={classes.balance}
         currency={currency} />
-      <AssetAmount className={classes.amount}
+      <UserAssetAmount className={classes.amount}
         currency={currency} />
     </div>
   );

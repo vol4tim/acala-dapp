@@ -28,6 +28,11 @@
   }
 }
 
+.content {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .content.padding {
   padding: 0 24px 24px 24px;
 }

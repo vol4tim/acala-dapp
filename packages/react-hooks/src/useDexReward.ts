@@ -17,7 +17,7 @@ interface HooksReturnType {
 export const useDexReward = (token: CurrencyId | string, account?: AccountId | string): HooksReturnType => {
   const { active } = useAccounts();
   const _account = account || (active ? active.address : '');
-  const totalInterest = useCall<Balance>('query.dex.totalInterest', [token]);
+  const totalInterest = useCall<[Balance, Balance]>('query.dex.totalInterest', [token]);
   const { share, totalShares } = useDexShare(token, _account);
   const withdrawnInterest = useCall<Balance>('query.dex.withdrawnInterest', [token, _account]);
   const liquidityIncentiveRate = useCall<Balance>('query.dex.liquidityIncentiveRate', [token]);
@@ -31,7 +31,7 @@ export const useDexReward = (token: CurrencyId | string, account?: AccountId | s
     };
   }
 
-  const _totalInterest = convertToFixed18(totalInterest);
+  const _totalInterest = convertToFixed18(totalInterest[0]);
   const _share = convertToFixed18(share);
   const _totalShares = convertToFixed18(totalShares);
   const _withdrawnInterest = convertToFixed18(withdrawnInterest || 0);

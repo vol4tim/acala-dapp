@@ -8,7 +8,7 @@ import { useModal, useConstants } from '@acala-dapp/react-hooks';
 
 import { getTokenName, tokenEq, numToFixed18Inner } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
-import { AssetBalance, AssetAmount } from './Assets';
+import { UserAssetBalance, UserAssetAmount } from './Assets';
 import classes from './TransferModal.module.scss';
 import { AddressInput } from './AddressInput';
 import { BalanceAmountInput } from './BalanceAmountInput';
@@ -32,7 +32,7 @@ const AssetBoard: FC<AssetBoardProps> = ({
         onClick={openSelect} >
         <div>
           <div className={classes.balance}>
-            <AssetBalance
+            <UserAssetBalance
               currency={currency}
               decimalLength={2}
             />
@@ -42,7 +42,7 @@ const AssetBoard: FC<AssetBoardProps> = ({
             />
             <ArrowDownIcon className={classes.icon} />
           </div>
-          <AssetAmount
+          <UserAssetAmount
             className={classes.amount}
             currency={currency}
             prefix='≈ US$'

@@ -63,13 +63,11 @@ export function useCall <T> (path: string, params: CallParams = []): T | undefin
   // on changes, re-subscribe
   useEffect(() => {
     // check if we have a function & that we are mounted
-    if (appReadyStatus) {
-      tracker.subscribe(api, path, params, key, setStore);
-    }
+    if (!appReadyStatus) return;
 
-    return (): void => {
-      tracker.unsubscribe(key);
-    };
+    tracker.subscribe(api, path, params, key, setStore);
+
+    return (): void => tracker.unsubscribe(key);
   }, [appReadyStatus, api, path, params, key, setStore]);
 
   return store[key];

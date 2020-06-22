@@ -1,0 +1,46 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% + 48px);
+  margin: 0 -24px;
+}
+
+.item {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  flex: 1;
+  padding: 0 24px;
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:first-child::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 12px;
+    height: calc(100% - 24px);
+    width: 1px;
+    background: #ecf0f2;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: bold;
+
+    .amount {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      color: #999999;
+    }
+  }
+
+  .chart {
+    width: 240px;
+    height: 120px;
+  }
+}
+

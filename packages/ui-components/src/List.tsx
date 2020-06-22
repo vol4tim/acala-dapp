@@ -16,16 +16,22 @@ export interface ListConfig {
 
 interface Props extends BareProps {
   config: ListConfig[];
-  data: ListData;
+  data: ListData | null;
   itemClassName?: string;
+  labelClassName?: string;
+  dataClassName?: string;
 }
 
 export const List: FC<Props> = memo(({
   className,
   config,
   data,
-  itemClassName
+  dataClassName,
+  itemClassName,
+  labelClassName,
 }) => {
+  if (!data) return null;
+
   return (
     <ul className={clsx(classes.root, className)}>
       {
@@ -37,8 +43,8 @@ export const List: FC<Props> = memo(({
               className={clsx(classes.listItem, itemClassName)}
               key={`list-${key}-${index}`}
             >
-              <div className={classes.labelValue}>{_config.title}</div>
-              <div className={classes.itemValue}>{_config.render(data[key], index)}</div>
+              <div className={clsx(classes.labelValue, labelClassName)}>{_config.title}</div>
+              <div className={clsx(classes.itemValue, dataClassName)}>{_config.render(data[key], index)}</div>
             </li>
           );
         })

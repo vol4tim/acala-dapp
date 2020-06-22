@@ -35,7 +35,6 @@ export * from './useCurrentRedeem';
 
 // loan
 export * from './loanHooks';
-export * from './useLoan';
 
 // council
 export * from './useCouncilList';
