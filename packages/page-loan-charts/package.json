@@ -1,7 +1,7 @@
 {
-  "name": "@acala-dapp/page-overview",
+  "name": "@acala-dapp/page-loan-charts",
   "version": "0.2.0",
-  "description": "overview page",
+  "description": "page loan charts",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",
   "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
@@ -12,6 +12,7 @@
     "@nivo/pie": "^0.62.0",
     "@polkadot/react-identicon": "^0.52.1",
     "apollo-boost": "^0.4.9",
+    "echarts": "^4.8.0",
     "graphql": "^15.1.0",
     "react-copy-to-clipboard": "^5.0.2"
   },

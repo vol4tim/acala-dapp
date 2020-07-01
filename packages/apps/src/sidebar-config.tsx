@@ -18,11 +18,6 @@ export const sideBarConfig: SideBarConfig = {
       path: 'loan'
     },
     {
-      icon: <LoanSVG />,
-      name: 'Overview',
-      path: 'overview'
-    },
-    {
       icon: <ExchangeSVG />,
       name: 'Swap',
       path: 'swap'
@@ -41,6 +36,11 @@ export const sideBarConfig: SideBarConfig = {
       icon: <GovernanceSVG />,
       name: 'Governance',
       path: 'governance'
+    },
+    {
+      icon: <LoanSVG />,
+      name: 'Loan Analysis',
+      path: 'anal/loan'
     }
   ],
   socialMedia: [

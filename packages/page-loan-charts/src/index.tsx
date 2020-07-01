@@ -8,7 +8,7 @@ import { TotalDebitAndCollateral } from './components/TotalDebitAndCollateral';
 const PageWallet: FC = () => {
   return (
     <Page>
-      <Page.Title title='Loans Overview' />
+      <Page.Title title='Loan Analysis' />
       <Page.Content>
         <Grid container
           direction='column'>
