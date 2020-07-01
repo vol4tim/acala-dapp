@@ -27,7 +27,7 @@ export interface ApiContextData {
 export const ApiContext = React.createContext<ApiContextData>({} as ApiContextData);
 
 interface Props {
-  endpoint: string;
+  endpoint?: string;
   children: ReactNode;
   ConnectError?: ReactNode;
   Loading?: ReactNode;

@@ -1,39 +1,28 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
+import ApolloClient from 'apollo-boost';
+import { ApolloProvider } from '@apollo/react-hooks';
 
-import { ConnectError, NoAccounts, NoExtensions } from '@acala-dapp/react-components';
-import { UIProvider, Notification, FullLoading } from '@acala-dapp/ui-components';
-import { ApiProvider, AccountProvider, GlobalStoreProvider } from '@acala-dapp/react-environment';
-import { useAppSetting } from '@acala-dapp/react-hooks/useAppSetting';
-import { RxStoreProvider } from '@acala-dapp/react-components/RxStore';
+import { UIProvider, Notification } from '@acala-dapp/ui-components';
+import { AcalaProvider } from '@acala-dapp/react-environment';
 
 import { RouterProvider } from './components/RouterProvider';
 import { config as routerConfig } from './router-config';
 
 const App: FC = () => {
-  const { endpoint } = useAppSetting();
+  const client = useMemo<ApolloClient<any>>(() => {
+    return new ApolloClient({ uri: 'http://118.25.24.80:4000' });
+  }, []);
 
   return (
-    <UIProvider>
-      <Notification>
-        <ApiProvider
-          ConnectError={<ConnectError />}
-          Loading={<FullLoading />}
-          endpoint={endpoint}
-        >
-          <AccountProvider
-            NoAccounts={<NoAccounts />}
-            NoExtensions={<NoExtensions />}
-            applicationName={'Acala Dapp'}
-          >
-            <RxStoreProvider>
-              <GlobalStoreProvider>
-                <RouterProvider config={routerConfig} />
-              </GlobalStoreProvider>
-            </RxStoreProvider>
-          </AccountProvider>
-        </ApiProvider>
-      </Notification>
-    </UIProvider>
+    <ApolloProvider client={client}>
+      <UIProvider>
+        <Notification>
+          <AcalaProvider applicationName={'Acala Dapp'}>
+            <RouterProvider config={routerConfig} />
+          </AcalaProvider>
+        </Notification>
+      </UIProvider>
+    </ApolloProvider>
   );
 };
 

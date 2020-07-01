@@ -10,8 +10,8 @@ import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 interface HooksReturnType {
   allCurrencies: CurrencyId[];
   dexBaseCurrency: CurrencyId;
-  dexCurrencies: Vec<CurrencyId>;
-  loanCurrencies: Vec<CurrencyId>;
+  dexCurrencies: CurrencyId[];
+  loanCurrencies: CurrencyId[];
   expectedBlockTime: number;
   nativeCurrency: CurrencyId;
   minmumDebitValue: Fixed18;

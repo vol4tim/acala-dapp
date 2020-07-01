@@ -4,7 +4,6 @@ export * from './useApi';
 export * from './useCall';
 export * from './useIsAppReady';
 export * from './useStorage';
-export * from './useAppSetting';
 export * from './useConstants';
 export * from './useExtrinsicHistory';
 export * from './useInterval';
