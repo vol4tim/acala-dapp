@@ -11,15 +11,15 @@ export const DEFAULT_ENDPOINTS: EndpointConfig[] = [
   {
     name: 'Mandala TC3 Node 1 (Hosted by OnFinality)',
     url: 'wss://node-6661046769230852096.jm.onfinality.io/ws'
-  },
-  {
-    name: 'Mandala TC3 Node 2 (Hosted by OnFinality)',
-    url: 'wss://node-6661046769218965504.rz.onfinality.io/ws'
-  },
-  {
-    name: 'Mandala TC3 Node 3 (Hosted by Acala)',
-    url: 'wss://testnet-node-1.acala.laminar.one/ws'
   }
+  // {
+  //   name: 'Mandala TC3 Node 2 (Hosted by OnFinality)',
+  //   url: 'wss://node-6661046769218965504.rz.onfinality.io/ws'
+  // },
+  // {
+  //   name: 'Mandala TC3 Node 3 (Hosted by Acala)',
+  //   url: 'wss://testnet-node-1.acala.laminar.one/ws'
+  // }
 ];
 
 export const selectFastestEndpoints = (endpoints: EndpointConfig[]): Observable<WsProvider> => {
