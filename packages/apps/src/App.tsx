@@ -18,10 +18,8 @@ const App: FC = () => {
     <ApolloProvider client={client}>
       <UIProvider>
         <AcalaProvider applicationName={'Acala Dapp'}>
-          <>
-            <RouterProvider config={routerConfig} />
-            <EventsWatcher />
-          </>
+          <RouterProvider config={routerConfig} />
+          <EventsWatcher />
         </AcalaProvider>
       </UIProvider>
     </ApolloProvider>

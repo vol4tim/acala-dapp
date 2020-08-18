@@ -1,16 +1,20 @@
-import React, { FC, memo, useState, useEffect } from 'react';
+import React, { FC, memo, useState, useEffect, useMemo, useCallback } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18, calcTargetInBaseToOther, convertToFixed18, calcTargetInOtherToBase, calcTargetInOtherToOther } from '@acala-network/app-util';
+import { DerivedDexPool } from '@acala-network/api-derive';
 
 import { FormatBalance } from '@acala-dapp/react-components';
+import { SwapOutlined, Tag } from '@acala-dapp/ui-components';
 import { useDexPool, useConstants } from '@acala-dapp/react-hooks';
+
 import { tokenEq } from './utils';
-import { DerivedDexPool } from '@acala-network/api-derive';
+import classes from './DexExchangeRate.module.scss';
 
 interface Props {
   supply: string | CurrencyId;
   target?: string | CurrencyId;
+  supplyAmount?: number;
 }
 
 function convertPool (pool: DerivedDexPool): { base: Fixed18; other: Fixed18 } {
@@ -20,14 +24,22 @@ function convertPool (pool: DerivedDexPool): { base: Fixed18; other: Fixed18 } {
   };
 }
 
-export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
+export const DexExchangeRate: FC<Props> = memo(({
+  supply,
+  supplyAmount = 1,
+  target
+}) => {
   const { dexBaseCurrency } = useConstants();
-  const _target = target || dexBaseCurrency;
+  const _target = useMemo(() => target || dexBaseCurrency, [dexBaseCurrency, target]);
+  // ensue that _supplyAmount always not empty
+  const _supplyAmount = useMemo(() => supplyAmount ? Fixed18.fromNatural(supplyAmount) : Fixed18.fromNatural(1), [supplyAmount]);
   const supplyPool = useDexPool(supply || null as any as CurrencyId);
   const targetPool = useDexPool(_target || null as any as CurrencyId);
   const [ratio, setRatio] = useState<Fixed18>(Fixed18.ZERO);
-  const [supplyToken, setSupplyToken] = useState<CurrencyId | string>();
-  const [targetToken, setTargetToken] = useState<CurrencyId | string>(dexBaseCurrency);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+  const handleSwapDirection = useCallback(() => {
+    setDirection(direction === 'forward' ? 'back' : 'forward');
+  }, [setDirection, direction]);
 
   useEffect(() => {
     if (!supplyPool || !supply) {
@@ -35,38 +47,51 @@ export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
     }
 
     if (tokenEq(supply, dexBaseCurrency) && !tokenEq(_target, dexBaseCurrency) && targetPool) {
-      setRatio(calcTargetInBaseToOther(Fixed18.fromNatural(1), convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
-      setSupplyToken(dexBaseCurrency);
-      setTargetToken(_target);
+      setRatio(calcTargetInBaseToOther(_supplyAmount, convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
     }
 
     if (tokenEq(_target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency) && supplyPool) {
-      setRatio(calcTargetInOtherToBase(Fixed18.fromNatural(1), convertPool(supplyPool), Fixed18.ZERO, Fixed18.ZERO));
-      setSupplyToken(supply);
-      setTargetToken(dexBaseCurrency);
+      setRatio(calcTargetInOtherToBase(_supplyAmount, convertPool(supplyPool), Fixed18.ZERO, Fixed18.ZERO));
     }
 
     if (!tokenEq(_target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency) && supplyPool && targetPool) {
-      setRatio(calcTargetInOtherToOther(Fixed18.fromNatural(1), convertPool(supplyPool), convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
-      setSupplyToken(supply);
-      setTargetToken(target || dexBaseCurrency);
+      setRatio(calcTargetInOtherToOther(_supplyAmount, convertPool(supplyPool), convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
     }
-  }, [supplyPool, targetPool, supply, target, dexBaseCurrency, _target]);
+  }, [supplyPool, targetPool, supply, _target, dexBaseCurrency, _supplyAmount]);
 
   return (
-    <FormatBalance
-      pair={[
-        {
-          balance: 1,
-          currency: supplyToken
-        },
-        {
-          balance: ratio,
-          currency: targetToken
+    <div className={classes.root}>
+      <FormatBalance
+        pair={
+          direction === 'forward' ? [
+            {
+              balance: 1,
+              currency: supply
+            },
+            {
+              balance: ratio.div(_supplyAmount),
+              currency: _target
+            }
+          ] : [
+            {
+              balance: 1,
+              currency: _target
+            },
+            {
+              balance: _supplyAmount.div(ratio),
+              currency: supply
+            }
+          ]
         }
-      ]}
-      pairSymbol='≈'
-    />
+        pairSymbol='≈'
+      />
+      <Tag
+        className={classes.swap}
+        onClick={handleSwapDirection}
+      >
+        <SwapOutlined />
+      </Tag>
+    </div>
   );
 });
 

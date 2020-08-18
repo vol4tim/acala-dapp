@@ -201,38 +201,41 @@ export const SwapConsole: FC = memo(() => {
     <Card className={classes.root}
       padding={false}>
       <div className={classes.main}>
-        <InputArea
-          currencies={supplyCurrencies}
-          error={form.errors.supply}
-          inputName='supply'
-          maxInput={maxSupplyInput}
-          onChange={onSupplyChange}
-          onTokenChange={onSupplyTokenChange}
-          showMax={true}
-          title='Pay With'
-          token={pool.supplyCurrency}
-          value={form.values.supply as number}
-        />
-        <SwapBtn onClick={onSwap} />
-        <InputArea
-          addon={
-            <div className={classes.addon}>
-              <p>Exchange Rate</p>
-              <DexExchangeRate
-                supply={pool.supplyCurrency}
-                target={pool.targetCurrency}
-              />
-            </div>
-          }
-          currencies={targetCurrencies}
-          error={form.errors.target}
-          inputName='target'
-          onChange={onTargetChange}
-          onTokenChange={onTargetTokenChange}
-          title='Receive (Estimate)'
-          token={pool.targetCurrency}
-          value={form.values.target}
-        />
+        <div className={classes.inputFields}>
+          <div className={classes.inputFieldsInner}>
+            <InputArea
+              currencies={supplyCurrencies}
+              error={form.errors.supply}
+              inputName='supply'
+              maxInput={maxSupplyInput}
+              onChange={onSupplyChange}
+              onTokenChange={onSupplyTokenChange}
+              showMax={true}
+              title='Pay With'
+              token={pool.supplyCurrency}
+              value={form.values.supply as number}
+            />
+            <SwapBtn onClick={onSwap} />
+            <InputArea
+              currencies={targetCurrencies}
+              error={form.errors.target}
+              inputName='target'
+              onChange={onTargetChange}
+              onTokenChange={onTargetTokenChange}
+              title='Receive (Estimate)'
+              token={pool.targetCurrency}
+              value={form.values.target}
+            />
+          </div>
+          <div className={classes.addon}>
+            <p>Dex Price</p>
+            <DexExchangeRate
+              supply={pool.supplyCurrency}
+              supplyAmount={form.values.supply as number}
+              target={pool.targetCurrency}
+            />
+          </div>
+        </div>
         <TxButton
           className={classes.txBtn}
           color={priceImpact > 0.05 ? 'danger' : 'primary'}

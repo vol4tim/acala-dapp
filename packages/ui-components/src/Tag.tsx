@@ -12,6 +12,7 @@ interface Props extends BareProps {
 
 export const Tag: FC<Props> = memo(({
   children,
+  className,
   color = 'normal',
   onClick
 }) => {
@@ -21,6 +22,7 @@ export const Tag: FC<Props> = memo(({
         clsx(
           classes.root,
           classes[color],
+          className,
           {
             [classes.clickable]: onClick
           }

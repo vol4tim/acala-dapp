@@ -161,10 +161,6 @@ export const WithdrawConsole: FC = memo(() => {
       <div>
         <ul className={classes.addon}>
           <li className={classes.addonItem}>
-            <span>Exchange Rate</span>
-            <DexExchangeRate supply={otherCurrency} />
-          </li>
-          <li className={classes.addonItem}>
             <span>Current Pool Size</span>
             <DexPoolSize token={otherCurrency} />
           </li>

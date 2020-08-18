@@ -17,11 +17,45 @@
 }
 
 .main {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 178px;
+
   padding: 24px;
-  padding-bottom: 32px;
+  background: var(--color-white);
   border-radius: 12px;
-  background: #ffffff;
+
+  .inputFields {
+    margin-right: 27px;
+  }
+
+  .inputFieldsInner {
+    display: grid;
+    grid-template-columns: 1fr 108px 1fr;
+  }
+
+  .swapBtn {
+    margin: 49px 25px 0 25px;
+    border-radius: 12px;
+    background: var(--color-white);
+  }
+
+  .txBtn {
+    margin-top: 49px;
+  }
+
+  .addon {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+    font-size: 16px;
+    line-height: 19px;
+    color: var(--text-color-second);
+
+    > p {
+      margin-right: 24px;
+    }
+  }
+
 }
 
 .swapInfoRoot {
@@ -45,26 +79,7 @@
   }
 }
 
-.swapBtn {
-  margin: 49px 25px 0 25px;
-  border-radius: 12px;
-  background: #ffffff;
-}
 
-.txBtn {
-  flex-shrink: 0;
-  margin: 49px 0 0 27px;
-}
-
-
-.addon {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 16px;
-  font-size: 16px;
-  line-height: 19px;
-  color: var(--text-color-second);
-}
 
 .swapRoute {
   display: flex;

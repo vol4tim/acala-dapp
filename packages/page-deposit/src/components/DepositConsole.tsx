@@ -1,4 +1,4 @@
-import React, { FC, memo, useState, useContext, useCallback } from 'react';
+import React, { FC, useState, useContext, useCallback } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
@@ -7,7 +7,7 @@ import { Fixed18 } from '@acala-network/app-util';
 
 import { Card, nextTick } from '@acala-dapp/ui-components';
 import { useDexExchangeRate, useFormValidator, useBalance } from '@acala-dapp/react-hooks';
-import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, DexPoolSize, DexUserShare, UserBalance } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, numToFixed18Inner, DexPoolRate, DexPoolSize, DexUserShare, UserBalance } from '@acala-dapp/react-components';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { CurrencyChangeFN } from '@acala-dapp/react-components/types';
 
@@ -29,7 +29,7 @@ interface InputAreaProps {
   showMax?: boolean;
 }
 
-const InputArea: FC<InputAreaProps> = memo(({
+const InputArea: FC<InputAreaProps> = ({
   currencies,
   disabled,
   error,
@@ -70,11 +70,11 @@ const InputArea: FC<InputAreaProps> = memo(({
       />
     </div>
   );
-});
+};
 
 InputArea.displayName = 'InputArea';
 
-export const DepositConsole: FC = memo(() => {
+export const DepositConsole: FC = () => {
   const { baseCurrencyId, enabledCurrencyIds } = useContext(DepositContext);
   const [otherCurrency, setOtherCurrency] = useState<CurrencyId>(enabledCurrencyIds[0]);
   const rate = useDexExchangeRate(otherCurrency);
@@ -190,7 +190,7 @@ export const DepositConsole: FC = memo(() => {
         <ul className={classes.addon}>
           <li className={classes.addonItem}>
             <span>Exchange Rate</span>
-            <DexExchangeRate supply={otherCurrency} />
+            <DexPoolRate supply={otherCurrency} />
           </li>
           <li className={classes.addonItem}>
             <span>Current Pool Size</span>
@@ -204,6 +204,4 @@ export const DepositConsole: FC = memo(() => {
       </div>
     </Card>
   );
-});
-
-DepositConsole.displayName = 'DepositConsole';
+};

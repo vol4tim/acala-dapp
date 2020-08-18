@@ -16,8 +16,7 @@ export const AllMarkets: FC = () => {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => (
-        <Token
-          currency={token}
+        <Token currency={token}
           icon
         />
       ),
@@ -28,7 +27,7 @@ export const AllMarkets: FC = () => {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => <DexExchangeRate supply={token} />,
-      title: 'Exchange Rate',
+      title: 'Dex Price',
       width: 3
     },
     {

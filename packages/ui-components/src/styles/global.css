@@ -36,6 +36,7 @@ p, span {
   --color-green: #8fce65;
   --color-red: #e02020;
   --color-yellow: #f0fa41;
+  --color-white: #ffffff;
 
   --color-success: var(--color-green);
   --color-error: var(--color-red);
