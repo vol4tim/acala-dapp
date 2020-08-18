@@ -5,33 +5,40 @@
   "workspaces": [
     "packages/*"
   ],
+  "engines": {
+    "node": ">=12.x",
+    "yarn": "1.x"
+  },
   "resolutions": {
-    "@polkadot/api": "^1.15.1",
-    "@acala-network/api": "beta"
+    "@polkadot/api": "^1.29.1",
+    "@acala-network/api": "0.4.0-beta.1",
+    "@acala-network/types": "0.4.0-beta.1",
+    "@acala-network/app-util": "0.4.0-beta.1"
   },
   "scripts": {
-    "start": "cd packages/apps && react-app-rewired start",
-    "build": "cd packages/apps && react-app-rewired build",
+    "start:dapp": "cd packages/apps && react-app-rewired start",
+    "start:dashboard": "cd packages/dashboard && react-app-rewired start",
+    "analyze": "source-map-explorer 'packages/apps/build/static/js/*.js'",
+    "build:dapp": "cd packages/apps && react-app-rewired build",
+    "build:dashboard": "cd packages/dashboard && react-app-rewired build",
+    "release:ghpages": "gh-pages -d packages/apps/build",
     "test": "polkadot-dev-run-test",
     "lint": "polkadot-dev-run-lint"
   },
   "dependencies": {
-    "lodash": "^4.17.15",
+    "gh-pages": "^3.1.0",
+    "history": "^5.0.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1"
   },
   "devDependencies": {
-    "eslint-plugin-header": "^3.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-sort-destructure-keys": "^1.3.4",
-    "eslint-plugin-standard": "^4.0.1",
     "@polkadot/dev": "^0.52.4",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/enzyme": "^3.10.5",
-    "@types/lodash": "^4.14.149",
+    "@types/lodash": "^4.14.157",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
@@ -39,10 +46,15 @@
     "@typescript-eslint/parser": "^2.26.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
+    "eslint-plugin-header": "^3.0.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-sort-destructure-keys": "^1.3.4",
+    "eslint-plugin-standard": "^4.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest-css-modules": "^2.1.0",
     "react-app-rewired": "^2.1.5",
     "react-scripts": "^3.4.1",
+    "source-map-explorer": "^2.4.2",
     "typescript": "^3.8.3"
   }
 }

@@ -1,44 +1,47 @@
-import React, { FC, memo, FocusEventHandler, useState, ReactNode, ChangeEventHandler, useCallback, useMemo } from 'react';
+import React, { FC, FocusEventHandler, useState, ReactNode, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 import { FormikErrors } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { useApi } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
+import { Button, Condition, NumberInput, NumberInputProps } from '@acala-dapp/ui-components';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
-import { TokenName } from './Token';
+import { TokenName, TokenImage } from './Token';
 import { TokenSelector } from './TokenSelector';
 import { getCurrencyIdFromName } from './utils';
 import classes from './BalanceInput.module.scss';
-import { Button, Condition } from '@acala-dapp/ui-components';
+import { CurrencyChangeFN } from './types';
 
-type BalanceInputSize = 'large' | 'middle';
+type BalanceInputSize = 'large' | 'middle' | 'small' | 'mini';
 
 export interface BalanceInputProps extends BareProps {
   currencies?: (CurrencyId | string)[];
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
-  id?: string;
-  name?: string;
-  onChange?: any;
-  onTokenChange?: (token: CurrencyId) => void;
+  onChange?: (value: number) => void;
+  onTokenChange?: CurrencyChangeFN;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   placeholder?: string;
-  token: CurrencyId | string;
+  token: CurrencyLike | string;
   tokenPosition?: 'left' | 'right';
   value?: number;
   showMaxBtn?: boolean;
   showIcon?: boolean;
+  showToken?: boolean;
   size?: BalanceInputSize;
   onMax?: () => void;
-  withHover?: boolean;
-  withFocused?: boolean;
-  withError?: boolean;
+  border?: boolean;
+  id?: string;
+  name?: string;
+  numberInputProps?: Partial<NumberInputProps>;
 }
 
-export const BalanceInput: FC<BalanceInputProps> = memo(({
+export const BalanceInput: FC<BalanceInputProps> = ({
+  border = true,
   className,
   currencies,
   disabled = false,
@@ -46,6 +49,7 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
   error,
   id,
   name,
+  numberInputProps,
   onBlur,
   onChange,
   onFocus,
@@ -54,13 +58,11 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
   placeholder,
   showIcon = true,
   showMaxBtn = false,
+  showToken = true,
   size = 'large',
   token,
   tokenPosition = 'right',
-  value,
-  withError = true,
-  withFocused = true,
-  withHover = true
+  value
 }) => {
   const { api } = useApi();
   const [focused, setFocused] = useState<boolean>(false);
@@ -72,6 +74,8 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
   }, [api, token]);
 
   const renderToken = useCallback((): ReactNode => {
+    if (!showToken) return null;
+
     return (
       <Condition
         condition={enableTokenSelect}
@@ -93,14 +97,14 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
           />
         )}
         or={(
-          <TokenName
-            className={classes.token}
-            currency={_token}
-          />
+          <div className={clsx(classes.token, { [classes.showIcon]: showIcon })}>
+            { showIcon ? <TokenImage currency={_token} /> : null }
+            <TokenName currency={_token} />
+          </div>
         )}
       />
     );
-  }, [enableTokenSelect, tokenPosition, currencies, onTokenChange, showIcon, _token]);
+  }, [showToken, enableTokenSelect, tokenPosition, showIcon, currencies, onTokenChange, _token]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);
@@ -112,36 +116,38 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
     onBlur && onBlur(event);
   }, [setFocused, onBlur]);
 
-  const _onChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
-    if (onChange) onChange(e);
-  }, [onChange]);
-
   const rootClasses = useMemo<string>((): string => clsx(
     className,
     classes.root,
     classes[size],
     {
-      [classes.hover]: withHover,
-      [classes.error]: withError && !!error,
-      [classes.focused]: withFocused && focused
+      [classes.disabled]: disabled,
+      [classes.border]: border,
+      [classes.noToken]: !showToken,
+      [classes.error]: !!error,
+      [classes.focused]: focused,
+      [classes.showMax]: showMaxBtn,
+      [classes.showIcon]: showIcon
     }
-  ), [className, error, focused, size, withError, withHover, withFocused]);
+  ), [className, size, disabled, border, showToken, error, focused, showMaxBtn, showIcon]);
 
   return (
-    <div className={rootClasses}>
+    <div
+      className={rootClasses}
+    >
       <Condition condition={tokenPosition === 'left'}>
         {renderToken}
       </Condition>
-      <input
+      <NumberInput
+        {...numberInputProps}
         className={classes.input}
         disabled={disabled}
         id={id}
         name={name}
         onBlur={_onBlur}
-        onChange={_onChange}
+        onChange={onChange}
         onFocus={_onFocus}
         placeholder={placeholder}
-        type='number'
         value={value}
       />
       <Condition condition={showMaxBtn}>
@@ -160,6 +166,4 @@ export const BalanceInput: FC<BalanceInputProps> = memo(({
       <p className={clsx(classes.error, { [classes.show]: !!error })}>{error ? error.toString() : ''}</p>
     </div>
   );
-});
-
-BalanceInput.displayName = 'BalanceInput';
+};

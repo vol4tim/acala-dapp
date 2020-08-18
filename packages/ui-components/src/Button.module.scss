@@ -20,7 +20,8 @@
     min-width: 178px;
     height: 58px;
     font-size: 20px;
-    line-height: 20px;
+    line-height: 30px;
+    font-weight: bold;
   }
 
   &.middle {
@@ -41,83 +42,110 @@
 
   // type
   &.type-normal.color-primary {
-    background: $color-primary;
+    background: var(--color-primary);
     color: $color-white;
 
     &:hover {
-      background: $color-primary-hover;
+      background: var(--color-primary-hover);
     }
 
     &:active {
-      background: $color-primary-active;
+      background: var(--color-primary-active);
     }
 
     &:hover.disabled,
     &.disabled {
       cursor: not-allowed;
       color: #d9d9d9; 
-      background: opacify($color-primary, 0.8);
+      background: var(--color-primary);
     }
   }
 
-  &.type-normal.color-normal{
+  &.type-normal.color-normal {
     background: #ecf0f2;
-    color: #333333;
+    color: var(--text-color-primary);
+  }
+
+  &.type-normal.color-danger {
+    background: var(--color-error);
+    color: var(--text-color-white);
+
+    &:hover.disabled,
+    &.disabled {
+      cursor: not-allowed;
+      color: #d9d9d9; 
+      background: var(--color-error);
+    }
   }
 
   &.type-border.color-primary {
-    color: $color-primary;
-    border: 1px solid $color-primary;
+    color: var(--color-primary);
+    border: 1px solid var(--color-primary);
 
     &:hover {
-      color: $color-primary-hover;
-      border: 1px solid $color-primary-hover;
+      color: var(--color-primary)-hover;
+      border: 1px solid var(--color-primary-hover);
     }
 
     &:active {
-      color: $color-primary-active;
-      border: 1px solid $color-primary-active;
+      color: var(--color-primary)-active;
+      border: 1px solid var(--color-primary-active);
     }
   }
 
   &.type-border.color-normal {
-    color: $color-black;
+    color: var(--text-color-primary);
     border: 1px solid $normal-button-border-color;
 
     &:hover {
-      color: $color-primary-hover;
-      border: 1px solid $color-primary-hover;
+      color: var(--color-primary-hover);
+      border: 1px solid var(--color-primary-hover);
     }
 
     &:active {
-      color: $color-primary-active;
-      border: 1px solid $color-primary-active;
+      color: var(--color-primary-active);
+      border: 1px solid var(--color-primary-active);
+    }
+  }
+
+  &.type-border.color-danger {
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+
+    &:hover {
+      color: var(--color-error);
+      border: 1px solid var(--color-error)
+    }
+
+    &:active {
+      color: var(--color-error);
+      border: 1px solid var(--color-error)
     }
   }
 
   &.type-ghost.color-primary {
     background: transparent;
-    color: $color-primary;
+    color: var(--color-primary);
 
     &:hover {
-      color: $color-primary-hover;
+      color: var(--color-primary-hover);
     }
 
     &:active {
-      color: $color-primary-active;
+      color: var(--color-primary-active);
     }
   }
 
   &.type-ghost.color-normal {
     background: transparent;
-    color: $color-black;
+    color: var(--text-color-primary);
 
     &:hover {
-      color: $color-primary-hover;
+      color: var(--color-primary-hover);
     }
 
     &:active {
-      color: $color-primary-active;
+      color: var(--color-primary-active);
     }
   }
 

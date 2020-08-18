@@ -1,0 +1,31 @@
+.root {
+  padding: 48px;
+  min-height: 365px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .title {
+    margin-top: 40px;
+    font-size: 20px;
+    line-height: 21px;;
+    font-weight: 500;
+  }
+
+  .detail {
+    margin-top: 26px;
+    font-size: 16px;
+    line-height: 19px;
+    color: var(--text-color-second);
+  }
+
+  .token {
+    margin: 0 8px;
+    padding: 0 4px;
+    height: 24px;
+    line-height: 24px;
+    border-radius: 2px;
+    background: rgba(68, 215, 182, 0.06);
+    color: var(--text-color-primary);
+  }
+}

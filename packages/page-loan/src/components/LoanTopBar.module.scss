@@ -1,3 +1,5 @@
+$item-height: 64px;
+
 .root {
   display: flex;
   flex-wrap: wrap;
@@ -5,18 +7,20 @@
 }
 
 .item {
-  display: flex;
   margin: 12px 0 0 24px;
-  width: 216px;
-  height: 64px;
+  height: $item-height;
+  display: grid;
+  grid-template-columns: 65px 1fr;
   border: 1px solid #d8d8d8;
   border-radius: 12px;
   background: #ffffff;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms ease;
+  overflow: hidden;
 
   &.active {
-    border-color: #173dc9;
+    border-color: var(--color-primary);
   }
 
   &.overview {
@@ -48,15 +52,15 @@
   }
 
   .icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 0 0 64.5px;
+    height: $item-height;
+    display: grid;
+    place-items: center;
     border-right: 1px solid #ebeef5;
   }
 
   .content {
-    flex: 1;
+    min-width: 151px;
+    height: $item-height;
     display: flex;
     flex-direction: column;
     align-items: center;

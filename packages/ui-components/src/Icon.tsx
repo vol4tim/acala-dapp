@@ -8,6 +8,8 @@ import { ReactComponent as ArrowDownIcon } from './assets/arrow-down.svg';
 import { ReactComponent as CheckedCircleIcon } from './assets/checked-circle.svg';
 import { ReactComponent as SwitchIcon } from './assets/switch.svg';
 
+export * from '@ant-design/icons';
+
 export {
   ArrowDownIcon,
   CopyIcon,

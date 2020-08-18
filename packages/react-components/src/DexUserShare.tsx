@@ -1,14 +1,14 @@
 import React, { FC, memo } from 'react';
 import AccountId from '@polkadot/types/generic/AccountId';
-import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useDexShare } from '@acala-dapp/react-hooks';
-import { FormatFixed18 } from './format';
+import { FormatFixed18, FormatRatio } from './format';
 import { convertToFixed18 } from '@acala-network/app-util';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 interface Props extends BareProps {
   account?: AccountId | string;
-  token: CurrencyId | string;
+  token: CurrencyLike;
   withRatio?: boolean;
 }
 
@@ -23,9 +23,13 @@ export const DexUserShare: FC<Props> = memo(({
 
   if (withRatio) {
     return (
-      <FormatFixed18
+      <FormatRatio
         data={_share.div(_totalShares)}
-        format='percentage'
+        formatNumberConfig={{
+          decimalLength: 6,
+          removeEmptyDecimalParts: true,
+          removeTailZero: true
+        }}
       />
     );
   }

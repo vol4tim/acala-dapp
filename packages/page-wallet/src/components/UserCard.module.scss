@@ -19,11 +19,14 @@
   }
 
   .name {
-    display: flex;
-    align-items: center;
+    width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: 20px;
     line-height: 24px;
     font-weight: 500;
+    color: var(--text-color-primary);
 
     > button {
       min-width: 0;
@@ -35,7 +38,7 @@
     margin-top: 14px;
     font-size: 14px;
     line-height: 16px;
-    color: #999999;
+    color: var(--text-color-second);
   }
 
   .edit, .copy {
@@ -51,7 +54,7 @@
     margin-top: 14px;
     font-size: 14px;
     line-height: 16px;
-    color: #173dc9;
+    color: var(--color-primary);
   }
 
   .copy {

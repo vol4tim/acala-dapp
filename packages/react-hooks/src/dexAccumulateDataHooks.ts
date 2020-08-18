@@ -12,6 +12,7 @@ import { useApi } from './useApi';
 import { useAccounts } from './useAccounts';
 import { useConstants } from './useConstants';
 import { useAllPrices } from './priceHooks';
+import { CurrencyLike } from './types';
 
 const calcAccumulateResult = (rewards: Fixed18[], callback: (result: Fixed18) => void): void => {
   const total = rewards.reduce((acc, cur) => {
@@ -23,10 +24,13 @@ const calcAccumulateResult = (rewards: Fixed18[], callback: (result: Fixed18) =>
 
 interface HooksReturnType {
   amount: Fixed18;
-  token: CurrencyId;
+  token: CurrencyLike;
 }
 
-export const useDexTotalReward = (): HooksReturnType => {
+/**
+ * @description get active user total reward from dex
+ */
+export const useDexTotalUserReward = (): HooksReturnType => {
   const { api } = useApi();
   const { active } = useAccounts();
   const { dexCurrencies, stableCurrency } = useConstants();
@@ -37,16 +41,18 @@ export const useDexTotalReward = (): HooksReturnType => {
 
     const getReward$ = (currency: CurrencyId): Observable<Fixed18> => {
       return combineLatest([
-        api.query.dex.totalInterest<Balance>(currency),
+        api.query.dex.totalInterest<[Balance, Balance]>(currency),
         api.query.dex.withdrawnInterest<Balance>(currency, active.address),
         api.query.dex.shares<Balance>(currency, active.address),
         api.query.dex.totalShares<Balance>(currency)
       ]).pipe(
-        map(([_totalInterest, _withdrawnInterest, _shares, _totalShares]) => {
+        map(([[_totalInterest], _withdrawnInterest, _shares, _totalShares]) => {
           const totalInterest = convertToFixed18(_totalInterest);
           const withdrawnInterest = convertToFixed18(_withdrawnInterest);
           const shares = convertToFixed18(_shares);
           const totalShares = convertToFixed18(_totalShares);
+
+          if (totalShares.isZero()) return Fixed18.ZERO;
 
           return totalInterest.mul(shares.div(totalShares)).sub(withdrawnInterest);
         })
@@ -71,6 +77,9 @@ export const useDexTotalReward = (): HooksReturnType => {
   };
 };
 
+/**
+ * @description get all system reward from dex
+ */
 export const useDexTotalSystemReward = (): HooksReturnType => {
   const { api } = useApi();
   const { dexCurrencies, stableCurrency } = useConstants();
@@ -80,10 +89,7 @@ export const useDexTotalSystemReward = (): HooksReturnType => {
     if (!api) return;
 
     const getReward$ = (currency: CurrencyId): Observable<Fixed18> => {
-      return combineLatest([
-        api.query.dex.totalInterest<Balance>(currency),
-        api.query.dex.totalWithdrawnInterest<Balance>(currency)
-      ]).pipe(
+      return api.query.dex.totalInterest<[Balance, Balance]>(currency).pipe(
         map(([_totalInterest, _withdrawnInterest]) => {
           const totalInterest = convertToFixed18(_totalInterest);
           const withdrawnInterest = convertToFixed18(_withdrawnInterest);
@@ -113,10 +119,10 @@ export const useDexTotalSystemReward = (): HooksReturnType => {
 
 interface HooksReturnType {
   amount: Fixed18;
-  token: CurrencyId;
+  token: CurrencyLike;
 }
 
-export const useDexTotalDeposit = (): HooksReturnType => {
+export const useDexTotalUserDeposit = (): HooksReturnType => {
   const { api } = useApi();
   const { active } = useAccounts();
   const { dexCurrencies, stableCurrency } = useConstants();
@@ -141,6 +147,8 @@ export const useDexTotalDeposit = (): HooksReturnType => {
           const share = convertToFixed18(_shares);
           const totalShares = convertToFixed18(_totalShares);
           const ratio = share.div(totalShares);
+
+          if (!ratio.isFinity()) return Fixed18.ZERO;
 
           return price ? base.mul(ratio).add(other.mul(ratio).mul(price.price)) : Fixed18.ZERO;
         })

@@ -1,6 +1,6 @@
 import React, { FC, useContext, ReactNode } from 'react';
 import { Table, Card, TableConfig } from '@acala-dapp/ui-components';
-import { Token, FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
+import { Token, FormatBalance, FormatRatio } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18 } from '@acala-network/app-util';
 
@@ -50,10 +50,7 @@ export const StakingPool: FC = () => {
       dataIndex: 'bondRatio',
       /* eslint-disable-next-line react/display-name */
       render: (value: Fixed18): ReactNode => (
-        <FormatFixed18
-          data={value}
-          format='percentage'
-        />
+        <FormatRatio data={value} />
       ),
       title: 'Bond Ratio'
     }

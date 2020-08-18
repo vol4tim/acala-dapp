@@ -19,3 +19,7 @@ export interface CallOptions <T> {
 export type CurrencyLike = CurrencyId | string;
 
 export type AccountLike = AccountId | string;
+
+export type WithNull<T> = T | null;
+
+export type WithUndefined<T> = T | null;

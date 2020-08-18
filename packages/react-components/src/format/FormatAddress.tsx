@@ -1,14 +1,16 @@
-import React, { FC, memo, ReactNode } from 'react';
+import React, { FC, memo, useMemo, useCallback } from 'react';
 
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { Copy } from '@acala-dapp/ui-components';
 import Identicon from '@polkadot/react-identicon';
 
 import classes from './format.module.scss';
+import { formatAddress } from '../utils';
 
 interface Props extends BareProps {
   address: string;
   withFullAddress?: boolean;
+  withMiniAddress?: boolean;
   withCopy?: boolean;
   withIcon?: boolean;
   iconWidth?: number;
@@ -20,30 +22,48 @@ export const FormatAddress: FC<Props> = memo(({
   iconWidth = 22,
   withCopy = false,
   withFullAddress = false,
-  withIcon = false
+  withIcon = false,
+  withMiniAddress = false
 }) => {
-  return (
-    <Copy
-      className={className}
-      render={(): ReactNode => {
-        return (
-          <>
-            {withIcon ? (
-              <Identicon
-                className={classes.icon}
-                size={iconWidth}
-                theme='substrate'
-                value={address}
-              />
-            ) : null }
-            {withFullAddress ? address : address.replace(/(\w{6})\w*?(\w{6}$)/, '$1......$2')}
-          </>
-        );
-      }}
-      text={address}
-      withCopy={withCopy}
-    />
-  );
+  const _address = useMemo<string>((): string => {
+    if (withFullAddress) {
+      return address;
+    }
+
+    if (!address) return '';
+
+    return formatAddress(address, withMiniAddress);
+  }, [address, withFullAddress, withMiniAddress]);
+
+  const renderInner = useCallback(() => {
+    return (
+      <>
+        {withIcon ? (
+          <Identicon
+            className={classes.icon}
+            size={iconWidth}
+            theme='substrate'
+            value={address}
+          />
+        ) : null }
+        {_address}
+      </>
+    );
+  }, [withIcon, _address, address, iconWidth]);
+
+  if (withCopy) {
+    return (
+      <Copy
+        className={className}
+        display='Copy Address Success'
+        render={renderInner}
+        text={address}
+        withCopy={withCopy}
+      />
+    );
+  }
+
+  return renderInner();
 });
 
 FormatAddress.displayName = 'FormatAddress';

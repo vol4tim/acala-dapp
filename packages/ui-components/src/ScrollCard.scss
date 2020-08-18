@@ -1,0 +1,29 @@
+.aca-scroll-card__header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.aca-scroll-card__content {
+  width: calc(100% - 48px);
+  margin: 0 24px 4px 24px;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(31, 45, 61, 0.14);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    color: green;
+  }
+}
+
+.aca-scroll-card__container {
+  width: 0;
+  display: flex;
+  flex-wrap: nowrap;
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@acala-dapp/page-oracles-charts",
+  "version": "0.2.0",
+  "description": "page dashboard home",
+  "main": "index.js",
+  "author": "Acala Developers <hello@acala.network>",
+  "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
+  "license": "Apache-2.0"
+}

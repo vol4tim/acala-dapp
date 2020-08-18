@@ -1,63 +1,31 @@
-import React, { ReactNode, FocusEventHandler, ReactElement, cloneElement, useCallback, useMemo } from 'react';
-import { useModal } from '@acala-dapp/react-hooks';
-import clsx from 'clsx';
+import React, { FC } from 'react';
+import { AutoComplete as AntAutoComplete } from 'antd';
+import { AutoCompleteProps as AntAutoCompleteProps } from 'antd/lib/auto-complete';
 
-import classes from './AutoComplete.module.scss';
-import { Condition } from './Condition';
+import './AutoComplete.scss';
 import { ArrowDownIcon } from './Icon';
-import { ClickAwayListener } from '@material-ui/core';
+import { Input } from './Input';
 
-interface AutoCompleteProps {
-  value?: string;
-  options: string[];
-  optionClassName: string;
-  renderOptions: (data: string) => ReactNode;
-  renderInput: () => ReactElement;
-  onSelect: (value: string) => void;
+interface AutoCompleteProps extends AntAutoCompleteProps {
+  inputClassName?: string;
 }
 
-export function AutoComplete (props: AutoCompleteProps): JSX.Element {
-  const { onSelect, optionClassName, options, renderInput, renderOptions, value } = props;
-  const { close: closeSuggest, open: openSuggest, status: suggestStatus } = useModal();
-
-  const _options = useMemo(() => {
-    if (!value) return options;
-
-    return options.filter((item: string) => item.toLocaleLowerCase().startsWith(value.toLocaleLowerCase()));
-  }, [options, value]);
-
-  const onFocus: FocusEventHandler<HTMLInputElement> = useCallback(() => {
-    openSuggest();
-  }, [openSuggest]);
-
-  const _onSelect = (value: string): void => {
-    onSelect(value);
-    closeSuggest();
-  };
-
-  const suffix = useMemo(() => {
-    return (
-      <ArrowDownIcon onClick={openSuggest} />
-    );
-  }, [openSuggest]);
+export const AutoComplete: FC<AutoCompleteProps> = (props: AutoCompleteProps) => {
+  const { children, inputClassName, ...other } = props;
 
   return (
-    <ClickAwayListener onClickAway={closeSuggest}>
-      <div className={classes.root}>
-        {cloneElement(renderInput(), { onFocus, suffix })}
-        <Condition condition={!!options.length}>
-          <ul className={clsx(classes.list, { [classes.open]: suggestStatus })}>
-            {
-              _options && _options.map((item, index) => (
-                <li className={clsx(optionClassName, classes.item)}
-                  key={`auto-complete-${index}`}
-                  onClick={(): void => _onSelect(item)}
-                >{renderOptions(item)}</li>)
-              )
-            }
-          </ul>
-        </Condition>
-      </div>
-    </ClickAwayListener>
+    <AntAutoComplete
+      className='aca-autocomplete'
+      {...other}
+    >
+      {
+        children || (
+          <Input
+            className={inputClassName}
+            suffix={<ArrowDownIcon />}
+          />
+        )
+      }
+    </AntAutoComplete>
   );
-}
+};

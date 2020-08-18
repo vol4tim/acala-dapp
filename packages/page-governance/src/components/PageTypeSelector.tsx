@@ -1,31 +1,28 @@
 import React, { FC, useContext } from 'react';
-import { Tabs, TabConfig } from '@acala-dapp/ui-components';
+import { Tabs } from '@acala-dapp/ui-components';
 import { governanceContext } from './provider';
 import { PageType } from './type';
 
 export const PageTypeSelector: FC = () => {
   const { setPageType } = useContext(governanceContext);
 
-  const tabsConfig: TabConfig[] = [
-    {
-      title: 'Council overview',
-      value: 'council'
-    },
-    {
-      title: 'Motions',
-      value: 'motions'
-    }
-  ];
-
-  const handleChange = (active: TabConfig): void => {
-    setPageType(active.value as PageType);
+  const handleChange = (active: string | number): void => {
+    setPageType(active as PageType);
   };
 
   return (
     <Tabs
-      config={tabsConfig}
       onChange={handleChange}
-      style='normal'
-    />
+      type='line'
+    >
+      <Tabs.Panel
+        key='council'
+        tab='Council Overview'
+      />
+      <Tabs.Panel
+        key='motions'
+        tab='Motions'
+      />
+    </Tabs>
   );
 };

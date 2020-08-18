@@ -1,70 +1,34 @@
-import React, { FC, memo, ReactElement, ChangeEvent } from 'react';
-import { useFormik } from 'formik';
-import { noop } from 'lodash';
+import React, { FC, ReactElement, useContext, useCallback, useState, useMemo } from 'react';
 
 import { TagGroup, Tag } from '@acala-dapp/ui-components';
 import { TagInput } from '@acala-dapp/ui-components/TagInput';
-import { useFormValidator } from '@acala-dapp/react-hooks';
 
 import classes from './SlippageInputArea.module.scss';
+import { SwapContext } from './SwapProvider';
 
-interface Props {
-  onChange?: (slippage: number) => void;
-  slippage?: number;
-}
-
-const SLIPPAGE_MAX = 99;
+const SLIPPAGE_MAX = 50;
 const SLIPPAGE_MIN = 0;
 
-export const SlippageInputArea: FC<Props> = memo(({ onChange, slippage = 0.005 }) => {
-  const suggestValues = [0.001, 0.005, 0.01];
+export const SlippageInputArea: FC = () => {
+  const { setSlippage, slippage } = useContext(SwapContext);
+  const [custom, setCustom] = useState<number>(0);
+  const suggestValues = useMemo(() => [0.001, 0.005, 0.01], []);
   const suggestedIndex = 1;
-  const validator = useFormValidator({
-    custom: {
-      equalMax: false,
-      equalMin: true,
-      max: SLIPPAGE_MAX,
-      min: SLIPPAGE_MIN,
-      type: 'number'
-    }
-  });
-  const form = useFormik({
-    initialValues: {
-      custom: (('' as any) as number)
-    },
-    onSubmit: noop,
-    validate: validator
-  });
 
-  const handleClick = (num: number): void => {
-    onChange && onChange(num);
-    form.resetForm();
-  };
+  const handleClick = useCallback((num: number): void => {
+    setSlippage(num);
+  }, [setSlippage]);
 
-  const renderSuggest = (num: number): string => {
+  const renderSuggest = useCallback((num: number): string => {
     return `${num * 100}%${num === suggestValues[suggestedIndex] ? ' (suggested)' : ''}`;
-  };
+  }, [suggestValues]);
 
-  const handleInput = (e: ChangeEvent<HTMLInputElement>): void => {
-    const value = Number(e.target.value);
+  const handleInput = useCallback((_value: number | string): void => {
+    const value = Number(_value);
 
-    if (value < SLIPPAGE_MIN) {
-      onChange && onChange(SLIPPAGE_MIN / 100);
-      form.setFieldValue('custom', SLIPPAGE_MIN);
-
-      return;
-    }
-
-    if (value > SLIPPAGE_MAX) {
-      onChange && onChange(SLIPPAGE_MAX / 100);
-      form.setFieldValue('custom', SLIPPAGE_MAX);
-
-      return;
-    }
-
-    onChange && onChange(value / 100);
-    form.handleChange(e);
-  };
+    setCustom(value);
+    setSlippage(value / 100);
+  }, [setSlippage, setCustom]);
 
   return (
     <div className={classes.root}> <p className={classes.title}>Limit addtion price slippage</p>
@@ -83,17 +47,16 @@ export const SlippageInputArea: FC<Props> = memo(({ onChange, slippage = 0.005 }
           })
         }
         <TagInput
-          error={!!form.errors.custom}
           id='custom'
           label='%'
+          max={SLIPPAGE_MAX}
+          min={SLIPPAGE_MIN}
           name='custom'
           onChange={handleInput}
           placeholder='Custom'
-          value={form.values.custom}
+          value={custom}
         />
       </TagGroup>
     </div>
   );
-});
-
-SlippageInputArea.displayName = 'SlippageInputArea';
+};

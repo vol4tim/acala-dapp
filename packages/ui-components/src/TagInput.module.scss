@@ -12,14 +12,14 @@
   padding: 0 8px;
   border-radius: 13px;
   background: #f0f0f0;
-  color: #333333;
+  color: var(--text-color-primary);
 
   border: 1px solid #e1e1e1;
   background: #ffffff;
 
   &.primary {
-    border: 1px solid $color-primary;
-    background: $color-primary;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
     color: $color-white;
   }
 
@@ -28,7 +28,7 @@
   }
 
   &.error {
-    border-color: #ff5500;
+    border-color: var(--color-error);
   }
 
   .input {
@@ -36,10 +36,6 @@
     min-height: 0;
     height: 70%;
     border: none;
-
-     > input {
-        font-size: 16px;
-        color: #333333;
-     }
+    font-size: 16px;
   }
 }

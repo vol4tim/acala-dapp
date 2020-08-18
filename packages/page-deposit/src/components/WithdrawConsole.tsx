@@ -4,10 +4,10 @@ import { useFormik } from 'formik';
 
 import { Vec } from '@polkadot/types';
 import { Card } from '@acala-dapp/ui-components';
-import { CurrencyId, Share } from '@acala-network/types/interfaces';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, DexPoolSize, DexUserShare, BalanceInputProps } from '@acala-dapp/react-components';
 import { useFormValidator, useDexShare } from '@acala-dapp/react-hooks';
-import { convertToFixed18 } from '@acala-network/app-util';
+import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
 import { DepositContext } from './Provider';
 import { ReactComponent as RightArrowIcon } from '../assets/right-arrow.svg';
@@ -21,9 +21,9 @@ interface InputAreaProps {
   name: string;
   currencies?: Vec<CurrencyId>;
   value: number;
-  onChange: (eventOrPath: string | React.ChangeEvent<any>) => void;
+  onChange: (value: number) => void;
   token: CurrencyId;
-  share: Share | undefined;
+  share: Fixed18;
   onTokenChange?: (token: CurrencyId) => void;
 }
 
@@ -38,12 +38,18 @@ const InputArea: FC<InputAreaProps> = memo(({
   token,
   value
 }) => {
+  const handleMax = useCallback(() => {
+    if (!onChange || !share) return;
+
+    onChange(share.toNumber());
+  }, [onChange, share]);
+
   return (
     <div className={classes.inputAreaRoot}>
       <div className={classes.inputAreaTitle}>
         <p>Pool Shares</p>
         <p className={classes.inputAreaBalance}>
-          Available: {share ? convertToFixed18(share).toString() : ''}
+          Available: {share.toNumber()}
         </p>
       </div>
       <BalanceInput
@@ -53,7 +59,9 @@ const InputArea: FC<InputAreaProps> = memo(({
         id={id}
         name={name}
         onChange={onChange}
+        onMax={handleMax}
         onTokenChange={onTokenChange}
+        showMaxBtn
         token={token}
         value={value}
       />
@@ -97,11 +105,15 @@ export const WithdrawConsole: FC = memo(() => {
     form.resetForm();
   }, [form]);
 
-  const handleOtherCurrencyChange = (currency: CurrencyId): void => {
+  const handleTokenChange = (currency: CurrencyId): void => {
     setOtherCurrency(currency);
 
     // reset form
     form.resetForm();
+  };
+
+  const handleShareChange = (value: number): void => {
+    form.setFieldValue('share', value);
   };
 
   return (
@@ -112,9 +124,9 @@ export const WithdrawConsole: FC = memo(() => {
           error={form.errors.share}
           id='share'
           name='share'
-          onChange={form.handleChange}
-          onTokenChange={handleOtherCurrencyChange}
-          share={share}
+          onChange={handleShareChange}
+          onTokenChange={handleTokenChange}
+          share={share ? convertToFixed18(share) : Fixed18.ZERO}
           token={otherCurrency}
           value={form.values.share}
         />

@@ -28,5 +28,5 @@ acala web app with honzon, homa, dex features.
 
 3. Launch the UI
    ```base
-   yarn run start
+   yarn run start:dapp
    ```

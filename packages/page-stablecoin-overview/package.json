@@ -1,0 +1,13 @@
+{
+  "name": "@acala-dapp/page-stablecoin-overview",
+  "version": "0.2.0",
+  "description": "page dashboard home",
+  "main": "index.js",
+  "author": "Acala Developers <hello@acala.network>",
+  "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@antv/data-set": "^0.11.4",
+    "bizcharts": "^4.0.10"
+  }
+}

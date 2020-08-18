@@ -1,11 +1,12 @@
 import React, { FC } from 'react';
 import clsx from 'clsx';
 
-import { InputProps, Input } from './Input';
+import { NumberInputProps, NumberInput } from './NumberInput';
 import classes from './TagInput.module.scss';
 
-interface Props extends InputProps{
+interface Props extends NumberInputProps{
   label: string;
+  error?: boolean;
 }
 
 export const TagInput: FC<Props> = ({
@@ -26,7 +27,7 @@ export const TagInput: FC<Props> = ({
         )
       }
     >
-      <Input {...inputProps}
+      <NumberInput {...inputProps}
         className={classes.input} />
       {label ? <span>{label}</span> : null}
     </div>

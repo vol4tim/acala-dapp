@@ -13,8 +13,7 @@ const PageWallet: FC = () => {
       <Page.Title title='Governance' />
       <Page.Content>
         <GovernanceProvider>
-          <Grid container
-            direction='column'>
+          <Grid container>
             <Grid item>
               <PageTypeSelector />
             </Grid>

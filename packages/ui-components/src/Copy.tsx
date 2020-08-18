@@ -1,9 +1,9 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useCallback } from 'react';
 import clsx from 'clsx';
-import FileCopyOutlinedIcon from '@material-ui/icons/FileCopyOutlined';
+import { CopyOutlined } from '@ant-design/icons';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
-import { useNotification } from '@acala-dapp/react-hooks';
+import { notification } from './notification';
 import { BareProps } from './types';
 import classes from './Copy.module.scss';
 
@@ -21,28 +21,39 @@ export const Copy: FC<Props> = ({
   text,
   withCopy = true
 }) => {
-  const { createNotification } = useNotification();
-
-  const handleCopy = (): void => {
-    createNotification({
-      icon: 'success',
-      removedDelay: 2000,
-      title: `Copy ${display || text} success`
+  const handleCopy = useCallback((): void => {
+    notification.success({
+      message: display || `copy ${text} success`
     });
-  };
+  }, [display, text]);
+
+  if (withCopy) {
+    return (
+      <span className={clsx(classes.root, className)}>
+        { render ? render() : text }
+        {
+          withCopy ? (
+            <CopyToClipboard
+              onCopy={handleCopy}
+              text={text}
+            >
+              <CopyOutlined style={{ marginLeft: 6 }} />
+            </CopyToClipboard>
+          ) : null
+        }
+      </span>
+    );
+  }
 
   return (
-    <span className={clsx(classes.root, className)}>
-      { render ? render() : text }
-      {
-        withCopy ? (
-          <CopyToClipboard onCopy={handleCopy}
-            text={text}
-          >
-            <FileCopyOutlinedIcon />
-          </CopyToClipboard>
-        ) : null
-      }
-    </span>
+    <CopyToClipboard
+      onCopy={handleCopy}
+      text={text}
+    >
+      <span className={clsx(classes.root, className)}>
+        { render ? render() : text }
+        { withCopy ? <CopyOutlined style={{ marginLeft: 6 }} /> : null }
+      </span>
+    </CopyToClipboard>
   );
 };

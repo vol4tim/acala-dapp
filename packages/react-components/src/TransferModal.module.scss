@@ -59,23 +59,16 @@
 
   .content {
     list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(3, 117px);
+    grid-column-gap: calc(50% - 175.5px);
     margin-top: -16px;
-  }
-
-  .content::after {
-    content: '';
-    flex: 0 0 117px;
   }
 
   .item {
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    flex: 0 0 117px;
 
     position: relative;
     box-sizing: border-box;
@@ -90,13 +83,13 @@
       font-size: 16px;
       line-height: 24px;
       font-weight: 400;
-      color: #333333;
+      color: var(--text-color-primary);
     }
 
     .fullName {
       font-size: 14px;
       line-height: 21px;
-      color: #999999;
+      color: var(--text-color-second);
     }
 
     .selected {

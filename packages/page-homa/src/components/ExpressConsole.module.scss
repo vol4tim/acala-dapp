@@ -1,0 +1,19 @@
+.panelContent {
+  padding: 16px 24px 24px 24px;
+  min-height: 320px;
+
+  .main {
+    width: 512px;
+    margin: 0 auto;
+  }
+
+  .balanceInput {
+    margin: 0 auto;
+  }
+
+  .actionBtn {
+    margin: 24px auto 0 auto;
+    min-width: 320px;
+    height: 58px;
+  }
+}

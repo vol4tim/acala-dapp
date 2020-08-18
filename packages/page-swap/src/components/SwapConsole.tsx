@@ -1,30 +1,32 @@
-import React, { FC, memo, useContext, ReactElement, ChangeEvent, ReactNode, useState, useCallback, useMemo } from 'react';
+import React, { FC, memo, useContext, ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Card, nextTick, IconButton, Condition } from '@acala-dapp/ui-components';
-import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, FormatFixed18, TokenName } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, FormatBalance } from '@acala-dapp/react-components';
 import { useFormValidator, useBalance } from '@acala-dapp/react-hooks';
+import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { CurrencyChangeFN } from '@acala-dapp/react-components/types';
 
 import classes from './SwapConsole.module.scss';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInputArea } from './SlippageInputArea';
 import { SwapContext } from './SwapProvider';
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
 interface InputAreaProps {
   addon?: ReactNode;
   error: any;
   title: string;
   currencies: (CurrencyId | string)[];
-  token: CurrencyId | string;
-  onTokenChange: (token: CurrencyId) => void;
+  token: CurrencyLike;
+  onTokenChange: CurrencyChangeFN;
   value: number;
-  onChange: any;
+  onChange: (value: number) => void;
   inputName: string;
-  showBalance?: boolean;
+  showMax?: boolean;
   maxInput?: Fixed18;
 }
 
@@ -36,10 +38,17 @@ const InputArea: FC<InputAreaProps> = ({
   maxInput,
   onChange,
   onTokenChange,
+  showMax = false,
   title,
   token,
   value
 }) => {
+  const handleMax = useCallback(() => {
+    if (!onChange || !maxInput) return;
+
+    onChange(maxInput.toNumber());
+  }, [maxInput, onChange]);
+
   return (
     <div className={classes.inputAreaRoot}>
       <div className={classes.title}>
@@ -47,7 +56,11 @@ const InputArea: FC<InputAreaProps> = ({
 
         <Condition condition={!!maxInput}>
           <p>
-            Max: <FormatFixed18 data={maxInput} /> <TokenName currency={token} />
+            Max:
+            <FormatBalance
+              balance={maxInput as Fixed18}
+              currency={token}
+            />
           </p>
         </Condition>
       </div>
@@ -58,7 +71,9 @@ const InputArea: FC<InputAreaProps> = ({
         error={error}
         name={inputName}
         onChange={onChange}
+        onMax={handleMax}
         onTokenChange={onTokenChange}
+        showMaxBtn={showMax}
         token={token}
         value={value}
       />
@@ -89,11 +104,12 @@ export const SwapConsole: FC = memo(() => {
     calcSupply,
     calcTarget,
     pool,
+    priceImpact,
     setCurrency,
+    slippage,
     supplyCurrencies,
     targetCurrencies
   } = useContext(SwapContext);
-  const [slippage, setSlippage] = useState<number>(0.005);
   const supplyCurrencyBalance = useBalance(pool.supplyCurrency);
 
   const validator = useFormValidator({
@@ -124,50 +140,37 @@ export const SwapConsole: FC = memo(() => {
     form.resetForm();
   }, [setCurrency, pool.targetCurrency, pool.supplyCurrency, form]);
 
-  const onSupplyChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const value = Number(event.currentTarget.value);
-
-    calcTarget(pool.supplyCurrency, pool.targetCurrency, value, slippage).subscribe((target) => {
+  const onSupplyChange = useCallback((value: number): void => {
+    calcTarget(pool.supplyCurrency, pool.targetCurrency, value).subscribe((target) => {
       nextTick(() => form.setFieldValue('target', target));
     });
 
-    form.handleChange(event);
-  };
+    nextTick(() => form.setFieldValue('supply', value));
+  }, [calcTarget, pool.supplyCurrency, pool.targetCurrency, form]);
 
-  const onTargetChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    const value = Number(event.currentTarget.value);
-
-    calcSupply(pool.supplyCurrency, pool.targetCurrency, value, slippage).subscribe((supply) => {
+  const onTargetChange = useCallback((value: number): void => {
+    calcSupply(pool.supplyCurrency, pool.targetCurrency, value).subscribe((supply) => {
       nextTick(() => form.setFieldValue('supply', supply));
     });
 
-    form.handleChange(event);
-  };
+    nextTick(() => form.setFieldValue('target', value));
+  }, [calcSupply, pool.supplyCurrency, pool.targetCurrency, form]);
 
-  const onSlippageChange = (slippage: number): void => {
-    const supply = form.values.supply;
-
-    setSlippage(slippage);
-    calcTarget(pool.supplyCurrency, pool.targetCurrency, supply, slippage).subscribe((target) => {
-      nextTick(() => form.setFieldValue('target', target));
-    });
-  };
-
-  const onSupplyTokenChange = (token: CurrencyId): void => {
+  const onSupplyTokenChange = useCallback((token: CurrencyId): void => {
     setCurrency(token, pool.targetCurrency);
 
-    calcSupply(token, pool.targetCurrency, form.values.target, slippage).subscribe((supply) => {
+    calcSupply(token, pool.targetCurrency, form.values.target).subscribe((supply) => {
       if (supply) nextTick(() => form.setFieldValue('supply', supply));
     });
-  };
+  }, [calcSupply, form, pool.targetCurrency, setCurrency]);
 
-  const onTargetTokenChange = (token: CurrencyId): void => {
+  const onTargetTokenChange = useCallback((token: CurrencyId): void => {
     setCurrency(pool.supplyCurrency, token);
 
-    calcTarget(pool.supplyCurrency, token, form.values.supply, slippage).subscribe((target) => {
+    calcTarget(pool.supplyCurrency, token, form.values.supply).subscribe((target) => {
       if (target) nextTick(() => form.setFieldValue('target', target));
     });
-  };
+  }, [calcTarget, form, pool.supplyCurrency, setCurrency]);
 
   const isDisabled = useMemo((): boolean => {
     if (form.errors.supply || form.errors.target) {
@@ -185,6 +188,15 @@ export const SwapConsole: FC = memo(() => {
     return supplyCurrencyBalance ? convertToFixed18(supplyCurrencyBalance).min(Fixed18.fromNatural(pool.supplySize)) : undefined;
   }, [supplyCurrencyBalance, pool.supplySize]);
 
+  const params = useMemo(() => {
+    return [
+      pool.supplyCurrency,
+      numToFixed18Inner(form.values.supply),
+      pool.targetCurrency,
+      Fixed18.fromNatural(form.values.target).div(Fixed18.fromNatural(1 + slippage)).innerToString()
+    ];
+  }, [form, pool, slippage]);
+
   return (
     <Card className={classes.root}
       padding={false}>
@@ -196,6 +208,7 @@ export const SwapConsole: FC = memo(() => {
           maxInput={maxSupplyInput}
           onChange={onSupplyChange}
           onTokenChange={onSupplyTokenChange}
+          showMax={true}
           title='Pay With'
           token={pool.supplyCurrency}
           value={form.values.supply as number}
@@ -216,40 +229,30 @@ export const SwapConsole: FC = memo(() => {
           inputName='target'
           onChange={onTargetChange}
           onTokenChange={onTargetTokenChange}
-          title='Receive'
+          title='Receive (Estimate)'
           token={pool.targetCurrency}
           value={form.values.target}
         />
         <TxButton
           className={classes.txBtn}
+          color={priceImpact > 0.05 ? 'danger' : 'primary'}
           disabled={isDisabled}
           method='swapCurrency'
           onSuccess={form.resetForm}
-          params={
-            [
-              pool.supplyCurrency,
-              numToFixed18Inner(form.values.supply),
-              pool.targetCurrency,
-              numToFixed18Inner(form.values.target)
-            ]
-          }
+          params={params}
           section='dex'
           size='large'
         >
-          Swap
+          {priceImpact > 0.05 ? 'Swap Anyway' : 'Swap'}
         </TxButton>
       </div>
       <SwapInfo
-        slippage={slippage}
         supply={form.values.supply}
         supplyCurrency={pool.supplyCurrency}
         target={form.values.target}
         targetCurrency={pool.targetCurrency}
       />
-      <SlippageInputArea
-        onChange={onSlippageChange}
-        slippage={slippage}
-      />
+      <SlippageInputArea />
     </Card>
   );
 });

@@ -1,0 +1,34 @@
+.root {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.hasPrevious {
+    .previous {
+      transform: translate3d(-60px, 0, 0);
+    }
+
+    .next {
+      transform: translate3d(-60px, 0, 0);
+    }
+  }
+
+  &.hasPrevious.signlePrevious {
+    .previous {
+      transform: none;
+    }
+  }
+}
+
+.previous {
+  width: 120px;
+}
+
+.next {
+  width: 320px;
+}
+
+.previous, .next {
+  transition: none;
+}

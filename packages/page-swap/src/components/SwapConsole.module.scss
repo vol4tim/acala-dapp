@@ -12,7 +12,7 @@
     justify-content: space-between;
     margin-bottom: 24px;
     font-size: 16px;
-    color: #333333;
+    color: var(--text-color-primary);
   }
 }
 
@@ -27,11 +27,17 @@
 .swapInfoRoot {
   margin: 20px 24px;
 
-  p {
+  .info, p {
+    display: flex;
+    align-items: center;
     margin-bottom: 12px;
     font-size: 16px;
-    color: #333333;
+    color: var(--text-color-primary);
     line-height: 19px;
+
+    > span {
+      margin: 0 8px;
+    }
   }
 
   p:last-child {
@@ -40,13 +46,14 @@
 }
 
 .swapBtn {
-  margin: 42px 25px;
+  margin: 49px 25px 0 25px;
   border-radius: 12px;
+  background: #ffffff;
 }
 
 .txBtn {
   flex-shrink: 0;
-  margin: 42px 0 0 27px;
+  margin: 49px 0 0 27px;
 }
 
 
@@ -56,5 +63,20 @@
   margin-top: 16px;
   font-size: 16px;
   line-height: 19px;
-  color: #999999;
+  color: var(--text-color-second);
+}
+
+.swapRoute {
+  display: flex;
+  align-items: center;
+
+  img {
+    max-width: 24px;
+    height: 24px;
+    margin: 0 8px;
+  }
+
+  svg {
+    margin: 0 8px;
+  }
 }

@@ -1,0 +1,27 @@
+.root {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: -12px;
+}
+
+.item {
+  padding: 12px;
+}
+
+.value {
+  display: flex;
+  justify-content: space-between;
+}
+
+.statisticContent {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.statistic {
+  width: 357px;
+}

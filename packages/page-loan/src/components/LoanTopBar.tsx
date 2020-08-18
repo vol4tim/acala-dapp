@@ -1,16 +1,16 @@
 import React, { FC, memo, useContext, useMemo } from 'react';
 import clsx from 'clsx';
 import { TokenImage, TokenName, CollateralRate } from '@acala-dapp/react-components';
-import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { ReactComponent as OverviewIcon } from '../assets/overview.svg';
 import { ReactComponent as AddIcon } from '../assets/add.svg';
 import classes from './LoanTopBar.module.scss';
-import { useAllLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
+import { useAllUserLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
 import { LoanContext } from './LoanProvider';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 interface LoanItemProps {
-  token: CurrencyId | string;
+  token: CurrencyLike;
 }
 
 const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
@@ -39,7 +39,6 @@ const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
         <CollateralRate
           className={classes.collateralRate}
           currency={token}
-          withTooltip={false}
         />
       </div>
     </div>
@@ -91,12 +90,10 @@ const LoanAdd: FC = () => {
 };
 
 export const LoanTopBar: FC = () => {
-  const { loans } = useAllLoans();
+  const loans = useAllUserLoans();
 
   const checkIfNeedAdd = useMemo((): boolean => {
-    if (!loans) {
-      return false;
-    }
+    if (!loans) return false;
 
     return loans.length !== filterEmptyLoan(loans).length;
   }, [loans]);

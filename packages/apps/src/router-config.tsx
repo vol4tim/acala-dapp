@@ -1,56 +1,57 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, lazy, LazyExoticComponent, Suspense } from 'react';
 
-import PageDeposit from '@acala-dapp/page-deposit';
-import PageLoan from '@acala-dapp/page-loan';
-import PageHoma from '@acala-dapp/page-homa';
-import PageSwap from '@acala-dapp/page-swap';
-import PageWallet from '@acala-dapp/page-wallet';
 import PageGovernance from '@acala-dapp/page-governance';
+import { PageLoading } from '@acala-dapp/ui-components';
 
 import { MainLayout } from './layouts/Main';
 import { sideBarConfig } from './sidebar-config';
 
 export interface RouterConfigData {
   children?: RouterConfigData[];
-  element?: ReactElement;
+  element?: ReactElement | LazyExoticComponent<any>;
   path: string;
   redirectTo?: string;
 }
+
+const PageWallet = lazy(() => import('@acala-dapp/page-wallet'));
+const PageDeposit = lazy(() => import('@acala-dapp/page-deposit'));
+const PageLoan = lazy(() => import('@acala-dapp/page-loan'));
+const PageHoma = lazy(() => import('@acala-dapp/page-homa'));
+const PageSwap = lazy(() => import('@acala-dapp/page-swap'));
 
 export const config: RouterConfigData[] = [
   {
     children: [
       {
-        element: <PageWallet />,
+        element: <Suspense fallback={<PageLoading />}><PageWallet/></Suspense>,
         path: 'wallet'
       },
       {
-        element: <PageDeposit />,
+        element: <Suspense fallback={<PageLoading />}><PageDeposit /></Suspense>,
         path: 'deposit'
       },
       {
-        element: <PageLoan />,
+        element: <Suspense fallback={<PageLoading />}><PageLoan /></Suspense>,
         path: 'loan'
       },
       {
-        element: <PageHoma />,
+        element: <Suspense fallback={<PageLoading />}><PageHoma /></Suspense>,
         path: 'homa'
       },
       {
-        element: <PageSwap />,
+        element: <Suspense fallback={<PageLoading />}><PageSwap /></Suspense>,
         path: 'swap'
       },
       {
-        element: <PageGovernance />,
+        element: <Suspense fallback={<PageLoading />}><PageGovernance /></Suspense>,
         path: 'governance'
       },
       {
-        element: <PageLoan />,
-        path: '/',
-        redirectTo: '/loan'
+        path: '*',
+        redirectTo: 'loan'
       }
     ],
     element: <MainLayout sideBarProps={{ config: sideBarConfig }} />,
-    path: '/'
+    path: '*'
   }
 ];

@@ -1,15 +1,17 @@
-import React, { FC, useState, ChangeEventHandler, useCallback, useContext } from 'react';
-import { AccountLike } from '@acala-dapp/react-hooks/types';
+import React, { FC, useState, useCallback, useMemo } from 'react';
+
 import { AutoComplete, Input, InputProps } from '@acala-dapp/ui-components';
 import Identicon from '@polkadot/react-identicon';
+import { useAccounts } from '@acala-dapp/react-hooks';
+
 import classes from './AddressInput.module.scss';
 import { isValidateAddress } from './utils';
 import { FormatAddress } from './format';
-import { globalStoreContext } from '@acala-dapp/react-environment';
 
-interface AddressInputProps extends Omit<InputProps, 'onError'>{
-  onAddressChange: (address: string) => void;
+interface AddressInputProps extends Omit<InputProps, 'onError' | 'onChange'>{
+  onChange: (address: string) => void;
   onError: (error: boolean) => void;
+  blockAddressList?: string[];
 }
 
 /**
@@ -17,29 +19,41 @@ interface AddressInputProps extends Omit<InputProps, 'onError'>{
  * @description input and auto select account
  */
 export const AddressInput: FC<AddressInputProps> = ({
-  onAddressChange,
+  blockAddressList = [],
+  onChange,
   onError,
   ...other
 }) => {
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [showIdentIcon, setShowIdentIcon] = useState<boolean>(false);
-  const { addAddress, addressList } = useContext(globalStoreContext);
+  const { addAddress, addressList } = useAccounts();
 
-  const renderOptions = (address: AccountLike): JSX.Element => {
-    return (
-      <>
-        <Identicon
-          className={classes.identicon}
-          size={32}
-          value={address}
-        />
-        <FormatAddress
-          address={address.toString()}
-        />
-      </>
-    );
-  };
+  const options = useMemo(() => {
+    return addressList
+      .filter((item) => !blockAddressList.includes(item.address))
+      .map((item) => {
+        return {
+          label: (
+            <div className={classes.option}>
+              <Identicon
+                className={classes.identicon}
+                size={32}
+                value={item.address}
+              />
+              <div>
+                {item?.meta?.name ? <p>{item.meta.name}</p> : null}
+                <FormatAddress
+                  address={item.address}
+                  withFullAddress
+                />
+              </div>
+            </div>
+          ),
+          value: item.address
+        };
+      });
+  }, [addressList, blockAddressList]);
 
   const insertOptions = useCallback((value: string) => {
     addAddress(value);
@@ -64,19 +78,17 @@ export const AddressInput: FC<AddressInputProps> = ({
     insertOptions(value);
 
     if (isValidateAddress(value)) {
-      onAddressChange(value);
+      onChange(value);
       handleError(false);
       handleShowIdentIcon(true);
     } else {
-      onAddressChange('');
+      onChange('');
       handleError(true);
       handleShowIdentIcon(false);
     }
-  }, [setValue, handleError, handleShowIdentIcon, insertOptions, onAddressChange]);
+  }, [setValue, handleError, handleShowIdentIcon, insertOptions, onChange]);
 
-  const handleInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    const value = event.target.value;
-
+  const handleChange = useCallback((value: string) => {
     _setValue(value);
   }, [_setValue]);
 
@@ -84,12 +96,15 @@ export const AddressInput: FC<AddressInputProps> = ({
     _setValue(value);
   }, [_setValue]);
 
-  const renderInput = (): JSX.Element => {
-    return (
+  return (
+    <AutoComplete
+      onChange={handleChange}
+      onSelect={handleSelect}
+      options={options}
+    >
       <Input
         error={error}
         inputClassName={classes.input}
-        onChange={handleInput}
         prefix={showIdentIcon ? (
           <Identicon
             className={classes.icon}
@@ -100,17 +115,6 @@ export const AddressInput: FC<AddressInputProps> = ({
         value={value}
         {...other}
       />
-    );
-  };
-
-  return (
-    <AutoComplete
-      onSelect={handleSelect}
-      optionClassName={classes.option}
-      options={addressList}
-      renderInput={renderInput}
-      renderOptions={renderOptions}
-      value={value}
-    />
+    </AutoComplete>
   );
 };

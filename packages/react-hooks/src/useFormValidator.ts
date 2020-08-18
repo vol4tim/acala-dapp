@@ -37,7 +37,7 @@ type Config = {
 }
 
 export function getFormValidator<T> (config: Config, api: ApiRx, active: InjectedAccountWithMeta): (values: T) => void | object | Promise<FormikErrors<T>> {
-  const numberPattern = /^([1-9]\d*|0)(\.\d{1,6})?$/;
+  const numberPattern = /^([1-9]\d*|0)(\.\d*)?$/;
 
   return (values: any): void | object | Promise<FormikErrors<T>> => {
     const error = {} as any;
@@ -55,11 +55,11 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
             const _min = Fixed18.fromNatural(_config.min !== undefined ? _config.min : 0);
 
             if (!numberPattern.test(value)) {
-              error[key] = 'Not a validate number';
+              error[key] = 'Not a valid number';
             }
 
             if (_value.isGreaterThan(_balance)) {
-              error[key] = 'Balance is not enough';
+              error[key] = 'Balance is too low';
             }
 
             if (_value.isGreaterThan(_max)) {
@@ -76,7 +76,7 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
 
         if (_config.type === 'number') {
           if (!numberPattern.test(value.toString())) {
-            error[key] = 'Not a validate number';
+            error[key] = 'Not a valid number';
           }
 
           if (_config.max !== undefined && value > _config.max) {
@@ -100,7 +100,7 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
           const length = (value as string).length;
 
           if (_config.pattern !== undefined && !_config.pattern.test(value)) {
-            error[key] = 'Value is not a validate string';
+            error[key] = 'Value is not a valid string';
           }
 
           if (_config.max !== undefined && length > _config.max) {

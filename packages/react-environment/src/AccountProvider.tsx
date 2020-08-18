@@ -1,25 +1,39 @@
-import React, { useState, useEffect, createContext, FC, useCallback, memo, ReactNode } from 'react';
-
+import React, { useState, useEffect, useRef, createContext, FC, useCallback, memo, ReactNode, useMemo } from 'react';
+import { uniqWith } from 'lodash';
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
 import { useModal, useApi, useStorage } from '@acala-dapp/react-hooks';
-import { SelectAccount } from '@acala-dapp/react-components';
+import { SelectAccount, isValidateAddress } from '@acala-dapp/react-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
 type AccountProviderError = 'NO_EXTENSIONS' | 'NO_ACCOUNTS' | '';
+
 const ACTIVE_ACCOUNT_KEY = 'active-account';
 
+const ADDRESS_LIST_KEY = 'saved_address_list';
+
+export const AccountContext = createContext<AccountsData>({} as AccountsData);
+
+interface AddressInfo {
+  address: string;
+  meta?: {
+    name?: string;
+  };
+}
+
 export interface AccountsData {
+  authRequired: boolean;
+  setAuthRequired: React.Dispatch<React.SetStateAction<boolean>>;
   active: InjectedAccountWithMeta | null;
   accounts: InjectedAccountWithMeta[];
   error: AccountProviderError;
   ready: boolean;
   openSelectAccount: () => void;
   closeSelectAccount: () => void;
+  addressList: AddressInfo[];
+  addAddress: (value: string) => void;
 }
-
-export const AccountContext = createContext<AccountsData>({} as AccountsData);
 
 interface Props extends BareProps {
   applicationName: string;
@@ -38,29 +52,26 @@ export const AccountProvider: FC<Props> = memo(({
   const [active, setActive] = useState<InjectedAccountWithMeta | null>(null);
   const [error, setError] = useState<AccountProviderError>('');
   const [ready, setReady] = useState<boolean>(false);
+  const [addressList, setAddressList] = useState<string[]>([]);
+  const [authRequired, setAuthRequired] = useState<boolean>(true);
+  const addressListRef = useRef<string[]>([]);
   const { getStorage, setStorage } = useStorage({ useAccountPrefix: false });
   const { close, open, status } = useModal(false);
 
-  const loadAccounts = useCallback(async (): Promise<boolean> => {
+  const loadAccounts = useCallback(async (): Promise<InjectedAccountWithMeta[]> => {
     const injected = await web3Enable(applicationName);
 
     if (!injected.length) {
-      setError('NO_EXTENSIONS');
-
-      return false;
+      throw new Error('NO_EXTENSIONS');
     }
 
     const accounts = await web3Accounts();
 
     if (!accounts.length) {
-      setError('NO_ACCOUNTS');
-
-      return false;
+      throw new Error('NO_ACCOUNTS');
     }
 
-    setAccounts(accounts);
-
-    return true;
+    return accounts;
   }, [applicationName]);
 
   const setActiveAccount = useCallback(async (account: InjectedAccountWithMeta): Promise<void> => {
@@ -76,42 +87,37 @@ export const AccountProvider: FC<Props> = memo(({
     }
   }, [api, setActive, setReady, setStorage]);
 
-  const openSelectAccount = useCallback((): void => {
-    open();
-  }, [open]);
+  const addAddress = useCallback((value: string) => {
+    if (!isValidateAddress(value)) return;
 
-  const closeSelectAccount = useCallback((): void => {
-    close();
-  }, [close]);
+    const isExist = addressListRef.current.find((address): boolean => address === value);
 
-  useEffect(() => {
-    loadAccounts();
-  }, [loadAccounts]);
-
-  useEffect(() => {
-    if (!accounts.length || active) {
-      return;
+    if (!isExist) {
+      addressListRef.current.push(value);
+      setStorage(ADDRESS_LIST_KEY, JSON.stringify(addressListRef.current));
+      setAddressList([...addressListRef.current]);
     }
+  }, [setAddressList, setStorage]);
 
-    // check saved active account
-    const savedActiveAccountAddress = getStorage(ACTIVE_ACCOUNT_KEY);
-    const savedActiveAccount = accounts.find((item): boolean => item.address === savedActiveAccountAddress);
+  const _addressList = useMemo<AddressInfo[]>((): AddressInfo[] => {
+    const result = [
+      ...accounts,
+      ...addressList.map((address) => {
+        return { address };
+      })
+    ];
 
-    if (savedActiveAccount) {
-      setActiveAccount(savedActiveAccount);
-    } else if (accounts.length === 1) {
-      setActiveAccount(accounts[0]);
-    } else {
-      openSelectAccount();
-    }
-  }, [accounts, active, getStorage, openSelectAccount, setActiveAccount]);
+    return uniqWith(result, (a, b) => a.address === b.address);
+  }, [accounts, addressList]);
 
-  const handleAccountSelect = async (account: InjectedAccountWithMeta): Promise<void> => {
+  const handleAccountSelect = useCallback(async (account: InjectedAccountWithMeta): Promise<void> => {
     await setActiveAccount(account);
-    closeSelectAccount();
-  };
+    close();
+  }, [setActiveAccount, close]);
 
   const renderError = useCallback((): ReactNode => {
+    if (!authRequired) return null;
+
     if (error && error === 'NO_ACCOUNTS' && NoAccounts) {
       return NoAccounts;
     }
@@ -121,21 +127,65 @@ export const AccountProvider: FC<Props> = memo(({
     }
 
     return null;
-  }, [error, NoAccounts, NoExtensions]);
+  }, [authRequired, error, NoAccounts, NoExtensions]);
+
+  useEffect(() => {
+    loadAccounts()
+      .then(async (accounts) => {
+        setAccounts(accounts);
+
+        if (!accounts.length || active) {
+          return;
+        }
+
+        // check saved active account
+        const savedActiveAccountAddress = getStorage(ACTIVE_ACCOUNT_KEY);
+        const savedActiveAccount = accounts.find((item): boolean => item.address === savedActiveAccountAddress);
+
+        if (savedActiveAccount) {
+          await setActiveAccount(savedActiveAccount);
+        } else if (accounts.length === 1) {
+          await setActiveAccount(accounts[0]);
+        } else {
+          open();
+        }
+      })
+      .catch((e: Error) => {
+        setError(e.message as AccountProviderError);
+      });
+  }, [loadAccounts, setError, active, getStorage, open, setActiveAccount]);
+
+  useEffect(() => {
+    const list = getStorage(ADDRESS_LIST_KEY);
+
+    try {
+      const options = JSON.parse(list as string) as string[] || [];
+
+      setAddressList(options);
+      addressListRef.current = options;
+    } catch (_e) {
+      // swallow error
+    }
+  }, [getStorage, setAddressList]);
 
   return (
     <AccountContext.Provider
       value={{
         accounts,
         active,
-        closeSelectAccount,
+        addAddress,
+        addressList: _addressList,
+        authRequired,
+        closeSelectAccount: close,
         error,
-        openSelectAccount,
-        ready
+        openSelectAccount: open,
+        ready,
+        setAuthRequired
       }}
     >
       <SelectAccount
         accounts={accounts}
+        defaultAccount={active ? active.address : undefined}
         onSelect={handleAccountSelect}
         visable={status}
       />

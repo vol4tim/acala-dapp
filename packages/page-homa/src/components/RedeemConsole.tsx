@@ -1,9 +1,9 @@
-import React, { FC, useContext, useState, useMemo, ReactNode } from 'react';
+import React, { FC, useContext, useState, useMemo, useCallback } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
 import { Fixed18 } from '@acala-network/app-util';
-import { Grid, List, Radio } from '@acala-dapp/ui-components';
+import { Grid, Radio, List, Condition } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, numToFixed18Inner, formatDuration, FormatBalance } from '@acala-dapp/react-components';
 import { useFormValidator } from '@acala-dapp/react-hooks';
 
@@ -62,6 +62,7 @@ export const RedeemConsole: FC = () => {
       type: 'balance'
     },
     target: {
+      equalMin: true,
       min: stakingPoolHelper?.currentEra,
       type: 'number'
     }
@@ -75,11 +76,9 @@ export const RedeemConsole: FC = () => {
     validate: validator
   });
 
-  if (!stakingPoolHelper || !stakingPool) {
-    return null;
-  }
+  const targetEra = useMemo<number>((): number => {
+    if (!stakingPoolHelper || !stakingPool) return 0;
 
-  const getTargetEra = (): number => {
     if (redeemType === 'Immediately') {
       return stakingPoolHelper.currentEra;
     }
@@ -93,41 +92,21 @@ export const RedeemConsole: FC = () => {
     }
 
     return stakingPoolHelper.currentEra;
-  };
+  }, [stakingPoolHelper, stakingPool, era, redeemType]);
 
-  const info = {
-    climeFee: stakingPoolHelper.claimFee(Fixed18.fromNatural(form.values.amount), getTargetEra()),
-    redeemed: Fixed18.fromNatural(form.values.amount)
-  };
+  const climeFee = useMemo<Fixed18>((): Fixed18 => {
+    if (!stakingPoolHelper || !form.values.amount) return Fixed18.ZERO;
 
-  const listConfig = [
-    {
-      key: 'redeemed',
-      /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => (
-        value.isFinity() ? (
-          <FormatBalance
-            balance={value}
-            currency={stakingPool.liquidCurrency}
-          />
-        ) : '~'
-      ),
-      title: 'Redeemed'
-    },
-    {
-      key: 'climeFee',
-      /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => (
-        value.isFinity() ? (
-          <FormatBalance
-            balance={value}
-            currency={stakingPool.liquidCurrency}
-          />
-        ) : '~'
-      ),
-      title: 'Claim Fee'
-    }
-  ];
+    return stakingPoolHelper.claimFee(Fixed18.fromNatural(form.values.amount), targetEra);
+  }, [stakingPoolHelper, targetEra, form.values.amount]);
+
+  const handleAmountInput = useCallback((value: number) => {
+    form.setFieldValue('amount', value);
+  }, [form]);
+
+  if (!stakingPoolHelper || !stakingPool) {
+    return null;
+  }
 
   const checkDisabled = (): boolean => {
     if (!form.values.amount) {
@@ -160,7 +139,6 @@ export const RedeemConsole: FC = () => {
     <Grid
       className={classes.root}
       container
-      direction='column'
     >
       <Grid item>
         <p className={classes.notice}>Withdraw deposit and interest</p>
@@ -209,7 +187,7 @@ export const RedeemConsole: FC = () => {
           error={form.errors.amount}
           id='amount'
           name='amount'
-          onChange={form.handleChange}
+          onChange={handleAmountInput}
           token={stakingPool.liquidCurrency}
           value={form.values.amount}
         />
@@ -219,29 +197,59 @@ export const RedeemConsole: FC = () => {
           Current Era = {stakingPoolHelper.currentEra} Unbounding Period = {formatDuration(unbondingDuration)} Days, Era {stakingPoolHelper.bondingDuration}
         </p>
       </Grid>
-      <Grid container
+      <Grid
+        container
         item
-        justify='center'>
-        <Grid item>
-          <TxButton
-            className={classes.txBtn}
-            disabled={checkDisabled()}
-            method='redeem'
-            onSuccess={form.resetForm}
-            params={getParams()}
-            section='homa'
-          >
-            Redeem
-          </TxButton>
-        </Grid>
+        justity='center'
+      >
+        <TxButton
+          className={classes.txBtn}
+          disabled={checkDisabled()}
+          method='redeem'
+          onSuccess={form.resetForm}
+          params={getParams()}
+          section='homa'
+        >
+          Redeem
+        </TxButton>
       </Grid>
       <Grid
         className={classes.info}
         item
       >
-        <List config={listConfig}
-          data={info}
-          itemClassName={classes.listItem} />
+        <List>
+          <List.Item
+            label='Redeemed'
+            value={
+              <Condition condition={form.values.amount}>
+                <FormatBalance
+                  balance={form.values.amount || 0}
+                  currency={stakingPool.liquidCurrency}
+                />
+              </Condition>
+            }
+          />
+          <List.Item
+            label='Received'
+            value={
+              <Condition condition={form.values.amount}>
+                ≈ <FormatBalance
+                  balance={stakingPoolHelper.liquidExchangeRate.mul(Fixed18.fromNatural(form.values.amount).sub(climeFee)) || 0}
+                  currency={stakingPool.stakingCurrency}
+                />
+              </Condition>
+            }
+          />
+          <List.Item
+            label='ClaimFee'
+            value={
+              <FormatBalance
+                balance={climeFee}
+                currency={stakingPool.liquidCurrency}
+              />
+            }
+          />
+        </List>
       </Grid>
     </Grid>
   );

@@ -2,9 +2,9 @@ import React, { FC, useContext } from 'react';
 
 import { convertToFixed18 } from '@acala-network/app-util';
 
-import { useDexTotalReward, useDexTotalDeposit, useDexTotalSystemReward } from '@acala-dapp/react-hooks';
+import { useDexTotalUserReward, useDexTotalUserDeposit, useDexTotalSystemReward } from '@acala-dapp/react-hooks';
 import { Card } from '@acala-dapp/ui-components';
-import { FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
+import { FormatBalance, FormatRatio } from '@acala-dapp/react-components';
 
 import { ReactComponent as UserIcon } from '../assets/user.svg';
 import { ReactComponent as SystemIcon } from '../assets/system.svg';
@@ -34,17 +34,13 @@ export const SystemCard: FC = () => {
             balance={totalReward.amount}
             className={classes.listContent}
             currency={totalReward.token}
-            decimalLength={2}
-            withTooltip={false}
           />
         </li>
         <li className={classes.listItem}>
           <p className={classes.listTitle}>Transaction Fee</p>
-          <FormatFixed18
+          <FormatRatio
             className={classes.listContent}
             data={convertToFixed18(exchangeFee)}
-            format='percentage'
-            withTooltip={false}
           />
         </li>
       </ul>
@@ -53,8 +49,8 @@ export const SystemCard: FC = () => {
 };
 
 export const UserCard: FC = () => {
-  const totalRewawrd = useDexTotalReward();
-  const totalDeposit = useDexTotalDeposit();
+  const totalRewawrd = useDexTotalUserReward();
+  const totalDeposit = useDexTotalUserDeposit();
 
   return (
     <Card
@@ -75,8 +71,6 @@ export const UserCard: FC = () => {
             balance={totalRewawrd.amount}
             className={classes.listContent}
             currency={totalRewawrd.token}
-            decimalLength={2}
-            withTooltip={false}
           />
         </li>
         <li className={classes.listItem}>
@@ -85,8 +79,6 @@ export const UserCard: FC = () => {
             balance={totalDeposit.amount}
             className={classes.listContent}
             currency={totalDeposit.token}
-            decimalLength={2}
-            withTooltip={false}
           />
         </li>
       </ul>

@@ -1,11 +1,11 @@
-import { Observable, combineLatest, Subscription } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Observable, combineLatest, Subscription, interval } from 'rxjs';
+import { map, shareReplay, startWith, mergeMap } from 'rxjs/operators';
 import { ApiRx } from '@polkadot/api';
 
-import { DerivedPrice, DerivedDexPool } from '@acala-network/api-derive';
+import { DerivedDexPool } from '@acala-network/api-derive';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
-import { CurrencyId } from '@acala-network/types/interfaces';
-
+import { CurrencyId, OracleKey } from '@acala-network/types/interfaces';
+import { TimestampedValue } from '@open-web3/orml-types/interfaces';
 import { BaseRxStore } from './base';
 import { PriceData, StakingPoolWithHelper } from './type';
 import { tokenEq, getValueFromTimestampValue } from '../utils';
@@ -18,22 +18,23 @@ export class PriceStore extends BaseRxStore {
   private api!: ApiRx;
 
   run (): void {
-    const nativeCurrency = this.api.consts.currencies.nativeCurrencyId as CurrencyId;
-    const allPrices$ = (this.api.derive as any).price.allPrices() as Observable<DerivedPrice[]>;
+    const nativeCurrency = this.api.consts.currencies.nativeCurrencyId as unknown as CurrencyId;
+    const allPrices$ = interval(1000 * 60).pipe(startWith(0), mergeMap(() => (this.api.rpc as any).oracle.getAllValues())) as Observable<[[OracleKey, TimestampedValue]]>;
+    // const allPrices$ = (this.api.rpc as any).oracle.getAllPrices() as Observable<DerivedPrice[]>;
     const dex$ = (this.api.derive as any).dex.pool(nativeCurrency) as Observable<DerivedDexPool>;
 
     this.data$ = combineLatest([allPrices$, this.stakingPool$, dex$]).pipe(
       map(([prices, pool, nativeCurrencyDex]): PriceData[] => {
         const exchangeRate = pool.helper.liquidExchangeRate;
 
-        const stakingCurrencyPrice = prices.find((item) =>
-          tokenEq(item.token, pool.stakingPool.stakingCurrency)
-        );
-
-        const result = prices.map((item: DerivedPrice) => ({
-          currency: item.token,
-          price: convertToFixed18(getValueFromTimestampValue(item.price))
+        const result = prices.map((item) => ({
+          currency: item[0].toString(),
+          price: convertToFixed18(getValueFromTimestampValue(item[1]))
         }));
+
+        const stakingCurrencyPrice = result.find((item) =>
+          tokenEq(item.currency, pool.stakingPool.stakingCurrency)
+        );
 
         // calculate native currency price
         if (nativeCurrencyDex) {
@@ -50,7 +51,7 @@ export class PriceStore extends BaseRxStore {
         // calculate and update liuquid currency price
         if (stakingCurrencyPrice && pool.stakingPool) {
           const currency = pool.stakingPool.liquidCurrency;
-          const price = convertToFixed18(getValueFromTimestampValue(stakingCurrencyPrice.price))
+          const price = stakingCurrencyPrice.price
             .mul(exchangeRate)
             .max(Fixed18.ZERO);
           const _p = result.find((item: PriceData): boolean => tokenEq(item.currency, currency));
@@ -61,6 +62,8 @@ export class PriceStore extends BaseRxStore {
             result.push({ currency: currency.toString(), price });
           }
         }
+
+        result.push({ currency: 'AUSD', price: Fixed18.fromNatural(1) });
 
         return result;
       }),

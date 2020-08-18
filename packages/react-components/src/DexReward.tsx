@@ -1,12 +1,12 @@
 import React, { FC, memo } from 'react';
 import AccountId from '@polkadot/types/generic/AccountId';
-import { CurrencyId } from '@acala-network/types/interfaces';
 import { useDexReward } from '@acala-dapp/react-hooks';
 import { FormatBalance } from './format';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 interface Props {
   account?: AccountId | string;
-  token: CurrencyId | string;
+  token: CurrencyLike;
 }
 
 export const DexReward: FC<Props> = memo(({

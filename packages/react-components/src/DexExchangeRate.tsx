@@ -1,15 +1,23 @@
 import React, { FC, memo, useState, useEffect } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Fixed18 } from '@acala-network/app-util';
+import { Fixed18, calcTargetInBaseToOther, convertToFixed18, calcTargetInOtherToBase, calcTargetInOtherToOther } from '@acala-network/app-util';
 
 import { FormatBalance } from '@acala-dapp/react-components';
 import { useDexPool, useConstants } from '@acala-dapp/react-hooks';
 import { tokenEq } from './utils';
+import { DerivedDexPool } from '@acala-network/api-derive';
 
 interface Props {
   supply: string | CurrencyId;
   target?: string | CurrencyId;
+}
+
+function convertPool (pool: DerivedDexPool): { base: Fixed18; other: Fixed18 } {
+  return {
+    base: convertToFixed18(pool.base),
+    other: convertToFixed18(pool.other)
+  };
 }
 
 export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
@@ -27,34 +35,19 @@ export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
     }
 
     if (tokenEq(supply, dexBaseCurrency) && !tokenEq(_target, dexBaseCurrency) && targetPool) {
-      setRatio(Fixed18.fromRational(
-        targetPool.base.toString(),
-        targetPool.other.toString()
-      ));
-      setSupplyToken(target);
-      setTargetToken(dexBaseCurrency);
+      setRatio(calcTargetInBaseToOther(Fixed18.fromNatural(1), convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
+      setSupplyToken(dexBaseCurrency);
+      setTargetToken(_target);
     }
 
     if (tokenEq(_target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency) && supplyPool) {
-      setRatio(Fixed18.fromRational(
-        supplyPool.base.toString(),
-        supplyPool.other.toString()
-      ));
+      setRatio(calcTargetInOtherToBase(Fixed18.fromNatural(1), convertPool(supplyPool), Fixed18.ZERO, Fixed18.ZERO));
       setSupplyToken(supply);
       setTargetToken(dexBaseCurrency);
     }
 
     if (!tokenEq(_target, dexBaseCurrency) && !tokenEq(supply, dexBaseCurrency) && supplyPool && targetPool) {
-      setRatio(Fixed18.fromRational(
-        Fixed18.fromRational(
-          supplyPool.base.toString(),
-          supplyPool.other.toString()
-        ).toNumber(),
-        Fixed18.fromRational(
-          targetPool.base.toString(),
-          targetPool.other.toString()
-        ).toNumber()
-      ));
+      setRatio(calcTargetInOtherToOther(Fixed18.fromNatural(1), convertPool(supplyPool), convertPool(targetPool), Fixed18.ZERO, Fixed18.ZERO));
       setSupplyToken(supply);
       setTargetToken(target || dexBaseCurrency);
     }
@@ -62,7 +55,6 @@ export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
 
   return (
     <FormatBalance
-      decimalLength={2}
       pair={[
         {
           balance: 1,
@@ -73,7 +65,7 @@ export const DexExchangeRate: FC<Props> = memo(({ supply, target }) => {
           currency: targetToken
         }
       ]}
-      pairSymbol='='
+      pairSymbol='≈'
     />
   );
 });

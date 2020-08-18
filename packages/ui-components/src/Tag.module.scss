@@ -2,10 +2,13 @@
 
 .root {
   box-sizing: border-box;
-  display: inline-block;
+  display: grid;
+  place-items: center;
   min-width: 30px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   height: 32px;
-  line-height: 28px;
   margin: 0 8px;
   padding: 0 8px;
   border-radius: 13px;
@@ -18,8 +21,8 @@
   }
 
   &.primary {
-    border: 1px solid $color-primary;
-    background: $color-primary;
+    border: 1px solid var(--color-primary);
+    background: var(--color-primary);
     color: $color-white;
   }
 

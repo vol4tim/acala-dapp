@@ -1,9 +1,9 @@
 import React, { FC, memo } from 'react';
-
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { FormatBalance } from '@acala-dapp/react-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
+
 import { useDexWithdrawShare } from './useDexWithdrawShare';
 
 interface Props extends BareProps {

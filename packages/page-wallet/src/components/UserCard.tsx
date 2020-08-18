@@ -1,30 +1,19 @@
 import React, { FC, ReactNode } from 'react';
 import Identicon from '@polkadot/react-identicon';
-import CopyToClipboard from 'react-copy-to-clipboard';
 
-import { Card, Loading, CopyIcon, EditIcon } from '@acala-dapp/ui-components';
+import { Card, Loading, CopyIcon, EditIcon, Copy } from '@acala-dapp/ui-components';
 
-import { useAccounts, useNotification } from '@acala-dapp/react-hooks';
+import { useAccounts } from '@acala-dapp/react-hooks';
 import classes from './UserCard.module.scss';
 import { FormatAddress } from '@acala-dapp/react-components';
 
 export const UserCard: FC = () => {
   const { active, openSelectAccount } = useAccounts();
-  const { createNotification } = useNotification();
 
   const renderContent = (): ReactNode => {
     if (!active) {
       return null;
     }
-
-    const handleCopy = (): void => {
-      createNotification({
-        icon: 'success',
-        removedDelay: 2000,
-        title: 'Copy Success',
-        type: 'success'
-      });
-    };
 
     return (
       <>
@@ -48,15 +37,17 @@ export const UserCard: FC = () => {
           <EditIcon />
           <p className={classes.action}>Change</p>
         </div>
-        <CopyToClipboard
-          onCopy={handleCopy}
+        <Copy
+          display='Copy Address Success'
+          render={(): JSX.Element => (
+            <div className={classes.copy}>
+              <CopyIcon />
+              <p className={classes.action}>Copy</p>
+            </div>
+          )}
           text={active.address}
-        >
-          <div className={classes.copy}>
-            <CopyIcon />
-            <p className={classes.action}>Copy</p>
-          </div>
-        </CopyToClipboard>
+          withCopy={false}
+        />
       </>
     );
   };

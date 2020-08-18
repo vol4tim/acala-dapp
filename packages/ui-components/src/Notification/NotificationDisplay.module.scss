@@ -49,8 +49,8 @@
   }
 
   &.error {
-    background: lighten(#ff5500, 50%);
-    border-color: #ff5500;
+    background: lighten(var(--color-error), 50%);
+    border-color: var(--color-error);
   }
 
   &.info {

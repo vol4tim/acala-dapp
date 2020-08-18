@@ -1,10 +1,10 @@
-import React, { FC, useContext, useMemo, ReactNode, useCallback } from 'react';
+import React, { FC, useContext, useMemo, useCallback } from 'react';
 
-import { FormatBalance, FormatFixed18, TxButton, numToFixed18Inner } from '@acala-dapp/react-components';
+import { FormatBalance, TxButton, numToFixed18Inner, FormatRatio } from '@acala-dapp/react-components';
 import { createProviderContext } from './CreateProvider';
 import { useConstants, useLoanHelper } from '@acala-dapp/react-hooks';
 import { Fixed18, stableCoinToDebit, calcCollateralRatio } from '@acala-network/app-util';
-import { List, Button } from '@acala-dapp/ui-components';
+import { Button, List } from '@acala-dapp/ui-components';
 import classes from './Confirm.module.scss';
 import { LoanContext } from './LoanProvider';
 
@@ -18,78 +18,6 @@ export const Confirm: FC = () => {
   const { cancelCurrentTab } = useContext(LoanContext);
   const { stableCurrency } = useConstants();
   const helper = useLoanHelper(selectedToken);
-
-  const data = useMemo(() => {
-    if (!helper) return {};
-
-    return {
-      borrowing: generate,
-      collateralRatio: calcCollateralRatio(
-        helper.collaterals.add(Fixed18.fromNatural(deposit || 0)).mul(helper.collateralPrice),
-        helper.debitAmount.add(Fixed18.fromNatural(generate || 0))
-      ),
-      depositing: deposit,
-      interestRate: helper.stableFeeAPR
-    };
-  }, [helper, deposit, generate]);
-
-  const listConfig = useMemo(() => {
-    return [
-      {
-        key: 'depositing',
-        /* eslint-disable-next-line react/display-name */
-        render: (data: number): ReactNode => {
-          return (
-            <FormatBalance
-              balance={data}
-              currency={selectedToken}
-            />
-          );
-        },
-        title: 'Depositing'
-      },
-      {
-        key: 'borrowing',
-        /* eslint-disable-next-line react/display-name */
-        render: (data: number): ReactNode => {
-          return (
-            <FormatBalance
-              balance={data}
-              currency={stableCurrency}
-            />
-          );
-        },
-        title: 'Borrowing'
-      },
-      {
-        key: 'collateralRatio',
-        /* eslint-disable-next-line react/display-name */
-        render: (data: Fixed18): JSX.Element => {
-          return (
-            <FormatFixed18
-              data={data}
-              format='percentage'
-            />
-          );
-        },
-        title: 'Collateralization Ratio'
-      },
-      {
-        key: 'interestRate',
-        /* eslint-disable-next-line react/display-name */
-        render: (data: Fixed18): JSX.Element => {
-          return (
-            <FormatFixed18
-              data={data}
-              format='percentage'
-            />
-          );
-        },
-        title: 'Interest Rate'
-      }
-    ];
-  }, [selectedToken, stableCurrency]);
-
   const isDisabled = useMemo((): boolean => {
     return false;
   }, []);
@@ -118,17 +46,53 @@ export const Confirm: FC = () => {
     setStep('generate');
   }, [setStep]);
 
+  const collateralRatio = useMemo<Fixed18>((): Fixed18 => {
+    if (!helper) return Fixed18.ZERO;
+
+    return calcCollateralRatio(
+      helper.collaterals.add(Fixed18.fromNatural(deposit || 0)).mul(helper.collateralPrice),
+      helper.debitAmount.add(Fixed18.fromNatural(generate || 0))
+    );
+  }, [helper, deposit, generate]);
+
   if (!helper) {
     return null;
   }
 
   return (
     <div className={classes.root}>
-      <List
-        config={listConfig}
-        data={data}
-        itemClassName={classes.listItem}
-      />
+      <List style='list'>
+        <List.Item
+          label='Depositing'
+          value={
+            <FormatBalance
+              balance={deposit}
+              currency={selectedToken}
+            />
+          }
+        />
+        <List.Item
+          label='Borrowing'
+          value={
+            <FormatBalance
+              balance={generate}
+              currency={stableCurrency}
+            />
+          }
+        />
+        <List.Item
+          label='Collateralization Ratio'
+          value={
+            <FormatRatio data={collateralRatio} />
+          }
+        />
+        <List.Item
+          label='Interest Rate'
+          value={
+            <FormatRatio data={helper.stableFeeAPR} />
+          }
+        />
+      </List>
       <div className={classes.action}>
         <Button
           onClick={cancelCurrentTab}

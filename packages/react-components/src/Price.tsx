@@ -1,12 +1,13 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import { usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
-import { FormatFixed18, FormatFixed18Props } from './format';
+import { FormatPrice } from './format';
+import { Fixed18 } from '@acala-network/app-util';
 
-interface Props extends BareProps, FormatFixed18Props {
+interface Props extends BareProps {
   currency: CurrencyLike;
 }
 
@@ -20,15 +21,14 @@ export const Price: FC<Props> = ({
 }) => {
   const price = usePrice(currency);
 
-  if (!price) {
-    return null;
-  }
+  const _price = useMemo(() => {
+    return price || Fixed18.ZERO;
+  }, [price]);
 
   return (
-    <FormatFixed18
+    <FormatPrice
       className={className}
-      data={price}
-      prefix='$'
+      data={_price}
     />
   );
 };

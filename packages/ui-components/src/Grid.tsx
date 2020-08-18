@@ -1,29 +1,90 @@
-import React, { FC } from 'react';
-import { Grid as MuiGrid, GridProps } from '@material-ui/core';
+import React, { FC, useMemo } from 'react';
+import { Row, Col } from 'antd';
+import { BareProps } from './types';
 
-interface Props extends GridProps{
-  spacing?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+interface ResponsedConfig {
+  xs?: number;
+  sm?: number;
+  md?: number;
+  lg?: number;
+  xl?: number;
+  xxl?: number;
 }
 
-export const Grid: FC<Props> = ({ children, spacing = 3, ...other }) => {
-  const props: GridProps = other;
+export interface GridProps extends BareProps {
+  align?: 'top' | 'middle' | 'bottom';
+  justity?: 'start' | 'end' | 'center' | 'space-around' | 'space-between';
+  container?: boolean;
 
-  if (props.container) {
-    props.spacing = spacing;
-  }
+  baseGutter?: number;
+  item?: boolean;
+  spacing?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  span?: number | ResponsedConfig;
+}
 
-  if (props.container && props.item) {
-    const { item, lg, md, xs, ...other } = props;
+export const Grid: FC<GridProps> = ({
+  align,
+  baseGutter = 8,
+  children,
+  className,
+  container,
+  item = false,
+  justity,
+  spacing = 3,
+  span = 24
+}) => {
+  const gutter = useMemo<[number, number]>((): [number, number] => {
+    return [baseGutter * spacing, baseGutter * spacing];
+  }, [baseGutter, spacing]);
 
+  const spanProps = useMemo(() => {
+    if (typeof span === 'number' || typeof span === 'string') {
+      return { span };
+    }
+
+    if (typeof span === 'object') {
+      return { ...span };
+    }
+
+    return {};
+  }, [span]);
+
+  if (container && item) {
     return (
-      <MuiGrid item={item}
-        lg={lg}
-        md={md}
-        xs={xs}>
-        <MuiGrid {...other}>{children}</MuiGrid>
-      </MuiGrid>
+      <Col
+        className={className}
+        {...spanProps}
+      >
+        <Row
+          align={align}
+          gutter={gutter}
+          justify={justity}
+          style={{ marginBottom: -gutter[1] / 2 }}
+        >
+          {children}
+        </Row>
+      </Col>
     );
   }
 
-  return <MuiGrid {...props}>{children}</MuiGrid>;
+  if (container) {
+    return (
+      <Row
+        align={align}
+        className={className}
+        gutter={gutter}
+        justify={justity}
+        style={{ marginBottom: -gutter[1] / 2 }}
+      >{children}</Row>
+    );
+  }
+
+  return (
+    <Col
+      className={className}
+      {...spanProps}
+    >
+      {children}
+    </Col>
+  );
 };

@@ -21,6 +21,7 @@ export const User: FC = memo(() => {
           </div>
         }
         path='wallet'
+        rel='wallet'
       />
     </div>
   );

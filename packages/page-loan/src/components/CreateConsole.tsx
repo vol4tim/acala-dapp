@@ -78,9 +78,7 @@ const Inner: FC = () => {
   const { selectedToken, step } = useContext(createProviderContext);
 
   return (
-    <Grid container
-      direction='column'
-    >
+    <Grid container>
       <Condition condition={step !== 'select'}>
         <Grid item>
           <SubTitle>
@@ -89,16 +87,19 @@ const Inner: FC = () => {
           </SubTitle>
         </Grid>
       </Condition>
-      <Grid container
-        direction='row'
-        item>
+      <Grid
+        container
+        item
+      >
         <Grid item
-          xs={new Set(['select', 'success']).has(step) ? 12 : 6}>
+          span={new Set(['select', 'success']).has(step) ? 24 : 12}>
           <Main />
         </Grid>
         <Condition condition={step !== 'select' && step !== 'success' }>
-          <Grid item
-            xs={6}>
+          <Grid
+            item
+            span={12}
+          >
             <CreateOverview />
           </Grid>
         </Condition>

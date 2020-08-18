@@ -26,10 +26,42 @@ p, span {
   cursor: inherit;
 }
 
-.ac-font-medium {
-  font-weight: 500;
+:root {
+  --color-primary: #173dc9;
+  --color-primary-light: #2938ce;
+  --color-primary-hover: #1b4af3;
+  --color-primary-active: #0c30ae;
+
+  --color-blue: #108ee9;
+  --color-green: #8fce65;
+  --color-red: #e02020;
+  --color-yellow: #f0fa41;
+
+  --color-success: var(--color-green);
+  --color-error: var(--color-red);
+  --color-alert: var(--color-yellow);
+  --color-info: var(--color-blue);
+
+  --text-color-white: #ffffff;
+  --text-color-primary: #333333;
+  --text-color-normal: #666666;
+  --text-color-second: #999999;
+
+  --screen-small: 960px;
+  --screen-middle: 1440px;
+  --screen-large: 1920px;
 }
 
-.ac-font-black {
-  color: #333333;
+/* overwrite ant style */
+.ant-steps-item-process .ant-steps-item-icon {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.ant-steps-item-finish .ant-steps-item-icon {
+  border-color: var(--color-primary);
+}
+
+.ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
+  color: var(--color-primary);
 }

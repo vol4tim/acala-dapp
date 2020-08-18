@@ -1,13 +1,11 @@
-import React, { FC, memo, ReactNode, createRef } from 'react';
-import Modal from '@material-ui/core/Modal';
-import Fade from '@material-ui/core/Fade';
-import Backdrop from '@material-ui/core/Backdrop';
+import React, { FC, ReactNode, useMemo } from 'react';
+import clsx from 'clsx';
+import { Modal } from 'antd';
 
 import { BareProps } from './types';
-import classes from './Dialog.module.scss';
 import { Button } from './Button';
-import clsx from 'clsx';
 import { CloseIcon } from './Icon';
+import './Dialog.scss';
 
 interface Props extends BareProps {
   visiable: boolean;
@@ -18,96 +16,72 @@ interface Props extends BareProps {
   cancelText?: string | null;
   onConfirm?: () => void;
   onCancel?: () => void;
-  onClose?: () => void;
   showCancel?: boolean;
 }
 
-export const Dialog: FC<Props> = memo(({
+export const Dialog: FC<Props> = ({
   action,
   cancelText = 'Cancel',
   children,
   className,
   confirmText = 'Confirm',
   onCancel,
-  onClose,
   onConfirm,
   showCancel = false,
   title,
   visiable = true,
   withClose = false
 }) => {
-  const $div = createRef<HTMLDivElement>();
-
-  const renderTitle = (): ReactNode => {
-    if (!title) {
+  const _action = useMemo(() => {
+    if (action === null) {
       return null;
     }
 
+    if (action) {
+      return (
+        <div className='aca-dialog__actions'>{action}</div>
+      );
+    }
+
     return (
-      <div className={classes.title}>
-        {title}
-        { withClose ? (
-          <CloseIcon
-            className={classes.close}
-            onClick={onClose}
-          />
-        ) : null }
+      <div className='aca-dialog__actions'>
+        {showCancel ? (
+          <Button
+            onClick={onCancel}
+            size='small'
+          >
+            {cancelText}
+          </Button>
+        ) : null}
+        {onConfirm ? (
+          <Button
+            color='primary'
+            onClick={onConfirm}
+            size='small'
+          >
+            {confirmText}
+          </Button>
+        ) : null}
       </div>
     );
-  };
+  }, [action, showCancel, cancelText, confirmText, onCancel, onConfirm]);
 
   return (
     <Modal
-      BackdropComponent={Backdrop}
-      BackdropProps={{ timeout: 500 }}
-      className={classes.mask}
-      closeAfterTransition
-      container={$div.current}
-      disableAutoFocus
-      disableEnforceFocus
-      open={visiable}
+      centered
+      className={clsx(className, 'aca-dialog__root')}
+      closable={withClose}
+      closeIcon={<CloseIcon />}
+      destroyOnClose
+      footer={null}
+      keyboard={true}
+      onCancel={onCancel}
+      title={title}
+      visible={visiable}
+      width={480}
     >
-      <Fade in={visiable}>
-        <div className={
-          clsx(
-            classes.root,
-            className,
-            {
-              [classes.visiable]: visiable
-            }
-          )
-        }>
-          {renderTitle()}
-          <div className={classes.content}>{children}</div>
-          <div className={classes.action}>
-            {
-              action || (
-                <>
-                  {showCancel ? (
-                    <Button
-                      onClick={onCancel}
-                      size='small'
-                    >
-                      {cancelText}
-                    </Button>
-                  ) : null}
-                  {onConfirm ? (
-                    <Button
-                      color='primary'
-                      onClick={onConfirm}
-                      size='small'
-                    >
-                      {confirmText}
-                    </Button>
-                  ) : null}
-                </>
-              )
-            }
-          </div>
-        </div>
-      </Fade>
+      <div>{children}</div>
+      {_action}
     </Modal>
   );
-});
-
-Dialog.displayName = 'Dialog';
+};

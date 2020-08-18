@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 
 import { AnyFunction } from '@polkadot/types/types';
 import Identicon from '@polkadot/react-identicon';
@@ -9,23 +9,33 @@ import classes from './SelectAccount.module.scss';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
 interface Props {
+  defaultAccount?: string;
   accounts: InjectedAccountWithMeta[];
   visable: boolean;
   onSelect?: (account: InjectedAccountWithMeta) => void;
 }
 
-export const SelectAccount: React.FC<Props> = memo(({
+export const SelectAccount: React.FC<Props> = ({
   accounts,
+  defaultAccount,
   onSelect,
   visable
 }) => {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-  const confirmHandler = (): void => {
+  const confirmHandler = useCallback(() => {
     onSelect && onSelect(accounts[selectedIndex]);
-  };
+  }, [onSelect, accounts, selectedIndex]);
 
-  const genSelectHandler = (index: number): AnyFunction => (): void => setSelectedIndex(index);
+  const genSelectHandler = useCallback((index: number): AnyFunction => (): void => setSelectedIndex(index), [setSelectedIndex]);
+
+  useEffect(() => {
+    if (!defaultAccount || !accounts.length) return;
+
+    const defaultIndex = accounts.findIndex((item) => item.address === defaultAccount);
+
+    setSelectedIndex(defaultIndex);
+  }, [defaultAccount, accounts, setSelectedIndex]);
 
   return (
     <Dialog
@@ -61,6 +71,4 @@ export const SelectAccount: React.FC<Props> = memo(({
       </ul>
     </Dialog>
   );
-});
-
-SelectAccount.displayName = 'SelectAccount';
+};

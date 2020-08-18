@@ -2,19 +2,23 @@ import React, { FC, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Card } from '@acala-dapp/ui-components';
-import { useConstants } from '@acala-dapp/react-hooks';
-import { TokenImage, TokenName, AssetBalance, AssetAmount } from '@acala-dapp/react-components';
+import { ScrollCard, Condition } from '@acala-dapp/ui-components';
+import { useConstants, useBalance } from '@acala-dapp/react-hooks';
+import { TokenImage, TokenName, UserAssetBalance, UserAssetValue, tokenEq, StakingPoolExchangeRate } from '@acala-dapp/react-components';
 
 import classes from './WalletBalance.module.scss';
+import { BareProps } from '@acala-dapp/ui-components/types';
 
-interface BalanceProps {
+interface BalanceProps extends BareProps {
   currency: CurrencyId;
 }
 
-const Balance: FC<BalanceProps> = ({ currency }) => {
+export const Balance: FC<BalanceProps> = ({ className, currency }) => {
+  const { liquidCurrency } = useConstants();
+  const liquidBalance = useBalance(liquidCurrency);
+
   return (
-    <div className={classes.item}>
+    <div className={className}>
       <TokenImage
         className={classes.image}
         currency={currency}
@@ -24,16 +28,24 @@ const Balance: FC<BalanceProps> = ({ currency }) => {
           className={classes.name}
           currency={currency}
         />
-        <AssetBalance
+        <UserAssetBalance
           className={classes.balance}
           currency={currency}
-          decimalLength={2}
         />
-        <AssetAmount
-          className={classes.amount}
-          currency={currency}
-          prefix='≈ US $'
-        />
+        <Condition
+          condition={tokenEq(currency, liquidCurrency)}
+          or={
+            <UserAssetValue
+              className={classes.amount}
+              currency={currency}
+            />
+          }>
+          <StakingPoolExchangeRate
+            className={classes.amount}
+            liquidAmount={liquidBalance}
+            showLiquidAmount={false}
+          />
+        </Condition>
       </div>
     </div>
   );
@@ -43,20 +55,25 @@ export const WalletBalance: FC = () => {
   const { allCurrencies } = useConstants();
 
   return (
-    <Card
+    <ScrollCard
       contentClassName={classes.cardContent}
       divider={false}
       header='Wallet Balance'
+      itemClassName={classes.item}
       padding={false}
     >
       {
         allCurrencies.map((currency: CurrencyId): ReactNode => (
-          <Balance
-            currency={currency}
+          <ScrollCard.Item
+            instance={(
+              <Balance
+                currency={currency}
+              />
+            )}
             key={`wallet-balance-${currency.toString()}`}
           />
         ))
       }
-    </Card>
+    </ScrollCard>
   );
 };

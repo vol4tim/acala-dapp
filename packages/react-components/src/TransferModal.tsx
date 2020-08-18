@@ -1,14 +1,14 @@
-import React, { FC, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { FC, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button } from '@acala-dapp/ui-components';
-import { useModal, useConstants } from '@acala-dapp/react-hooks';
+import { useModal, useConstants, useAccounts } from '@acala-dapp/react-hooks';
 
 import { getTokenName, tokenEq, numToFixed18Inner } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
-import { AssetBalance, AssetAmount } from './Assets';
+import { UserAssetBalance, UserAssetValue } from './Assets';
 import classes from './TransferModal.module.scss';
 import { AddressInput } from './AddressInput';
 import { BalanceAmountInput } from './BalanceAmountInput';
@@ -32,9 +32,8 @@ const AssetBoard: FC<AssetBoardProps> = ({
         onClick={openSelect} >
         <div>
           <div className={classes.balance}>
-            <AssetBalance
+            <UserAssetBalance
               currency={currency}
-              decimalLength={2}
             />
             <TokenName
               className={classes.token}
@@ -42,11 +41,9 @@ const AssetBoard: FC<AssetBoardProps> = ({
             />
             <ArrowDownIcon className={classes.icon} />
           </div>
-          <AssetAmount
+          <UserAssetValue
             className={classes.amount}
             currency={currency}
-            prefix='≈ US$'
-            withTooltip={false}
           />
         </div>
       </div>
@@ -116,6 +113,8 @@ const TransferForm: FC<TransferFormProps> = ({
   onBalanceError,
   onCurrencyChange
 }) => {
+  const { active } = useAccounts();
+
   return (
     <>
       <FormItem
@@ -123,9 +122,10 @@ const TransferForm: FC<TransferFormProps> = ({
         label='Account'
       >
         <AddressInput
+          blockAddressList={[active ? active.address : '']}
           id='account'
           name='account'
-          onAddressChange={onAccountChange}
+          onChange={onAccountChange}
           onError={onAccountError}
         />
       </FormItem>
@@ -159,7 +159,7 @@ export const TransferModal: FC<TransferModalProps> = ({
   visiable
 }) => {
   const [currency, setCurrency] = useState<CurrencyLike>(defaultCurrency);
-  const { close, open, status: selectCurrencyStatus } = useModal();
+  const { close, open, status: selectCurrencyStatus, update } = useModal();
   const [account, setAccount] = useState<string>('');
   const [amount, setAmount] = useState<number>(0);
   const [accountError, setAccountError] = useState<boolean>(true);
@@ -169,7 +169,7 @@ export const TransferModal: FC<TransferModalProps> = ({
     return `Transfer ${getTokenName(currency)}`;
   }, [currency]);
 
-  const renderTransfer = (): JSX.Element => {
+  const renderTransfer = useCallback((): JSX.Element => {
     return (
       <TransferForm
         currency={currency}
@@ -180,12 +180,12 @@ export const TransferModal: FC<TransferModalProps> = ({
         onCurrencyChange={setCurrency}
       />
     );
-  };
+  }, [currency, setAccount, setAccountError, setAmount, setAmountError, setCurrency]);
 
   const renderSelect = useCallback((): ReactNode => {
     const handleSelect = (currency: CurrencyLike): void => {
       setCurrency(currency);
-      setTimeout(close, 300);
+      close();
     };
 
     return (
@@ -212,6 +212,14 @@ export const TransferModal: FC<TransferModalProps> = ({
     return accountError || amountError;
   }, [amount, account, accountError, amountError]);
 
+  useEffect(() => {
+    if (!visiable) {
+      setAccount('');
+      update(false);
+      setCurrency(defaultCurrency);
+    }
+  }, [visiable, setAccount, setCurrency, defaultCurrency, update]);
+
   return (
     <Dialog
       action={
@@ -234,7 +242,7 @@ export const TransferModal: FC<TransferModalProps> = ({
           </TxButton>
         </>
       }
-      onClose={onClose}
+      onCancel={onClose}
       title={renderHeader()}
       visiable={visiable}
       withClose

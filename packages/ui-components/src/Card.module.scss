@@ -15,17 +15,30 @@
 }
 
 .title {
+  display: flex;
+  justify-content: space-between;
   padding: 20px 24px;
-  color: $color-black;
+  color: var(--text-color-primary);
   font-size: 18px;
   line-height: 21px;
   font-weight: 500;
+
+  .extra {
+    font-size: 16px;
+    font-weight: normal;
+    color: var(--text-color-second);
+  }
 
   &.divider {
     font-size: 20px;
     line-height: 24px;
     border-bottom: 1px solid #ecf0f2;
   }
+}
+
+.content {
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .content.padding {

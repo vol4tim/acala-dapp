@@ -1,16 +1,20 @@
 import React, { FC, memo, useContext, useState } from 'react';
+
 import { Card } from '@acala-dapp/ui-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
+import { useDexReward, useConstants } from '@acala-dapp/react-hooks';
 import { TxButton, DexReward, TokenSelector } from '@acala-dapp/react-components';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { CurrencyChangeFN } from '@acala-dapp/react-components/types';
+
 import { DepositContext } from './Provider';
 import classes from './RewardConsole.module.scss';
-import { useDexReward, useConstants } from '@acala-dapp/react-hooks';
 import { ReactComponent as RightArrowIcon } from '../assets/right-arrow.svg';
 
 interface InputAreaProps {
   currencies?: CurrencyId[];
-  token: CurrencyId;
-  onTokenChange?: (token: CurrencyId) => void;
+  token: CurrencyLike;
+  onTokenChange?: CurrencyChangeFN;
 }
 
 const InputArea: FC<InputAreaProps> = memo(({
@@ -29,6 +33,7 @@ const InputArea: FC<InputAreaProps> = memo(({
           className={classes.dropdown}
           currencies={dexCurrencies}
           onChange={onTokenChange}
+          showIcon
           value={token}
         />
         <RightArrowIcon className={classes.arrowIcon} />

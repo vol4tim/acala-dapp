@@ -1,12 +1,11 @@
-import React, { ReactNode, FC, useState, useEffect } from 'react';
-import { ApiRx } from '@polkadot/api';
-import { timeout, switchMap } from 'rxjs/operators';
+import React, { ReactNode, FC, useState, useEffect, useContext } from 'react';
+import { timeout } from 'rxjs/operators';
 
+import { ApiRx } from '@polkadot/api';
 import { options } from '@acala-network/api';
 
-import { EventsWatcher } from '@acala-dapp/react-components';
-
-import { selectFastestEndpoints, DEFAULT_ENDPOINTS } from './utils/endpoints';
+import { createProvider } from './utils/endpoints';
+import { SettingContext } from './SettingProvider';
 
 const MAX_CONNECT_TIME = 1000 * 60; // one minute
 
@@ -21,15 +20,14 @@ export interface ApiContextData {
   connected: boolean;
   error: boolean;
   loading: boolean;
+  chain: string;
 }
 
 // ensure that api always exist
 export const ApiContext = React.createContext<ApiContextData>({} as ApiContextData);
 
 interface Props {
-  endpoint: string;
   children: ReactNode;
-  ConnectError?: ReactNode;
   Loading?: ReactNode;
 }
 
@@ -38,55 +36,33 @@ interface Props {
  * @description connect chain in the Api Higher-Order Component.
  */
 export const ApiProvider: FC<Props> = ({
-  ConnectError,
   Loading,
-  children,
-  endpoint
+  children
 }) => {
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>(
     {} as ConnectStatus
   );
   const [api, setApi] = useState<ApiRx>({} as ApiRx);
+  const [chain, setChain] = useState<string>('');
+  const { endpoint } = useContext(SettingContext);
 
   const renderContent = (): ReactNode => {
     if (connectStatus.loading) {
       return Loading || null;
     }
 
-    if (connectStatus.connected) {
+    if (JSON.stringify(api) !== '{}') {
       return children;
     }
-
-    return null;
-  };
-
-  const renderError = (): ReactNode => {
-    if (connectStatus.error && ConnectError) {
-      return ConnectError;
-    }
-
-    return null;
   };
 
   useEffect(() => {
-    if (api.isConnected) return;
-
-    let _endpoints = DEFAULT_ENDPOINTS;
-
-    if (endpoint) {
-      _endpoints = [{
-        name: '',
-        url: endpoint
-      }];
-    }
+    if (api.isConnected || !endpoint || !endpoint.length) return;
 
     // reset connect status
     setConnectStatus({ connected: false, error: false, loading: true });
 
-    selectFastestEndpoints(_endpoints).pipe(
-      switchMap((provider) => {
-        return ApiRx.create(options({ provider }));
-      }),
+    const subscriber = ApiRx.create(options({ provider: createProvider(endpoint) })).pipe(
       timeout(MAX_CONNECT_TIME)
     ).subscribe({
       error: (): void => {
@@ -98,8 +74,22 @@ export const ApiProvider: FC<Props> = ({
       }
     });
 
-    return (): void => Reflect.has(api, 'disconnect') ? api.disconnect() : undefined;
+    return (): void => {
+      subscriber.unsubscribe();
+
+      if (api.disconnect) {
+        api.disconnect();
+      }
+    };
   }, [api, endpoint]);
+
+  useEffect(() => {
+    if (!connectStatus.connected) return;
+
+    api.rpc.system.chain().subscribe((result) => {
+      setChain(result.toString());
+    });
+  }, [api, connectStatus]);
 
   useEffect(() => {
     if (!connectStatus.connected) return;
@@ -110,6 +100,9 @@ export const ApiProvider: FC<Props> = ({
     api.on('error', () => {
       setConnectStatus({ connected: false, error: true, loading: false });
     });
+    api.on('connected', () => {
+      setConnectStatus({ connected: true, error: false, loading: false });
+    });
 
     return (): void => api.disconnect();
   }, [api, connectStatus]);
@@ -118,12 +111,11 @@ export const ApiProvider: FC<Props> = ({
     <ApiContext.Provider
       value={{
         api,
+        chain,
         ...connectStatus
       }}
     >
       {renderContent()}
-      {renderError()}
-      <EventsWatcher />
     </ApiContext.Provider>
   );
 };

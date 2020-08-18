@@ -1,7 +1,9 @@
+@import '../../ui-components/src/styles/index.scss';
+
 .root {
   position: relative;
   font-size: 16px;
-  color: #333333;
+  color: var(--text-color-primary);
   padding-left: 20px;
   transition: background 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
 
@@ -18,10 +20,16 @@
   }
 
   &.connected {
-    color: #173dc9;
+    color: var(--color-primary);
   }
 
   &.connected::before {
-    background: #173dc9;
+    background: var(--color-primary);
+  }
+
+  @include media-breakpoint-up('md') {
+    p {
+      display: none;
+    }
   }
 }

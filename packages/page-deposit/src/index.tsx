@@ -16,21 +16,18 @@ const PageDeposit: FC = () => {
       <Page>
         <Page.Title title='Deposit & Earn' />
         <Page.Content>
-          <Grid container
-            direction='column'
-            item>
+          <Grid container>
             <Grid item>
               <WalletBalance />
             </Grid>
             <Grid container
-              direction='row'
               item>
               <Grid item
-                xs={6}>
+                span={12}>
                 <UserCard />
               </Grid>
               <Grid item
-                xs={6}>
+                span={12}>
                 <SystemCard />
               </Grid>
             </Grid>

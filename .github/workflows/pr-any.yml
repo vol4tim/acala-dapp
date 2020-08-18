@@ -37,7 +37,7 @@ jobs:
         yarn test
 
   build_code:
-    name: Build Code
+    name: Build Code 
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,4 +51,5 @@ jobs:
     - name: build
       run: |
         yarn install --frozen-lockfile
-        yarn build
+        yarn build:dapp
+        yarn build:dashboard

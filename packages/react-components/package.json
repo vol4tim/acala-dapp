@@ -12,15 +12,11 @@
     "@acala-network/api-derive": "beta",
     "@acala-network/app-util": "beta",
     "@acala-network/types": "beta",
-    "@material-ui/core": "^4.9.13",
-    "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "^4.0.0-alpha.55",
-    "@polkadot/api": "~1.10.1",
+    "@polkadot/api": "^1.10.1",
     "@polkadot/react-identicon": "^0.52.1",
     "@polkadot/ui-keyring": "^0.53.1",
     "dayjs": "^1.8.25",
-    "react-copy-to-clipboard": "^5.0.2",
-    "rxjs": "^6.5.3"
+    "react-copy-to-clipboard": "^5.0.2"
   },
   "devDependencies": {
     "@types/react-copy-to-clipboard": "^4.3.0"

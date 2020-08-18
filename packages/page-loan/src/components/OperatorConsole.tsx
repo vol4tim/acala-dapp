@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { useConstants, useLoanHelper, useBalance } from '@acala-dapp/react-hooks';
-import { getTokenName, TokenImage, FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
+import { getTokenName, TokenImage, FormatBalance, FormatValue } from '@acala-dapp/react-components';
 import { Card } from '@acala-dapp/ui-components';
 import classes from './OperatorConsole.module.scss';
 import { debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
@@ -44,10 +44,9 @@ export const DebitConsole: FC<OperatorConsoleProps> = ({ currency }) => {
           className={classes.balance}
           currency={stableCurrency}
         />
-        <FormatFixed18
+        <FormatValue
           className={classes.amount}
           data={helper.debitAmount}
-          prefix='≈ US $'
         />
       </div>
       <div className={classes.actionArea}>
@@ -124,10 +123,9 @@ export const CollateralConsole: FC<OperatorConsoleProps> = ({ currency }) => {
           className={classes.balance}
           currency={currency}
         />
-        <FormatFixed18
+        <FormatValue
           className={classes.amount}
           data={helper.collateralAmount}
-          prefix='≈ US $'
         />
       </div>
       <div className={classes.actionArea}>

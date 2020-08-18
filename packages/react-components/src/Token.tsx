@@ -15,8 +15,9 @@ interface TokenComponentProps extends BareProps {
 const generateTokenComponent = (getFN: (currency: CurrencyLike) => any, wrapperComponent: string, getProps: (data: any) => object, displayName: string): FC<TokenComponentProps> => {
   const Component: FC<TokenComponentProps> = ({ className, currency }) => {
     const content = getFN(currency);
+    const props = getProps(content) as any;
 
-    return content ? React.createElement(wrapperComponent, { className, ...getProps(content) }) : null;
+    return content ? React.createElement(wrapperComponent, { ...props, className: clsx(className, props.className) }) : null;
   };
 
   Component.displayName = displayName;
@@ -32,7 +33,7 @@ const generateTokenComponent = (getFN: (currency: CurrencyLike) => any, wrapperC
 export const TokenImage = generateTokenComponent(
   getTokenImage,
   'img',
-  (data: any) => ({ src: data }),
+  (data: any) => ({ className: classes.tokenImg, src: data }),
   'TokenImage'
 );
 

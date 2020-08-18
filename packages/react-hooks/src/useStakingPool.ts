@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Observable, combineLatest, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { DerivedStakingPool } from '@acala-network/api-derive';
 import { StakingPoolHelper, Fixed18, convertToFixed18 } from '@acala-network/app-util';
@@ -8,8 +10,6 @@ import { useApi } from './useApi';
 import { useCall } from './useCall';
 import { useAccounts } from './useAccounts';
 import { useRxStore } from './useRxStore';
-import { Observable, combineLatest, of } from 'rxjs';
-import { map } from 'rxjs/operators';
 
 export interface FreeItem {
   era: number;
@@ -47,7 +47,7 @@ export const useStakingPool = (): UseStakingPoolReturnType => {
       return 0;
     }
 
-    const eraLength = api.consts.polkadotBridge.eraLength as BlockNumber;
+    const eraLength = api.consts.polkadotBridge.eraLength as unknown as BlockNumber;
     const expectedBlockTime = api.consts.babe.expectedBlockTime;
 
     return expectedBlockTime.toNumber() * eraLength.toNumber() * stakingPool.bondingDuration.toNumber();
@@ -58,7 +58,7 @@ export const useStakingPool = (): UseStakingPoolReturnType => {
       return 0;
     }
 
-    const eraLength = api.consts.polkadotBridge.eraLength as BlockNumber;
+    const eraLength = api.consts.polkadotBridge.eraLength as unknown as BlockNumber;
     const expectedBlockTime = api.consts.babe.expectedBlockTime;
 
     return expectedBlockTime.toNumber() * eraLength.toNumber();
@@ -86,7 +86,7 @@ export const useStakingPool = (): UseStakingPoolReturnType => {
 
     const duration = stakingPool.bondingDuration.toNumber();
     const start = stakingPool.currentEra.toNumber();
-    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index);
+    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index + 2);
 
     return combineLatest(
       eraArray.map((era: number) => api.query.stakingPool.claimedUnbond<Balance>(active.address, era))

@@ -1,5 +1,4 @@
 import React, { FC, ReactNode } from 'react';
-
 import { BaseTxHistory, FormatBalance, FormatTime, FormatHash, FormatAddress } from '@acala-dapp/react-components';
 import { TableConfig, Status } from '@acala-dapp/ui-components';
 import { Fixed18 } from '@acala-network/app-util';
@@ -14,20 +13,6 @@ export const Transaction: FC = () => {
       /* eslint-disable-next-line react/display-name */
       render: (value): ReactNode => <FormatHash hash={value} />,
       title: 'Hash'
-    },
-    {
-      align: 'left',
-      dataIndex: 'signer',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => (
-        <FormatAddress
-          address={value}
-          iconWidth={16}
-          withCopy
-          withIcon
-        />
-      ),
-      title: 'From'
     },
     {
       align: 'left',

@@ -1,4 +1,4 @@
-import React, { FC, useContext, useCallback, ReactNode } from 'react';
+import React, { FC, useContext, useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
@@ -33,39 +33,25 @@ export const StakingConsole: FC = () => {
     form.resetForm();
   }, [form]);
 
+  const receivedLiquidToken = useMemo<Fixed18>((): Fixed18 => {
+    if (!stakingPoolHelper || !form.values.stakingBalance) return Fixed18.ZERO;
+
+    return stakingPoolHelper.convertToLiquid(Fixed18.fromNatural(form.values.stakingBalance));
+  }, [stakingPoolHelper, form.values.stakingBalance]);
+
+  const handleStakingBalanceChange = useCallback((value: number): void => {
+    form.setFieldValue('stakingBalance', value);
+  }, [form]);
+
+  const profit = useMemo<Fixed18>((): Fixed18 => {
+    if (!rewardRate || !form.values.stakingBalance) return Fixed18.ZERO;
+
+    return Fixed18.fromNatural(form.values.stakingBalance).mul(convertToFixed18(rewardRate || 0));
+  }, [rewardRate, form.values.stakingBalance]);
+
   if (!stakingPoolHelper || !stakingPool) {
     return null;
   }
-
-  const estimated = {
-    depositStakingToken: Fixed18.fromNatural(form.values.stakingBalance).mul(convertToFixed18(rewardRate || 0)),
-    receivedLiquidToken: stakingPoolHelper.convertToLiquid(Fixed18.fromNatural(form.values.stakingBalance))
-  };
-
-  const listConfig = [
-    {
-      key: 'receivedLiquidToken',
-      /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => (
-        value.isFinity() ? (<FormatBalance
-          balance={value}
-          currency={stakingPool.liquidCurrency}
-        />) : '~'
-      ),
-      title: 'Mint'
-    },
-    {
-      key: 'depositStakingToken',
-      /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => (
-        value.isFinity() ? (<FormatBalance
-          balance={value}
-          currency={stakingPool.stakingCurrency}
-        />) : '~'
-      ),
-      title: 'Estimated Profit / Era'
-    }
-  ];
 
   const checkDisabled = (): boolean => {
     if (!form.values.stakingBalance) {
@@ -87,7 +73,6 @@ export const StakingConsole: FC = () => {
     <Grid
       className={classes.root}
       container
-      direction='column'
     >
       <Grid item>
         <p className={classes.notice}>
@@ -99,32 +84,53 @@ export const StakingConsole: FC = () => {
           error={form.errors.stakingBalance}
           id='stakingBalance'
           name='stakingBalance'
-          onChange={form.handleChange}
+          onChange={handleStakingBalanceChange}
           onMax={handleMax}
           showMaxBtn
           token={stakingPool.stakingCurrency}
           value={form.values.stakingBalance}
         />
       </Grid>
-      <Grid item>
-        <TxButton
-          className={classes.txBtn}
-          disabled={checkDisabled()}
-          method='mint'
-          onSuccess={resetForm}
-          params={[numToFixed18Inner(form.values.stakingBalance)]}
-          section='homa'
-          size='middle'
-        >
-          Deposit
-        </TxButton>
+      <Grid
+        container
+        item
+        justity='center'
+      >
+        <Grid item>
+          <TxButton
+            className={classes.txBtn}
+            disabled={checkDisabled()}
+            method='mint'
+            onSuccess={resetForm}
+            params={[numToFixed18Inner(form.values.stakingBalance)]}
+            section='homa'
+            size='middle'
+          >
+            Deposit
+          </TxButton>
+        </Grid>
       </Grid>
       <Grid item>
-        <List
-          config={listConfig}
-          data={estimated}
-          itemClassName={classes.listItem}
-        />
+        <List>
+          <List.Item
+            label='Mint'
+            value={
+              <FormatBalance
+                balance={receivedLiquidToken}
+                currency={stakingPool.liquidCurrency}
+              />
+            }
+          />
+          <List.Item
+            label='Estimated Profit / Era'
+            value={
+              <FormatBalance
+                balance={profit}
+                currency={stakingPool.stakingCurrency}
+              />
+            }
+          />
+        </List>
       </Grid>
     </Grid>
   );

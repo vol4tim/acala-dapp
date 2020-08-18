@@ -2,21 +2,29 @@
   display: flex;
   padding-bottom: 24px;
   margin-top: -24px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    height: 4px;
+  }
 }
 
 .item {
-  flex: 1 1 20%;
-  border-right: 1px solid #ecf0f2; 
-
-  box-sizing: border-box;
-  padding: 0 24px;
-  margin-top: 48px;
-
+  flex: 0 0 20%;
   display: flex;
   align-items: stretch;
+  border-right: 1px solid #ecf0f2; 
+  margin-top: 48px;
+  padding: 0 24px;
+
+  &:first-child {
+    padding-left: 0;
+  }
 
   &:last-child {
     border-right: none;
+    padding-right: 0;
   }
 
   .image {
@@ -31,7 +39,7 @@
     left: 0;
     font-size: 14px;
     line-height: 16px;
-    color: #333333;
+    color: var(--text-color-primary);
   }
 
   .balance {
@@ -44,7 +52,7 @@
   .amount {
     font-size: 16px;
     line-height: 19px;
-    color: #999999;
+    color: var(--text-color-second);
     white-space: nowrap;
   }
 

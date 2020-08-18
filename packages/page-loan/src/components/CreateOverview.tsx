@@ -12,8 +12,7 @@ export const CreateOverview: FC = () => {
   const { deposit, generate, selectedToken } = useContext(createProviderContext);
 
   return (
-    <Grid container
-      direction='column'>
+    <Grid container>
       <Grid item>
         <DynamicLiquidationPrice
           collateral={deposit}

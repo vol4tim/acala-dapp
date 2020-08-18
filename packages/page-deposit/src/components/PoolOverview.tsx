@@ -1,9 +1,8 @@
 import React, { FC, memo, useContext, ReactNode } from 'react';
 
-import { CurrencyId } from '@acala-network/types/interfaces';
-
 import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
 import { DexPoolSize, DexReward, DexRewardRatio, DexUserShare } from '@acala-dapp/react-components';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { DepositContext } from './Provider';
 import { AccountDexTokens } from './AccountDexTokens';

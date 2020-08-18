@@ -1,22 +1,22 @@
-import React, { FC, ChangeEvent, ReactNode, useMemo, useCallback } from 'react';
+import React, { FC, useMemo, useCallback } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
-import { CurrencyId } from '@acala-network/types/interfaces';
 import { stableCoinToDebit, Fixed18, convertToFixed18, calcLiquidationPrice, calcCollateralRatio } from '@acala-network/app-util';
 
-import { Dialog, ButtonProps, Button, List, ListConfig } from '@acala-dapp/ui-components';
+import { Dialog, ButtonProps, Button, List } from '@acala-dapp/ui-components';
 import { useModal, useFormValidator, useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
-import { BalanceInput, TxButton, FormatBalance, FormatFixed18 } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, FormatBalance, FormatRatio, FormatPrice } from '@acala-dapp/react-components';
 
 import classes from './LoanActionButton.module.scss';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 type ActionType = 'payback' | 'generate' | 'deposit' | 'withdraw';
 
 interface Props extends Omit<ButtonProps, 'onClick' | 'type'> {
   type: ActionType;
   text: string;
-  token: CurrencyId | string;
+  token: CurrencyLike;
 }
 
 export const LonaActionButton: FC<Props> = ({
@@ -199,43 +199,6 @@ export const LonaActionButton: FC<Props> = ({
     return false;
   }, [form.values, form.errors]);
 
-  const config: ListConfig[] = [
-    {
-      key: 'borrowed',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => {
-        return <FormatBalance balance={value} />;
-      },
-      title: 'Borrowed aUSD'
-    },
-    {
-      key: 'collateralRate',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => {
-        return (
-          <FormatFixed18
-            data={value}
-            format='percentage'
-          />
-        );
-      },
-      title: 'New Collateral Ratio'
-    },
-    {
-      key: 'liquidationPrice',
-      /* eslint-disable-next-line react/display-name */
-      render: (value): ReactNode => {
-        return (
-          <FormatFixed18
-            data={value}
-            prefix='$'
-          />
-        );
-      },
-      title: 'New Liquidation Price'
-    }
-  ];
-
   const _close = (): void => {
     close();
     form.resetForm();
@@ -249,17 +212,6 @@ export const LonaActionButton: FC<Props> = ({
     return value || Fixed18.fromNatural(NaN);
   }, [form.errors]);
 
-  const listData = useMemo(() => {
-    if (!loanHelper) return {};
-
-    return {
-      borrowed: formatListData(loanHelper.debitAmount),
-      canGenerate: formatListData(loanHelper.canGenerate),
-      collateralRate: formatListData(newCollateralRatio),
-      liquidationPrice: formatListData(newLiquidationPrice)
-    };
-  }, [loanHelper, newCollateralRatio, newLiquidationPrice, formatListData]);
-
   const showMaxBtn = useMemo<boolean>((): boolean => {
     return type !== 'generate';
   }, [type]);
@@ -268,8 +220,8 @@ export const LonaActionButton: FC<Props> = ({
     form.setFieldValue('value', maxInput);
   };
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-    form.handleChange(event);
+  const handleChange = (value: number): void => {
+    form.setFieldValue('value', value);
   };
 
   return (
@@ -318,10 +270,27 @@ export const LonaActionButton: FC<Props> = ({
         />
         <List
           className={classes.list}
-          config={config}
-          data={listData}
-          itemClassName={classes.listItem}
-        />
+          style='list'
+        >
+          <List.Item
+            label='Borrowed aUSD'
+            value={
+              <FormatBalance balance={formatListData(loanHelper ? loanHelper.debitAmount : Fixed18.ZERO)} />
+            }
+          />
+          <List.Item
+            label='New Collateral Ratio'
+            value={
+              <FormatRatio data={formatListData(newCollateralRatio)} />
+            }
+          />
+          <List.Item
+            label='New Liquidation Price'
+            value={
+              <FormatPrice data={formatListData(newLiquidationPrice)} />
+            }
+          />
+        </List>
       </Dialog>
     </>
   );

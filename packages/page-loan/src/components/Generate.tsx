@@ -84,6 +84,14 @@ export const Generate: FC = () => {
     form.setFieldValue('deposit', data);
   }, [selectedCurrencyBalance, form]);
 
+  const handleDepositChange = useCallback((value: number) => {
+    form.setFieldValue('deposit', value);
+  }, [form]);
+
+  const handleGenerateChange = useCallback((value: number) => {
+    form.setFieldValue('generate', value);
+  }, [form]);
+
   useEffect(() => {
     if (!helper) return;
 
@@ -108,7 +116,7 @@ export const Generate: FC = () => {
             error={form.errors.deposit}
             id='deposit'
             name='deposit'
-            onChange={form.handleChange}
+            onChange={handleDepositChange}
             onMax={handleDepositMax}
             showMaxBtn
             size='middle'
@@ -125,7 +133,7 @@ export const Generate: FC = () => {
             error={form.errors.generate}
             id='generate'
             name='generate'
-            onChange={form.handleChange}
+            onChange={handleGenerateChange}
             size='middle'
             token={stableCurrency}
             value={form.values.generate}

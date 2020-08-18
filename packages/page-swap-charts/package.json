@@ -1,0 +1,16 @@
+{
+  "name": "@acala-dapp/page-swap-charts",
+  "version": "0.2.0",
+  "description": "page swap charts",
+  "main": "index.js",
+  "author": "Acala Developers <hello@acala.network>",
+  "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@apollo/react-hooks": "^3.1.5",
+    "@polkadot/react-identicon": "^0.52.1",
+    "apollo-boost": "^0.4.9",
+    "bizcharts": "^4.0.10",
+    "graphql": "^15.1.0"
+  }
+}

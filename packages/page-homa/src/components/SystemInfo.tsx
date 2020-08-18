@@ -1,9 +1,8 @@
-import React, { FC, useContext, ReactNode } from 'react';
+import React, { FC, useContext } from 'react';
 
-import { Card, ListConfig, List } from '@acala-dapp/ui-components';
-import { getTokenName } from '@acala-dapp/react-components';
-import { convertToFixed18 } from '@acala-network/app-util';
-import { FormatFixed18 } from '@acala-dapp/react-components/format/FormatFixed18';
+import { Card, List } from '@acala-dapp/ui-components';
+import { FormatRatio, FormatBalance } from '@acala-dapp/react-components';
+import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 
 import { StakingPoolContext } from './StakingPoolProvider';
 
@@ -14,48 +13,42 @@ export const SystemInfo: FC = () => {
     return null;
   }
 
-  const listConfig: ListConfig[] = [
-    {
-      key: 'liquidExchangeRate',
-      /* eslint-disable-next-line react/display-name */
-      render: (data): ReactNode => <FormatFixed18 data={data} />,
-      title: `Exchange Rate (${getTokenName(stakingPool.stakingCurrency)} / ${getTokenName(stakingPool.liquidCurrency)})`
-    },
-    {
-      key: 'maxRatio',
-      /* eslint-disable-next-line react/display-name */
-      render: (data): ReactNode => (
-        <FormatFixed18
-          data={data}
-          format='percentage'
-        />
-      ),
-      title: 'Max Bonding Ratio'
-    },
-    {
-      key: 'minRatio',
-      /* eslint-disable-next-line react/display-name */
-      render: (data): ReactNode => (
-        <FormatFixed18
-          data={data}
-          format='percentage'
-        />
-      ),
-      title: 'Min Bonding Ratio'
-    }
-  ];
-
-  const listData = {
-    liquidExchangeRate: stakingPoolHelper?.liquidExchangeRate,
-    maxRatio: convertToFixed18(stakingPool?.maxBondRatio || 0),
-    minRatio: convertToFixed18(stakingPool?.minBondRatio || 0)
-  };
-
   return (
     <Card header='System Info'
       padding={false}>
-      <List config={listConfig}
-        data={listData} />
+      <List style='list'>
+        <List.Item
+          label='Exchange Rate'
+          value={
+            <FormatBalance
+              pair={[
+                {
+                  balance: Fixed18.fromNatural(1),
+                  currency: stakingPool.stakingCurrency
+                },
+                {
+                  balance: Fixed18.fromNatural(1).div(stakingPoolHelper.liquidExchangeRate),
+                  currency: stakingPool.liquidCurrency
+
+                }
+              ]}
+              pairSymbol='≈'
+            />
+          }
+        />
+        <List.Item
+          label='Max Bonding Ratio'
+          value={
+            <FormatRatio data={convertToFixed18(stakingPool.maxBondRatio)} />
+          }
+        />
+        <List.Item
+          label='Min Bonding Ratio'
+          value={
+            <FormatRatio data={convertToFixed18(stakingPool.minBondRatio)} />
+          }
+        />
+      </List>
     </Card>
   );
 };

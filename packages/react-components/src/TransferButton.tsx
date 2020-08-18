@@ -7,7 +7,7 @@ import { BareProps } from '@acala-dapp/ui-components/types';
 import { TransferModal } from './TransferModal';
 
 interface Props extends BareProps {
-  currency: CurrencyId;
+  currency: CurrencyId | string;
 }
 
 export const TransferButton: FC<Props> = memo(({

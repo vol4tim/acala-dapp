@@ -5,22 +5,41 @@ import AUSDIcon from '../assets/coins-icon/aUSD.svg';
 import BtcIcon from '../assets/coins-icon/BTC.svg';
 import DotIcon from '../assets/coins-icon/DOT.svg';
 import LDotIcon from '../assets/coins-icon/LDOT.svg';
+import RenIcon from '../assets/coins-icon/REN.svg';
 
-const ICON_IMAGES = {
+export const ICON_IMAGES = {
   aca: AcaIcon,
   ausd: AUSDIcon,
+  btc: BtcIcon,
   dot: DotIcon,
   ldot: LDotIcon,
+  renbtc: RenIcon,
   xbtc: BtcIcon
 };
 
-const ICON_FULLNAMES = {
+export const ICON_FULLNAMES = {
   aca: 'Acala',
   ausd: 'Acala Dollar',
+  btc: 'Bitcoin',
   dot: 'Polkadot',
   ldot: 'Liquid DOT',
+  renbtc: 'Ren Bitcoin',
   xbtc: 'Interchain Bitcoin'
 };
+
+export const TOKEN_COLOR_MAP: Map<string, string> = new Map([
+  ['SYSTEM', '#173DC9'],
+  ['BTC', '#F7931A'],
+  ['XBTC', '#F7931A'],
+  ['RENBTC', '#87888C'],
+  ['LDOT', '#00F893'],
+  ['DOT', '#e6007a']
+]);
+
+export function getTokenColor (token: CurrencyLike): string {
+  // default color is black
+  return TOKEN_COLOR_MAP.get(token.toString().toUpperCase()) || '#000000';
+}
 
 export function getTokenImage (token: CurrencyLike): string {
   return Reflect.get(ICON_IMAGES, token.toString().toLowerCase()) || '';
@@ -35,11 +54,15 @@ export function getTokenName (token: CurrencyLike, upper = true): string {
     return '';
   }
 
-  const _name = token.toString();
+  const _name = token.toString().toUpperCase();
 
-  if (_name.toUpperCase() === 'AUSD') {
+  if (_name === 'AUSD') {
     return upper ? 'aUSD' : 'ausd';
   }
 
-  return upper ? _name.toUpperCase() : _name.toLowerCase();
+  if (_name === 'RENBTC') {
+    return upper ? 'renBTC' : 'renbtc';
+  }
+
+  return upper ? _name : _name.toLowerCase();
 }

@@ -8,9 +8,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@acala-network/api": "beta",
-    "@polkadot/api": "^1.10.1",
-    "mobx-react-lite": "^2.0.7",
-    "rxjs": "^6.5.5"
+    "@polkadot/api": "^1.10.1"
   },
   "devDependencies": {
     "@types/url-parse": "^1.4.3"

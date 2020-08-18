@@ -1,10 +1,11 @@
+/* eslint-disable */
+// TODO: need update
+
 import React, { FC, useMemo } from 'react';
 import { Card, Table, TableConfig } from '@acala-dapp/ui-components';
 import { useHistory, useAccounts } from '@acala-dapp/react-hooks';
-import Pagination from '@material-ui/lab/Pagination';
 
 import classes from './BaseTxHistory.module.scss';
-import { Box } from '@material-ui/core';
 
 interface Props {
   section: string;
@@ -35,13 +36,13 @@ export const BaseTxHistory: FC<Props> = ({
     signer: active ? active.address : ''
   });
 
-  const count = useMemo(() => {
-    return Math.ceil(pagination.total / pagination.pageSize);
-  }, [pagination]);
+  // const count = useMemo(() => {
+  //   return Math.ceil(pagination.total / pagination.pageSize);
+  // }, [pagination]);
 
-  const handlePaginationChagne = (_event: any, page: number): void => {
-    onPaginationChagne({ currentPage: page - 1 });
-  };
+  // const handlePaginationChagne = (_event: any, page: number): void => {
+  //   onPaginationChagne({ currentPage: page - 1 });
+  // };
 
   return (
     <Card
@@ -57,22 +58,6 @@ export const BaseTxHistory: FC<Props> = ({
         loading={loading}
         showHeader
       />
-      {
-        data.length ? (
-          <Box
-            className={classes.pagination}
-            display='flex'
-            justifyContent='flex-end'
-          >
-            <Pagination
-              count={count}
-              onChange={handlePaginationChagne}
-              page={pagination.currentPage + 1}
-              shape='rounded'
-            />
-          </Box>
-        ) : null
-      }
     </Card>
   );
 };

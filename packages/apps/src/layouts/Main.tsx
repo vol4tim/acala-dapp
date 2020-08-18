@@ -1,7 +1,7 @@
 import React, { PropsWithChildren } from 'react';
 
 import { useIsAppReady } from '@acala-dapp/react-hooks';
-import { FullLoading } from '@acala-dapp/ui-components';
+import { PageLoading } from '@acala-dapp/ui-components';
 
 import { Sidebar, SideBarProps } from '../components/SideBar';
 import classes from './Main.module.scss';
@@ -17,7 +17,7 @@ export const MainLayout: React.FC<PropsWithChildren<Props>> = ({ children, sideB
     <div className={classes.root}>
       <Sidebar {...sideBarProps} />
       <div className={classes.content}>
-        {appReadyStatus ? children : <FullLoading />}
+        {appReadyStatus ? children : <PageLoading />}
       </div>
     </div>
   );

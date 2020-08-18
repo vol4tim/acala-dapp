@@ -28,7 +28,7 @@ export const AllMarkets: FC = () => {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => <DexExchangeRate supply={token} />,
-      title: 'Market Price',
+      title: 'Exchange Rate',
       width: 3
     },
     {

@@ -7,7 +7,7 @@ export interface LoanStatus { status: LOAN_STATUS_TEXT; color: string; descripti
 export const loanStatusConfig: {[k in LOAN_STATUS_TEXT]: LoanStatus } = {
   DANGEROUS: {
     color: '#fa0000',
-    description: '(Forced Liquidation)',
+    description: '(High Risk)',
     status: 'DANGEROUS'
   },
   SAFE: {

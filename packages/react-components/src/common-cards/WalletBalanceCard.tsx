@@ -1,6 +1,5 @@
 import React, { FC, memo, ReactNode } from 'react';
 
-import { CurrencyId } from '@acala-network/types/interfaces';
 import { Table, TableConfig, Card } from '@acala-dapp/ui-components';
 import { useAccounts, useConstants } from '@acala-dapp/react-hooks';
 
@@ -8,8 +7,7 @@ import { Token } from '../Token';
 import { UserBalance } from '../UserBalance';
 import { Price } from '../Price';
 import { TransferButton } from '../TransferButton';
-
-type TableData = CurrencyId[];
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 type TableShowCellType = 'token' | 'balance' | 'price' | 'amount' | 'action';
 
@@ -36,7 +34,7 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'left',
       key: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <Token currency={token} />,
+      render: (token: CurrencyLike): ReactNode => <Token currency={token} />,
       title: 'Token',
       width: 1
     },
@@ -44,7 +42,7 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'right',
       key: 'balance',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => (
+      render: (token: CurrencyLike): ReactNode => (
         <UserBalance
           token={token}
           withIcon={false}
@@ -65,10 +63,10 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'right',
       key: 'amount',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => (
+      render: (token: CurrencyLike): ReactNode => (
         <UserBalance
+          showValue
           token={token}
-          withPrice
         />
       ),
       title: 'Amount',
@@ -78,7 +76,7 @@ export const WalletBalanceCard: FC<Props> = memo(({
       align: 'right',
       key: 'action',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <TransferButton currency={token} />,
+      render: (token: CurrencyLike): ReactNode => <TransferButton currency={token} />,
       title: 'Action',
       width: 2
     }
@@ -98,7 +96,6 @@ export const WalletBalanceCard: FC<Props> = memo(({
       padding={false}
     >
       <Table
-        cellClassName={'ac-font-black'}
         config={tableConfig}
         data={allToken}
         showHeader={showHeader}

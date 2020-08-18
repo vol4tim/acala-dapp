@@ -1,7 +1,6 @@
 import React, { FC, PropsWithChildren, useEffect, useRef, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import clsx from 'clsx';
-import Slide from '@material-ui/core/Slide';
 import classes from './NotificationDisplay.module.scss';
 import { NotificationConfig } from './types';
 import { Loading } from '../Loading';
@@ -48,8 +47,7 @@ const NotificationCard: FC<NotificationConfig> = (config) => {
   };
 
   return (
-    <Slide direction='left'
-      in>
+    <>
       <div
         className={
           clsx(
@@ -67,7 +65,7 @@ const NotificationCard: FC<NotificationConfig> = (config) => {
           <div className={classes.info}>{config.content}</div>
         </div>
       </div>
-    </Slide>
+    </>
   );
 };
 

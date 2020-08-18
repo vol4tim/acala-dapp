@@ -1,38 +1,34 @@
-import React, { FC, ReactElement } from 'react';
+import React, { FC } from 'react';
 
-import { Page, Tabs, ComingSoon, Grid } from '@acala-dapp/ui-components';
+import { Page, Tabs, ComingSoon } from '@acala-dapp/ui-components';
 
-import { Liquid } from './components/Liquid';
 import { StakingPoolProvider } from './components/StakingPoolProvider';
+import { Advanced } from './components/Advanced';
+import { Express } from './components/Express';
 
 const PageHoma: FC = () => {
-  const tabsConfig = [
-    {
-      /* eslint-disable-next-line react/display-name */
-      render: (): ReactElement => <Liquid />,
-      title: 'Liquid Asset'
-    },
-    {
-      /* eslint-disable-next-line react/display-name */
-      render: (): ReactElement => <ComingSoon />,
-      title: 'Vote for Validators'
-    }
-  ];
-
   return (
     <StakingPoolProvider>
       <Page>
         <Page.Title title={'Liquid Asset'} />
         <Page.Content>
-          <Grid container>
-            <Grid item
-              xs={12}>
-              <Tabs
-                config={tabsConfig}
-                style='button'
-              />
-            </Grid>
-          </Grid>
+          <Tabs type='button'>
+            <Tabs.Panel key='express'
+              tab='Express'
+            >
+              <Express />
+            </Tabs.Panel>
+            <Tabs.Panel key='advance'
+              tab='Advanced'
+            >
+              <Advanced />
+            </Tabs.Panel>
+            <Tabs.Panel key='validators'
+              tab='Vote For Validators'
+            >
+              <ComingSoon />
+            </Tabs.Panel>
+          </Tabs>
         </Page.Content>
       </Page>
     </StakingPoolProvider>

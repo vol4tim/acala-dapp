@@ -1,0 +1,15 @@
+.auctionMakeBid {
+  min-width: 200;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+.auctionMakeBidInput {
+  width: 120px;
+  margin-right: 8px;
+}
+
+.auctionMakeBidButton {
+  min-width: 60px !important;
+}

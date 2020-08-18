@@ -1,0 +1,29 @@
+.root {
+  display: grid;
+  place-items: center;
+
+  .container {
+    width: 512px;
+    padding: 16px 0 32px 0;
+  }
+
+  .description {
+    font-weight: bold;
+    color: var(--text-color-primary);
+  }
+
+  .actionArea {
+    position: relative;
+    display: grid;
+    place-items: center;
+
+    .txBtn {
+      width: 320px;
+      height: 58px;
+
+      font-weight: bold;
+      font-size: 20px;
+      line-height: 30px;
+    }
+  }
+}

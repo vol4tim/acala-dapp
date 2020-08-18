@@ -14,7 +14,7 @@ import { useConstants } from './useConstants';
 import { CurrencyLike, AccountLike } from './types';
 import { usePrice, useAllPrices } from './priceHooks';
 
-export type BalanceData = { currency: CurrencyLike; balance: Balance };
+export type BalanceData = { currency: CurrencyLike; balance: Fixed18 };
 
 /**
  * @name useBalance
@@ -22,16 +22,16 @@ export type BalanceData = { currency: CurrencyLike; balance: Balance };
  * @param currency
  * @param account
  */
-export const useBalance = (currency: CurrencyLike, account?: AccountLike): Balance | undefined => {
+export const useBalance = (currency: CurrencyLike, account?: AccountLike): Fixed18 => {
   const { active } = useAccounts();
   const _account = useMemo(() => account || (active ? active.address : '_'), [account, active]);
   const balance = useCall<Balance>('derive.currencies.balance', [_account, currency]);
 
-  if (!currency) {
-    return;
+  if (!currency || !balance) {
+    return Fixed18.ZERO;
   }
 
-  return balance;
+  return convertToFixed18(balance);
 };
 
 /**
@@ -55,7 +55,7 @@ export const useBalances = (currencies: CurrencyLike[], account?: AccountLike): 
       return (api.derive as any).currencies.balance(_account, currency) as Observable<Balance>;
     })).subscribe({
       next: (result) => setBalances(currencies.map((currency: CurrencyLike, index: number): BalanceData => ({
-        balance: result[index],
+        balance: result ? convertToFixed18(result[index]) : Fixed18.ZERO,
         currency
       })))
     });
@@ -78,12 +78,12 @@ export const useAllBalances = (account?: AccountLike): BalanceData[] => {
 };
 
 /**
- * @name useAmount
- * @description get currency amount in USD
+ * @name useValue
+ * @description get currency value in USD
  * @param currency
  * @param account
  */
-export const useAmount = (currency: CurrencyId | string, account?: AccountLike): Fixed18 | undefined => {
+export const useValue = (currency: CurrencyId | string, account?: AccountLike): Fixed18 | undefined => {
   const balance = useBalance(currency, account);
   const price = usePrice(currency);
 
@@ -91,24 +91,24 @@ export const useAmount = (currency: CurrencyId | string, account?: AccountLike):
     return;
   }
 
-  return convertToFixed18(balance).mul(price);
+  return balance.mul(price);
 };
 
 const calcTotalAmount = (prices: PriceData[], amount: BalanceData[]): Fixed18 => {
   return amount.reduce((acc: Fixed18, current: BalanceData): Fixed18 => {
     const price = prices.find((value: PriceData): boolean => tokenEq(value.currency, current.currency));
-    const amount = (price ? price.price : Fixed18.ZERO).mul(convertToFixed18(current.balance));
+    const amount = (price?.price || Fixed18.ZERO).mul(current.balance);
 
     return acc.add(amount);
   }, Fixed18.ZERO);
 };
 
 /**
- * @name useTotalAmount
- * @description get total amount inUSD of all currencies
+ * @name useTotalValue
+ * @description get total value in USD of all currencies
  * @param account
  */
-export const useTotalAmount = (account?: AccountLike): Fixed18 | undefined => {
+export const useTotalValue = (account?: AccountLike): Fixed18 | undefined => {
   const { allCurrencies } = useConstants();
   const balances = useBalances(allCurrencies, account);
   const prices = useAllPrices();
@@ -121,4 +121,10 @@ export const useTotalAmount = (account?: AccountLike): Fixed18 | undefined => {
   }, [balances, prices]);
 
   return result;
+};
+
+export const useIssuance = (asset: CurrencyLike): Fixed18 => {
+  const issuance = useCall<Balance>('query.tokens.totalIssuance', [asset]);
+
+  return issuance ? convertToFixed18(issuance) : Fixed18.ZERO;
 };
