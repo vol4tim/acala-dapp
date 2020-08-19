@@ -91,7 +91,7 @@ const StakePanel: FC = () => {
         className={classes.actionBtn}
         disabled={isDisabled}
         method='mint'
-        onSuccess={onSuccess}
+        onExtrinsicSuccess={onSuccess}
         params={params}
         section='homa'
         size='large'
@@ -188,7 +188,7 @@ const UnstakePanel: FC = () => {
         className={classes.actionBtn}
         disabled={isDisabled}
         method='redeem'
-        onSuccess={onSuccess}
+        onExtrinsicSuccess={onSuccess}
         params={params}
         section='homa'
         size='large'

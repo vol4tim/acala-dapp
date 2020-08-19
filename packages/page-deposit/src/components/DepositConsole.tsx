@@ -172,7 +172,7 @@ export const DepositConsole: FC = () => {
           className={classes.txBtn}
           disabled={checkDisabled()}
           method='addLiquidity'
-          onSuccess={handleSuccess}
+          onExtrinsicSuccess={handleSuccess}
           params={
             [
               otherCurrency,

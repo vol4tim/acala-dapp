@@ -190,7 +190,7 @@ export const useTotalDebit = (): TotalDebitOrCollateralData | null => {
   return result;
 };
 
-export const useTotalCollatearl = (): TotalDebitOrCollateralData | null => {
+export const useTotalCollateral = (): TotalDebitOrCollateralData | null => {
   const { api } = useApi();
   const { loanCurrencies } = useConstants();
   const prices = useAllPrices();

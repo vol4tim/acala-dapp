@@ -111,7 +111,7 @@ export const Confirm: FC = () => {
         <TxButton
           disabled={isDisabled}
           method='adjustLoan'
-          onSuccess={handleSuccess}
+          onExtrinsicSuccess={handleSuccess}
           params={params}
           section='honzon'
           size='small'

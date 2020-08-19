@@ -65,10 +65,6 @@ export const RewardConsole: FC = memo(() => {
           token={otherCurrency}
         />
         <TxButton
-          addon={{
-            amount,
-            currency: otherCurrency.toString()
-          }}
           className={classes.txBtn}
           disabled={checkDisabled()}
           method='withdrawIncentiveInterest'

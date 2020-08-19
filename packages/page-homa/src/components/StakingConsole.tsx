@@ -101,7 +101,7 @@ export const StakingConsole: FC = () => {
             className={classes.txBtn}
             disabled={checkDisabled()}
             method='mint'
-            onSuccess={resetForm}
+            onExtrinsicSuccess={resetForm}
             params={[numToFixed18Inner(form.values.stakingBalance)]}
             section='homa'
             size='middle'

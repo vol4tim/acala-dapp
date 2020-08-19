@@ -112,7 +112,7 @@ export const AUSD: FC = () => {
                 className={classes.txBtn}
                 disabled={isDisabled}
                 method='transfer'
-                onSuccess={handleSuccess}
+                onExtrinsicSuccess={handleSuccess}
                 params={params}
                 section='currencies'
               >

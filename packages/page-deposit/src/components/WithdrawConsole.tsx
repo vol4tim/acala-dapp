@@ -146,11 +146,10 @@ export const WithdrawConsole: FC = memo(() => {
           </div>
         </div>
         <TxButton
-          addon={_withdrawToken}
           className={classes.txBtn}
           disabled={checkDisabled()}
           method='withdrawLiquidity'
-          onSuccess={handleSuccess}
+          onExtrinsicSuccess={handleSuccess}
           params={[otherCurrency, numToFixed18Inner(form.values.share)]}
           section='dex'
           size='large'

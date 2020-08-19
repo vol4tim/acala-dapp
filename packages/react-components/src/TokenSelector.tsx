@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, useCallback } from 'react';
+import React, { FC, useEffect, useState, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 import { noop } from 'lodash';
 
@@ -59,11 +59,7 @@ export const TokenSelector: FC<Props> = ({
     }
   }, [allCurrencies, api, currencies]);
 
-  if (!_currencies.length) {
-    return null;
-  }
-
-  const menu = (
+  const menu = useMemo(() => (
     <Menu>
       {
         _currencies.map((currency) => {
@@ -99,10 +95,15 @@ export const TokenSelector: FC<Props> = ({
         })
       }
     </Menu>
-  );
+  ), [_currencies, disabledCurrencies, _onChange, value]);
+
+  if (!_currencies.length) {
+    return null;
+  }
 
   return (
     <Dropdown
+      getPopupContainer={(triggerNode): any => triggerNode.parentNode}
       onVisibleChange={setVisible}
       overlay={menu}
       trigger={['click']}

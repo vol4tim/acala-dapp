@@ -26,7 +26,7 @@ export const WithdrawUnbonded: FC = memo(() => {
         !result.amount.isEmpty && (
           <TxButton
             method='withdrawRedemption'
-            onSuccess={handleSuccess}
+            onExtrinsicSuccess={handleSuccess}
             params={[]}
             section='homa'
           >

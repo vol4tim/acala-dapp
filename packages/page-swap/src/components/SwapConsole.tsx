@@ -246,7 +246,7 @@ export const SwapConsole: FC = () => {
           color={priceImpact > 0.05 ? 'danger' : 'primary'}
           disabled={isDisabled}
           method='swapCurrency'
-          onSuccess={form.resetForm}
+          onExtrinsicSuccess={form.resetForm}
           params={params}
           section='dex'
           size='large'

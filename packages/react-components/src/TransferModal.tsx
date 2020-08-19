@@ -233,7 +233,7 @@ export const TransferModal: FC<TransferModalProps> = ({
           <TxButton
             disabled={isDisabled}
             method='transfer'
-            onSuccess={onClose}
+            onExtrinsicSuccess={onClose}
             params={params}
             section='currencies'
             size='small'

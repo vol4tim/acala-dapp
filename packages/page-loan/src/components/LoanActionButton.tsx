@@ -245,7 +245,7 @@ export const LonaActionButton: FC<Props> = ({
             <TxButton
               disabled={isDisabled}
               method='adjustLoan'
-              onSuccess={_close}
+              onExtrinsicSuccess={_close}
               params={getParams()}
               section='honzon'
               size='small'

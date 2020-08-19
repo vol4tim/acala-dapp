@@ -206,7 +206,7 @@ export const RedeemConsole: FC = () => {
           className={classes.txBtn}
           disabled={checkDisabled()}
           method='redeem'
-          onSuccess={form.resetForm}
+          onExtrinsicSuccess={form.resetForm}
           params={getParams()}
           section='homa'
         >
