@@ -21,6 +21,7 @@ export interface BalanceInputProps extends BareProps {
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
+  disabledCurrencies?: CurrencyLike[];
   onChange?: (value: number) => void;
   onTokenChange?: CurrencyChangeFN;
   onFocus?: FocusEventHandler<HTMLInputElement>;
@@ -45,6 +46,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
   className,
   currencies,
   disabled = false,
+  disabledCurrencies,
   enableTokenSelect = false,
   error,
   id,
@@ -91,6 +93,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
               )
             }
             currencies={currencies}
+            disabledCurrencies={disabledCurrencies}
             onChange={onTokenChange}
             showIcon={showIcon}
             value={_token}
@@ -104,7 +107,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         )}
       />
     );
-  }, [showToken, enableTokenSelect, tokenPosition, showIcon, currencies, onTokenChange, _token]);
+  }, [showToken, enableTokenSelect, tokenPosition, showIcon, currencies, onTokenChange, _token, disabledCurrencies]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);

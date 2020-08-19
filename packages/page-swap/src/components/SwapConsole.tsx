@@ -1,4 +1,4 @@
-import React, { FC, memo, useContext, ReactElement, ReactNode, useCallback, useMemo } from 'react';
+import React, { FC, useContext, ReactElement, ReactNode, useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
@@ -20,6 +20,7 @@ interface InputAreaProps {
   addon?: ReactNode;
   error: any;
   title: string;
+  disabledCurrencies?: (CurrencyId | string)[];
   currencies: (CurrencyId | string)[];
   token: CurrencyLike;
   onTokenChange: CurrencyChangeFN;
@@ -33,6 +34,7 @@ interface InputAreaProps {
 const InputArea: FC<InputAreaProps> = ({
   addon,
   currencies,
+  disabledCurrencies,
   error,
   inputName,
   maxInput,
@@ -67,6 +69,7 @@ const InputArea: FC<InputAreaProps> = ({
       <BalanceInput
         className={classes.input}
         currencies={currencies}
+        disabledCurrencies={disabledCurrencies}
         enableTokenSelect
         error={error}
         name={inputName}
@@ -99,7 +102,7 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
   );
 }
 
-export const SwapConsole: FC = memo(() => {
+export const SwapConsole: FC = () => {
   const {
     calcSupply,
     calcTarget,
@@ -205,6 +208,7 @@ export const SwapConsole: FC = memo(() => {
           <div className={classes.inputFieldsInner}>
             <InputArea
               currencies={supplyCurrencies}
+              disabledCurrencies={[pool.targetCurrency]}
               error={form.errors.supply}
               inputName='supply'
               maxInput={maxSupplyInput}
@@ -218,6 +222,7 @@ export const SwapConsole: FC = memo(() => {
             <SwapBtn onClick={onSwap} />
             <InputArea
               currencies={targetCurrencies}
+              disabledCurrencies={[pool.supplyCurrency]}
               error={form.errors.target}
               inputName='target'
               onChange={onTargetChange}
@@ -228,7 +233,7 @@ export const SwapConsole: FC = memo(() => {
             />
           </div>
           <div className={classes.addon}>
-            <p>Dex Price</p>
+            <p>Price:</p>
             <DexExchangeRate
               supply={pool.supplyCurrency}
               supplyAmount={form.values.supply as number}
@@ -258,6 +263,4 @@ export const SwapConsole: FC = memo(() => {
       <SlippageInputArea />
     </Card>
   );
-});
-
-SwapConsole.displayName = 'SwapConsole';
+};

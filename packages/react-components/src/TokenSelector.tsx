@@ -1,15 +1,19 @@
-import React, { FC, memo, useEffect, useState, ReactNode } from 'react';
+import React, { FC, useEffect, useState, useCallback } from 'react';
 import clsx from 'clsx';
 import { noop } from 'lodash';
 
+import { Menu, Dropdown } from 'antd';
+
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useApi, useConstants } from '@acala-dapp/react-hooks';
-import { Dropdown, DropdownConfig } from '@acala-dapp/ui-components';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { ArrowDownIcon } from '@acala-dapp/ui-components';
 
-import { Token } from './Token';
+import { Token, TokenImage, TokenName } from './Token';
 import { getCurrencyIdFromName, tokenEq } from './utils';
 import { CurrencyChangeFN } from './types';
+import classes from './TokenSelector.module.scss';
+import { UserAssetBalance } from './Assets';
 
 interface Props extends BareProps {
   currencies?: CurrencyLike[];
@@ -20,9 +24,9 @@ interface Props extends BareProps {
   showDetail?: boolean;
 }
 
-export const TokenSelector: FC<Props> = memo(({
-  className,
+export const TokenSelector: FC<Props> = ({
   currencies,
+  disabledCurrencies,
   onChange = noop,
   value,
   showIcon
@@ -30,6 +34,15 @@ export const TokenSelector: FC<Props> = memo(({
   const { api } = useApi();
   const [_currencies, setCurrencies] = useState<(CurrencyLike)[]>([]);
   const { allCurrencies } = useConstants();
+  const [visible, setVisible] = useState<boolean>(false);
+
+  const _onChange = useCallback((currency: CurrencyLike) => {
+    if (onChange) {
+      onChange(currency);
+    }
+
+    setVisible(false);
+  }, [onChange]);
 
   // format currencies and set default vlaue if need
   useEffect(() => {
@@ -39,11 +52,7 @@ export const TokenSelector: FC<Props> = memo(({
     } else {
       // try to convert string to CurrencyId
       const result = currencies.map((item: CurrencyLike): CurrencyLike => {
-        if (typeof item === 'string') {
-          return getCurrencyIdFromName(api, item);
-        }
-
-        return item;
+        return typeof item === 'string' ? getCurrencyIdFromName(api, item) : item;
       });
 
       setCurrencies(result);
@@ -54,32 +63,63 @@ export const TokenSelector: FC<Props> = memo(({
     return null;
   }
 
-  const config: DropdownConfig[] = _currencies.map((currency: CurrencyLike) => ({
-    /* eslint-disable-next-line react/display-name */
-    render: (): ReactNode => {
-      return (
-        <Token
-          currency={currency}
-          icon={showIcon}
-        />
-      );
-    },
-    value: currency
-  }));
+  const menu = (
+    <Menu>
+      {
+        _currencies.map((currency) => {
+          return (
+            <Menu.Item
+              className={
+                clsx(
+                  classes.item,
+                  {
+                    [classes.active]: tokenEq(currency, value || '')
+                  }
+                )
+              }
+              disabled={disabledCurrencies ? !!disabledCurrencies.find((item): boolean => tokenEq(item, currency)) : false}
+              key={currency.toString()}
+              onClick={(): void => _onChange(currency)}
+            >
+              <TokenImage
+                className={classes.tokenImage}
+                currency={currency}
+              />
+              <div className={classes.tokenDetail}>
+                <TokenName
+                  className={classes.tokenName}
+                  currency={currency}
+                />
+                <UserAssetBalance
+                  className={classes.assetBalance}
+                  currency={currency} />
+              </div>
+            </Menu.Item>
+          );
+        })
+      }
+    </Menu>
+  );
 
   return (
     <Dropdown
-      className={
-        clsx(
-          className
-        )
-      }
-      compareFN={tokenEq}
-      config={config}
-      onChange={onChange}
-      value={value}
-    />
+      onVisibleChange={setVisible}
+      overlay={menu}
+      trigger={['click']}
+      visible={visible}
+    >
+      <div className={classes.selected}>
+        {
+          value ? (
+            <Token
+              className={classes.token}
+              currency={value}
+              icon={showIcon}
+            />
+          ) : null
+        }
+        <ArrowDownIcon className={classes.arrow} />
+      </div>
+    </Dropdown>
   );
-});
-
-TokenSelector.displayName = 'TokenSelector';
+};
