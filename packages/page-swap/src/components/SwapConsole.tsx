@@ -93,7 +93,6 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
   return (
     <IconButton
       className={classes.swapBtn}
-      color='primary'
       icon='swap'
       onClick={onClick}
       size='large'

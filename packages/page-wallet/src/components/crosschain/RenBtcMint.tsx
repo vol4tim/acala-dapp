@@ -104,7 +104,6 @@ const InputStep: FC = () => {
       <div className={classes.actionArea}>
         <Button
           className={classes.nextBtn}
-          color='primary'
           disabled={isDisabled}
           onClick={handleNext}
         >
@@ -188,7 +187,6 @@ const ConfirmStep: FC = () => {
         </Button>
         <Button
           className={classes.nextBtn}
-          color='primary'
           onClick={handleNext}
         >
           Confirm

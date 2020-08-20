@@ -41,7 +41,6 @@ export const Guide: FC = () => {
       />
       <GuideBG className={classes.guideBg} />
       <Button
-        color='primary'
         onClick={handleStart}
         size='small'
       >
@@ -113,7 +112,6 @@ export const Overview: FC = () => {
 
         return (
           <Button
-            color='primary'
             onClick={handleClick}
             size='small'
           >

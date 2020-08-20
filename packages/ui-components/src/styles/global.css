@@ -9,6 +9,13 @@ html, body {
   font-weight: 400;
 }
 
+button {
+  border: none;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+}
+
 p, ul {
   margin: 0;
   padding: 0;
@@ -37,6 +44,7 @@ p, span {
   --color-red: #e02020;
   --color-yellow: #f0fa41;
   --color-white: #ffffff;
+  --color-gray: #cccccc;
 
   --color-success: var(--color-green);
   --color-error: var(--color-red);

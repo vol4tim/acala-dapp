@@ -90,7 +90,6 @@ const BtcAddressContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
       <Grid item>
         <Button
           className={classes.btn}
-          color='primary'
           onClick={handleNext}
         >
           Get test renBTC from Faucet
@@ -157,7 +156,6 @@ const SuccessContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
       <Grid item>
         <Button
           className={classes.btn}
-          color='primary'
           onClick={handleNext}
         >
           Return

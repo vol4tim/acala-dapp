@@ -227,6 +227,8 @@ export const TransferModal: FC<TransferModalProps> = ({
           <Button
             onClick={onClose}
             size='small'
+            style='normal'
+            type='border'
           >
               Close
           </Button>

@@ -71,25 +71,26 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       return;
     }
 
-    const checkExtrinsicFee = (signedTx: SubmittableExtrinsic<'rxjs'>): Observable<SubmittableExtrinsic<'rxjs'>> => {
-      return signedTx.paymentInfo(active.address).pipe(
-        switchMap((result) => {
-          console.log('???')
-          console.log(result);
+    // const checkExtrinsicFee = (signedTx: SubmittableExtrinsic<'rxjs'>): Observable<SubmittableExtrinsic<'rxjs'>> => {
+    //   return signedTx.paymentInfo(active.address).pipe(
+    //     switchMap((result) => {
+    //       console.log('???')
+    //       console.log(result);
 
-          return signedTx;
-        })
-      );
-    };
+    //       return signedTx;
+    //     })
+    //   );
+    // };
 
     const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => api.query.system.account<AccountInfo>(active.address).pipe(
+      take(1),
       map((account) => {
         const _params = isFunction(params) ? params() : params;
 
         return [account, _params] as [AccountInfo, any[]];
       }),
       // switchMap(([account, params]) => {
-      //   console.log(section, method, params);
+      //   console.log(api.tx[section][method](...params).toString());
 
       //   return api.tx[section][method](...params).paymentInfo(active.address).pipe(
       //     map((result) => {
@@ -103,8 +104,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
           active.address,
           { nonce: account.nonce.toNumber() }
         );
-      }),
-      take(1)
+      })
     );
 
     const notify = (signedTx: SubmittableExtrinsic<'rxjs'>): [SubmittableExtrinsic<'rxjs'>, string] => {
@@ -261,7 +261,6 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   return (
     <Button
       className={className}
-      color='primary'
       disabled={disabled || isSending}
       loading={isSending}
       onClick={onClick}

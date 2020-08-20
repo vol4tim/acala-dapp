@@ -156,7 +156,6 @@ export const BalanceInput: FC<BalanceInputProps> = ({
       <Condition condition={showMaxBtn}>
         <Button
           className={classes.maxBtn}
-          color='primary'
           onClick={onMax}
           type='ghost'
         >

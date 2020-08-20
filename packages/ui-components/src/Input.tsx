@@ -70,7 +70,6 @@ export const Input: FC<InputProps> = forwardRef<HTMLDivElement, InputProps>(({
       <Condition condition={showMaxBtn}>
         <Button
           className={classes.maxBtn}
-          color='primary'
           onClick={onMax}
           type='ghost'
         >

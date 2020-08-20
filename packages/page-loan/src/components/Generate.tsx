@@ -173,7 +173,6 @@ export const Generate: FC = () => {
           Prev
         </Button>
         <Button
-          color='primary'
           disabled={isDisabled}
           onClick={handleNext}
           size='small'

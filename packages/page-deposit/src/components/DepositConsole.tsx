@@ -25,6 +25,7 @@ interface InputAreaProps {
   onChange: (value: number | string) => void;
   token: CurrencyLike;
   onTokenChange?: CurrencyChangeFN;
+  onMax?: () => void;
   maxValue?: number;
   showMax?: boolean;
 }
@@ -36,18 +37,12 @@ const InputArea: FC<InputAreaProps> = ({
   id,
   name,
   onChange,
+  onMax,
   onTokenChange,
   showMax = true,
   token,
   value
 }) => {
-  const balance = useBalance(token);
-  const handleMax = useCallback(() => {
-    if (!onChange || !balance) return;
-
-    onChange(balance.toNumber());
-  }, [onChange, balance]);
-
   return (
     <div className={classes.inputAreaRoot}>
       <div className={classes.inputAreaTitle}>
@@ -62,7 +57,7 @@ const InputArea: FC<InputAreaProps> = ({
         id={id}
         name={name}
         onChange={onChange}
-        onMax={handleMax}
+        onMax={onMax}
         onTokenChange={onTokenChange}
         showMaxBtn={showMax}
         token={token}
@@ -98,8 +93,10 @@ export const DepositConsole: FC = () => {
     onSubmit: noop,
     validate: validator
   });
+  const baseBalance = useBalance(baseCurrencyId);
+  const otherBalance = useBalance(otherCurrency);
 
-  const handleOtherInput = (_value: number | string): void => {
+  const handleOtherInput = useCallback((_value: number | string): void => {
     const value = Number(_value);
 
     nextTick(() => {
@@ -108,9 +105,9 @@ export const DepositConsole: FC = () => {
         other: value
       });
     });
-  };
+  }, [form, rate]);
 
-  const handleBaseInput = (_value: number | string): void => {
+  const handleBaseInput = useCallback((_value: number | string): void => {
     const value = Number(_value);
 
     nextTick(() => {
@@ -119,21 +116,41 @@ export const DepositConsole: FC = () => {
         other: Fixed18.fromNatural(value).div(rate).toNumber()
       });
     });
-  };
+  }, [form, rate]);
 
-  const handleSuccess = (): void => {
+  const handleSuccess = useCallback((): void => {
     // reset form
     form.resetForm();
-  };
+  }, [form]);
 
-  const handleOtherCurrencyChange = (currency: CurrencyId): void => {
+  const handleOtherCurrencyChange = useCallback((currency: CurrencyId): void => {
     setOtherCurrency(currency);
 
     // reset form
     form.resetForm();
-  };
+  }, [setOtherCurrency, form]);
 
-  const checkDisabled = (): boolean => {
+  const handleMax = useCallback(() => {
+    // base amount calculate from other
+    const other2Base = otherBalance.mul(rate);
+    const base2Other = baseBalance.div(rate);
+
+    if (other2Base.isGreaterThan(baseBalance)) {
+      form.setValues({
+        base: baseBalance.toNumber(),
+        other: base2Other.toNumber()
+      });
+    }
+
+    if (base2Other.isGreaterThan(otherBalance)) {
+      form.setValues({
+        base: other2Base.toNumber(),
+        other: otherBalance.toNumber()
+      });
+    }
+  }, [otherBalance, baseBalance, form, rate]);
+
+  const checkDisabled = useCallback((): boolean => {
     if (!(form.values.base && form.values.other)) {
       return true;
     }
@@ -143,7 +160,7 @@ export const DepositConsole: FC = () => {
     }
 
     return false;
-  };
+  }, [form]);
 
   return (
     <Card>
@@ -154,6 +171,7 @@ export const DepositConsole: FC = () => {
           id={'other'}
           name={'other'}
           onChange={handleOtherInput}
+          onMax={handleMax}
           onTokenChange={handleOtherCurrencyChange}
           token={otherCurrency}
           value={form.values.other as number}
@@ -165,6 +183,7 @@ export const DepositConsole: FC = () => {
           id={'base'}
           name={'base'}
           onChange={handleBaseInput}
+          onMax={handleMax}
           token={baseCurrencyId}
           value={form.values.base as number}
         />

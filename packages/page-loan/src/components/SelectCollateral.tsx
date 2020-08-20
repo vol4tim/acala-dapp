@@ -158,7 +158,6 @@ export const SelectCollateral: FC = () => {
           Cancel
         </Button>
         <Button
-          color='primary'
           disabled={isNextDisabled}
           onClick={handleNext}
           size='small'

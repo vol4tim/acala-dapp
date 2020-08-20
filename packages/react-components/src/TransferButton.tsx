@@ -21,7 +21,6 @@ export const TransferButton: FC<Props> = memo(({
     <>
       <Button
         className={className}
-        color='primary'
         onClick={toggle}
         size='small'
       >

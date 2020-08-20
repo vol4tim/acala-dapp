@@ -55,7 +55,6 @@ export const Dialog: FC<Props> = ({
         ) : null}
         {onConfirm ? (
           <Button
-            color='primary'
             onClick={onConfirm}
             size='small'
           >
