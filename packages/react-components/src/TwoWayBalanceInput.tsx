@@ -164,7 +164,7 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
           <SwitchIcon />
         </div>
       </Condition>
-      <div>
+      <div className={classes.inputContainer}>
         <div className={classes.inputArea}>
           <BalanceInput
             border={false}

@@ -20,21 +20,21 @@ export const AllMarkets: FC = () => {
           icon
         />
       ),
-      title: 'Token Pair',
+      title: 'Pool',
       width: 1
     },
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => <DexExchangeRate supply={token} />,
-      title: 'Dex Price',
+      title: 'Exchange Rate',
       width: 3
     },
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
       render: (token: string | CurrencyId): ReactNode => <DexPoolSize token={token} />,
-      title: 'Pool Size',
+      title: 'Liquidity',
       width: 3
     }
   ];

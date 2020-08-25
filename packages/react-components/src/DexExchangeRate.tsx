@@ -24,6 +24,14 @@ function convertPool (pool: DerivedDexPool): { base: Fixed18; other: Fixed18 } {
   };
 }
 
+function convertInfinityToZero (value: Fixed18): Fixed18 {
+  if (!value.isFinity()) {
+    return Fixed18.ZERO;
+  }
+
+  return value;
+}
+
 export const DexExchangeRate: FC<Props> = memo(({
   supply,
   supplyAmount = 1,
@@ -69,7 +77,7 @@ export const DexExchangeRate: FC<Props> = memo(({
               currency: supply
             },
             {
-              balance: ratio.div(_supplyAmount),
+              balance: convertInfinityToZero(ratio.div(_supplyAmount)),
               currency: _target
             }
           ] : [
@@ -78,7 +86,7 @@ export const DexExchangeRate: FC<Props> = memo(({
               currency: _target
             },
             {
-              balance: _supplyAmount.div(ratio),
+              balance: convertInfinityToZero(_supplyAmount.div(ratio)),
               currency: supply
             }
           ]

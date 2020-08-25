@@ -13,7 +13,7 @@
     margin-top: 24px;
 
     .title {
-    margin-bottom: 16px;
+      margin-bottom: 16px;
       font-size: 22px;
       font-weight: bold;
     }
@@ -27,6 +27,11 @@
       justify-content: space-between;
       padding: 8px 0;
       font-size: 18px;
+      cursor: pointer;
+
+      &:hover {
+        background-image: linear-gradient(90deg, #E5EAFF 0%, #F5F6FA 100%);
+      }
     }
   }
 }

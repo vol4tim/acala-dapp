@@ -85,11 +85,11 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
           map((result) => {
             console.log(result.toString());
           }),
-          map(() => [account, params]),
+          map(() => [account, params] as [AccountInfo, any[]]),
           catchError((error) => {
             console.log(error);
 
-            return of([account, params]);
+            return of([account, params] as [AccountInfo, any[]]);
           })
         );
       }),

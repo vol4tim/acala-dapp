@@ -1,11 +1,11 @@
-import React, { FC, memo, useState, useContext, useCallback } from 'react';
+import React, { FC, memo, useState, useContext, useCallback, useMemo } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
 import { Vec } from '@polkadot/types';
 import { Card } from '@acala-dapp/ui-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { BalanceInput, TxButton, numToFixed18Inner, DexPoolSize, DexUserShare, BalanceInputProps } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, numToFixed18Inner, DexPoolSize, DexUserShare, BalanceInputProps, getTokenName } from '@acala-dapp/react-components';
 import { useFormValidator, useDexShare } from '@acala-dapp/react-hooks';
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
@@ -13,7 +13,6 @@ import { DepositContext } from './Provider';
 import { ReactComponent as RightArrowIcon } from '../assets/right-arrow.svg';
 import classes from './Withdraw.module.scss';
 import { AccountDexTokens } from './AccountDexTokens';
-import { useDexWithdrawShare } from './useDexWithdrawShare';
 
 interface InputAreaProps {
   error?: BalanceInputProps['error'];
@@ -77,8 +76,17 @@ export const WithdrawConsole: FC = memo(() => {
   const { share } = useDexShare(otherCurrency);
   const validator = useFormValidator({
     share: {
-      max: share ? convertToFixed18(share).toNumber() : 0,
-      min: 0,
+      custom: (value: number): string | undefined => {
+        const _share = convertToFixed18(share || Fixed18.ZERO);
+
+        if (_share.isZero()) {
+          return `No Shares In ${getTokenName(otherCurrency)} Liqiidity Pool`;
+        }
+
+        if (Fixed18.fromNatural(value).isGreaterThan(_share)) {
+          return 'Input Shares Is Greater Than Owned';
+        }
+      },
       type: 'number'
     }
   });
@@ -90,16 +98,13 @@ export const WithdrawConsole: FC = memo(() => {
     validate: validator
   });
 
-  const withdrawTokens = useDexWithdrawShare(otherCurrency, form.values.share);
-  const _withdrawToken = withdrawTokens.map((item) => ({ balance: item.balance.toNumber(), currency: item.currency.toString() }));
-
-  const checkDisabled = (): boolean => {
+  const isDisabled = useMemo((): boolean => {
     if (form.values.share && !form.errors.share) {
       return false;
     }
 
     return true;
-  };
+  }, [form]);
 
   const handleSuccess = useCallback((): void => {
     form.resetForm();
@@ -147,7 +152,7 @@ export const WithdrawConsole: FC = memo(() => {
         </div>
         <TxButton
           className={classes.txBtn}
-          disabled={checkDisabled()}
+          disabled={isDisabled}
           method='withdrawLiquidity'
           onExtrinsicSuccess={handleSuccess}
           params={[otherCurrency, numToFixed18Inner(form.values.share)]}

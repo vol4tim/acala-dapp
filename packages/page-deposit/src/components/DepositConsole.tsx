@@ -137,15 +137,15 @@ export const DepositConsole: FC = () => {
 
     if (other2Base.isGreaterThan(baseBalance)) {
       form.setValues({
-        base: baseBalance.toNumber(),
-        other: base2Other.toNumber()
+        base: baseBalance.toString(18, 3),
+        other: base2Other.toString(18, 3)
       });
     }
 
     if (base2Other.isGreaterThan(otherBalance)) {
       form.setValues({
-        base: other2Base.toNumber(),
-        other: otherBalance.toNumber()
+        base: other2Base.toString(18, 3),
+        other: otherBalance.toString(18, 3)
       });
     }
   }, [otherBalance, baseBalance, form, rate]);

@@ -12,7 +12,7 @@ import { SwitchIcon, Condition } from '@acala-dapp/ui-components';
 import classes from './BalanceAmountInput.module.scss';
 import { BalanceInput } from './BalanceInput';
 import { TokenName } from './Token';
-import { FormatFixed18 } from './format';
+import { FormatFixed18, FormatValue } from './format';
 
 type InputType = 'balance' | 'amount';
 
@@ -96,7 +96,7 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   const handleBalanceMax = useCallback(() => {
     if (!balance) return;
 
-    form.setFieldValue('balance', convertToFixed18(balance).toNumber());
+    form.setFieldValue('balance', convertToFixed18(balance).toString(18, 3));
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [balance]);
 
@@ -176,10 +176,7 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
             value={form.values.balance}
           />
           <div className={classes.amountDisplay}>
-            <FormatFixed18
-              data={displayAmount}
-              prefix='≈ US$'
-            />
+            <FormatValue data={displayAmount} />
             <TokenName currency={stableCurrency} />
           </div>
         </Condition>

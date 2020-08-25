@@ -30,7 +30,7 @@ export const DexPoolSize: FC<Props> = ({ token }) => {
           currency: dexBaseCurrency
         }
       ]}
-      pairSymbol='/'
+      pairSymbol='+'
     />
   );
 };

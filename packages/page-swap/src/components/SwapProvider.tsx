@@ -7,7 +7,7 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18, calcTargetInOtherToBase, convertToFixed18, calcTargetInBaseToOther, calcTargetInOtherToOther, calcSupplyInOtherToBase, calcSupplyInBaseToOther, calcSupplyInOtherToOther } from '@acala-network/app-util';
 import { DerivedDexPool } from '@acala-network/api-derive';
 
-import { useApi, useConstants, useInitialize } from '@acala-dapp/react-hooks';
+import { useApi, useConstants, useInitialize, useDexPool } from '@acala-dapp/react-hooks';
 import { tokenEq } from '@acala-dapp/react-components';
 import { PageLoading } from '@acala-dapp/ui-components';
 
@@ -24,8 +24,8 @@ interface ContextData {
   supplyCurrencies: (CurrencyId | string)[];
   targetCurrencies: (CurrencyId | string)[];
 
-  calcSupply: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number) => Observable<number>;
-  calcTarget: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number) => Observable<number>;
+  calcSupply: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number | string, slippage?: number | string) => Observable<number | string>;
+  calcTarget: (supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number | string, slippage?: number | string) => Observable<number | string>;
 
   setCurrency: (target: CurrencyId, other: CurrencyId, callback?: (pool: PoolData) => void) => void;
   pool: PoolData;
@@ -132,7 +132,7 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
     }
   }, [api.derive, dexBaseCurrency, setPool]);
 
-  const calcSupply = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number, slippage?: number): Observable<number> => {
+  const calcSupply = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, target: number | string, slippage?: number | string): Observable<number | string> => {
     // reload supply pool and target pool
     return combineLatest([
       (api.derive as any).dex.pool(supplyCurrency) as Observable<DerivedDexPool>,
@@ -148,14 +148,14 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
             convertPool(supplyPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
           return calcSupplyInBaseToOther(
             Fixed18.fromNatural(target),
             convertPool(targetPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
           // other to other
           return calcSupplyInOtherToOther(
@@ -164,7 +164,7 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
             convertPool(targetPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         }
 
         return 0;
@@ -173,7 +173,7 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
     );
   }, [api.derive, dexBaseCurrency, feeRate]);
 
-  const calcTarget = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number, slippage?: number): Observable<number> => {
+  const calcTarget = useCallback((supplyCurrency: CurrencyId, targetCurrency: CurrencyId, supply: number | string, slippage?: number | string): Observable<number | string> => {
     // reload supply pool and target pool
     return combineLatest([
       (api.derive as any).dex.pool(supplyCurrency) as Observable<DerivedDexPool>,
@@ -189,14 +189,14 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
             convertPool(supplyPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         } else if (supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
           return calcTargetInBaseToOther(
             Fixed18.fromNatural(supply),
             convertPool(targetPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         } else if (!supplyCurrency.eq(dexBaseCurrency) && !targetCurrency.eq(dexBaseCurrency)) {
           // other to other
           return calcTargetInOtherToOther(
@@ -205,7 +205,7 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
             convertPool(targetPool),
             convertToFixed18(feeRate),
             Fixed18.fromNatural(slippage || 0)
-          ).toNumber();
+          ).toString(18, 3);
         }
 
         return 0;

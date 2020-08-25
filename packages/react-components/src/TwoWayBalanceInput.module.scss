@@ -32,6 +32,10 @@
     }
   }
 
+  .inputContainer {
+    flex: 1;
+  }
+
   .inputArea {
     height: 59.5px;
     border-bottom: 1px solid #E9E9E9;
@@ -41,14 +45,16 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
     height: 58.5px;
+    padding-left: 16px;
 
+    color: var(--text-color-second); 
     font-size: 24px;
     line-height: 29px;
-    color: #666666;
 
     > .token {
+      width: 160px;
+      padding: 0 12px;
       display: flex;
       align-items: center;
     }
@@ -56,13 +62,12 @@
     .tokenName {
       font-size: 24px;
       line-height: 29px;
-      color: var(--text-color-primary);
     }
 
     .tokenImage {
       width: 24px;
       line-height: 24px;
-      margin: 0 16px;
+      margin-right: 16px;
     }
   }
 }

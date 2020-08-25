@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button } from '@acala-dapp/ui-components';
+import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition } from '@acala-dapp/ui-components';
 import { useModal, useConstants, useAccounts } from '@acala-dapp/react-hooks';
 
 import { getTokenName, tokenEq, numToFixed18Inner } from './utils';
@@ -223,7 +223,7 @@ export const TransferModal: FC<TransferModalProps> = ({
   return (
     <Dialog
       action={
-        <>
+        <Condition condition={!selectCurrencyStatus}>
           <Button
             onClick={onClose}
             size='small'
@@ -242,7 +242,7 @@ export const TransferModal: FC<TransferModalProps> = ({
           >
               Confirm
           </TxButton>
-        </>
+        </Condition>
       }
       onCancel={onClose}
       title={renderHeader()}

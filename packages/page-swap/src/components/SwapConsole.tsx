@@ -25,7 +25,7 @@ interface InputAreaProps {
   token: CurrencyLike;
   onTokenChange: CurrencyChangeFN;
   value: number;
-  onChange: (value: number) => void;
+  onChange: (value: number | string) => void;
   inputName: string;
   showMax?: boolean;
   maxInput?: Fixed18;
@@ -48,7 +48,7 @@ const InputArea: FC<InputAreaProps> = ({
   const handleMax = useCallback(() => {
     if (!onChange || !maxInput) return;
 
-    onChange(maxInput.toNumber());
+    onChange(maxInput.toString(18, 3));
   }, [maxInput, onChange]);
 
   return (
@@ -117,11 +117,23 @@ export const SwapConsole: FC = () => {
   const validator = useFormValidator({
     supply: {
       currency: pool.supplyCurrency,
-      max: pool.supplySize,
-      min: 0,
+      custom: (value: string | number): string | undefined => {
+        if (!value) return;
+
+        if (Fixed18.fromNatural(value).isGreaterThan(Fixed18.fromNatural(pool.supplySize))) {
+          return 'Liquidity Pool Has No Enough Balance';
+        }
+      },
       type: 'balance'
     },
     target: {
+      custom: (value: string | number): string | undefined => {
+        if (!value) return;
+
+        if (Fixed18.fromNatural(value).isGreaterThan(Fixed18.fromNatural(pool.targetSize))) {
+          return 'Liquidity Pool Has No Enough Balance';
+        }
+      },
       max: pool.targetSize,
       min: 0,
       type: 'number'
@@ -142,7 +154,7 @@ export const SwapConsole: FC = () => {
     form.resetForm();
   }, [setCurrency, pool.targetCurrency, pool.supplyCurrency, form]);
 
-  const onSupplyChange = useCallback((value: number): void => {
+  const onSupplyChange = useCallback((value: number | string): void => {
     calcTarget(pool.supplyCurrency, pool.targetCurrency, value).subscribe((target) => {
       nextTick(() => form.setFieldValue('target', target));
     });
@@ -150,7 +162,7 @@ export const SwapConsole: FC = () => {
     nextTick(() => form.setFieldValue('supply', value));
   }, [calcTarget, pool.supplyCurrency, pool.targetCurrency, form]);
 
-  const onTargetChange = useCallback((value: number): void => {
+  const onTargetChange = useCallback((value: number | string): void => {
     calcSupply(pool.supplyCurrency, pool.targetCurrency, value).subscribe((supply) => {
       nextTick(() => form.setFieldValue('supply', supply));
     });
@@ -242,13 +254,13 @@ export const SwapConsole: FC = () => {
         </div>
         <TxButton
           className={classes.txBtn}
-          color={priceImpact > 0.05 ? 'danger' : 'primary'}
           disabled={isDisabled}
           method='swapCurrency'
           onExtrinsicSuccess={form.resetForm}
           params={params}
           section='dex'
           size='large'
+          style={priceImpact > 0.05 ? 'danger' : 'primary'}
         >
           {priceImpact > 0.05 ? 'Swap Anyway' : 'Swap'}
         </TxButton>

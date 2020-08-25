@@ -1,4 +1,4 @@
-import React, { FC, useCallback, CSSProperties } from 'react';
+import React, { FC, useCallback } from 'react';
 import { Drawer } from 'antd';
 
 import { useSetting } from '@acala-dapp/react-hooks';
@@ -37,12 +37,14 @@ export const AppSettings: FC = () => {
             {
               DEFAULT_ENDPOINTS.map((config) => {
                 return (
-                  <li className={classes.listItem}
-                    key={`endpoint-${config.url}`}>
+                  <li
+                    className={classes.listItem}
+                    key={`endpoint-${config.url}`}
+                    onClick={(): void => handleEndpoint(config.url)}
+                  >
                     <div>{config.name}</div>
                     <Radio
                       checked={endpoint === config.url}
-                      onClick={(): void => handleEndpoint(config.url)}
                     />
                   </li>
                 );

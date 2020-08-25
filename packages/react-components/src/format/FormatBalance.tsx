@@ -48,7 +48,7 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
     return [
       <span key={'format-balance-' + index}>
         <FormatNumber
-          data={_balance}
+          data={_balance.isFinity() ? _balance : 0}
           formatNumberConfig={{ ...formatBalanceConfig, decimalLength }}
         />
         {data.currency ? <span>{' '}{getTokenName(data.currency)}</span> : null}

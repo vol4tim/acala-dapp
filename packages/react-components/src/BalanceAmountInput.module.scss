@@ -6,6 +6,7 @@
   border-radius: 2px;
   display: grid;
   grid-template-columns: 64px calc(100% - 64px);
+  transition: all 200ms 0 cubic-bezier(0.23, 1, 0.320, 1);
 
   &:hover, &.focused {
     border-color: var(--color-primary);
@@ -26,6 +27,7 @@
     height: 48px !important;
     border-bottom: 1px solid #E9E9E9 !important;
     font-size: 16px !important;
+
     input {
       height: 46px !important;
     }
@@ -40,7 +42,7 @@
 
     font-size: 16px;
     line-height: 19px;
-    color: var(--text-color-primary);
+    color: var(--text-color-second);
   }
 
   .amountInput {
@@ -53,6 +55,7 @@
   .balanceDisplay {
     padding-left: 0 !important;
     height: 46px !important;
+    color: var(--text-color-second);
     border: none;
 
     & > input:disabled {
