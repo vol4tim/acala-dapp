@@ -75,6 +75,8 @@ export const AccountProvider: FC<Props> = memo(({
   }, [applicationName]);
 
   const setActiveAccount = useCallback(async (account: InjectedAccountWithMeta): Promise<void> => {
+    if (!api) return;
+
     try {
       const injector = await web3FromAddress(account.address);
 

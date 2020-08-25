@@ -82,9 +82,9 @@ export const useLoanHelper = (currency: CurrencyLike, account?: AccountLike): Lo
 
     return new LoanHelper({
       collateralPrice: loanCurrencyPrice,
-      collaterals: loan.collaterals,
+      collaterals: loan.collateral,
       debitExchangeRate: type.debitExchangeRate,
-      debits: loan.debits,
+      debits: loan.debit,
       expectedBlockTime: type.expectedBlockTime.toNumber(),
       globalStableFee: type.globalStabilityFee,
       liquidationRatio: type.liquidationRatio,

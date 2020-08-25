@@ -126,5 +126,9 @@ export function useFormValidator<T extends any> (_config: Config): (values: T) =
     return (): object => ({ global: "can't get user address" });
   }
 
+  if (!api) {
+    return (): object => ({ global: "can't connect endpoint" });
+  }
+
   return getFormValidator<T>(_config, api, active);
 }

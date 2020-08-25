@@ -1,7 +1,7 @@
 import React, { FC, PropsWithChildren, useState, useCallback } from 'react';
 import { isFunction, uniqueId } from 'lodash';
 import { Observable, of } from 'rxjs';
-import { switchMap, map, timeout, finalize, take } from 'rxjs/operators';
+import { switchMap, map, timeout, finalize, take, catchError } from 'rxjs/operators';
 
 import { SubmittableResult } from '@polkadot/api';
 import { ITuple, ISubmittableResult } from '@polkadot/types/types';
@@ -71,17 +71,6 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       return;
     }
 
-    // const checkExtrinsicFee = (signedTx: SubmittableExtrinsic<'rxjs'>): Observable<SubmittableExtrinsic<'rxjs'>> => {
-    //   return signedTx.paymentInfo(active.address).pipe(
-    //     switchMap((result) => {
-    //       console.log('???')
-    //       console.log(result);
-
-    //       return signedTx;
-    //     })
-    //   );
-    // };
-
     const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => api.query.system.account<AccountInfo>(active.address).pipe(
       take(1),
       map((account) => {
@@ -89,17 +78,24 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
 
         return [account, _params] as [AccountInfo, any[]];
       }),
-      // switchMap(([account, params]) => {
-      //   console.log(api.tx[section][method](...params).toString());
-
-      //   return api.tx[section][method](...params).paymentInfo(active.address).pipe(
-      //     map((result) => {
-      //       console.log(result);
-      //     }),
-      //     map(() => [account, params] as [AccountInfo, any[]])
-      //   );
-      // }),
       switchMap(([account, params]) => {
+        const signedExtrinsic = api.tx[section][method](...params);
+
+        return signedExtrinsic.paymentInfo(active.address).pipe(
+          map((result) => {
+            console.log(result.toString());
+          }),
+          map(() => [account, params]),
+          catchError((error) => {
+            console.log(error);
+
+            return of([account, params]);
+          })
+        );
+      }),
+      switchMap(([account, params]) => {
+        console.log(account);
+
         return api.tx[section][method](...params).signAsync(
           active.address,
           { nonce: account.nonce.toNumber() }
@@ -252,6 +248,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
             key: notificationKey,
             message: 'Submit Transaction Success'
           });
+
           subscriber.unsubscribe();
         }
       }

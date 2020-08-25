@@ -1,4 +1,4 @@
-import React, { ReactNode, FC, useState, useEffect, useContext } from 'react';
+import React, { ReactNode, FC, useState, useEffect, useContext, useCallback } from 'react';
 import { timeout } from 'rxjs/operators';
 
 import { ApiRx } from '@polkadot/api';
@@ -46,18 +46,16 @@ export const ApiProvider: FC<Props> = ({
   const [chain, setChain] = useState<string>('');
   const { endpoint } = useContext(SettingContext);
 
-  const renderContent = (): ReactNode => {
-    if (connectStatus.loading) {
+  const renderContent = useCallback((): ReactNode => {
+    if (connectStatus.loading && Loading) {
       return Loading || null;
     }
 
-    if (JSON.stringify(api) !== '{}') {
-      return children;
-    }
-  };
+    return children;
+  }, [connectStatus, Loading, children]);
 
   useEffect(() => {
-    if (api.isConnected || !endpoint || !endpoint.length) return;
+    if (!endpoint) return;
 
     // reset connect status
     setConnectStatus({ connected: false, error: false, loading: true });
@@ -76,12 +74,8 @@ export const ApiProvider: FC<Props> = ({
 
     return (): void => {
       subscriber.unsubscribe();
-
-      if (api.disconnect) {
-        api.disconnect();
-      }
     };
-  }, [api, endpoint]);
+  }, [endpoint]);
 
   useEffect(() => {
     if (!connectStatus.connected) return;
@@ -103,8 +97,6 @@ export const ApiProvider: FC<Props> = ({
     api.on('connected', () => {
       setConnectStatus({ connected: true, error: false, loading: false });
     });
-
-    return (): void => api.disconnect();
   }, [api, connectStatus]);
 
   return (

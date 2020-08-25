@@ -42,6 +42,7 @@ export function getTokenColor (token: CurrencyLike): string {
 }
 
 export function getTokenImage (token: CurrencyLike): string {
+
   return Reflect.get(ICON_IMAGES, token.toString().toLowerCase()) || '';
 }
 

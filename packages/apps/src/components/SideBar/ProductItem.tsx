@@ -6,7 +6,7 @@ import { Condition, Tooltip, UIContext, UIData } from '@acala-dapp/ui-components
 
 import classes from './Sidebar.module.scss';
 
-export const ProductItem: React.FC<SideBarItem & { showTitle?: boolean }> = memo(({ icon, isExternal, name, path, rel, showTitle = true, target }) => {
+export const ProductItem: React.FC<SideBarItem & { showTitle?: boolean }> = memo(({ icon, isExternal, name, onClick, path, rel, showTitle = true, target }) => {
   const search = window.location.search;
   const ui = useContext<UIData>(UIContext);
 
@@ -29,6 +29,27 @@ export const ProductItem: React.FC<SideBarItem & { showTitle?: boolean }> = memo
           </span>
         </Condition>
       </a>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <div
+        className={classes.item}
+        onClick={onClick}
+      >
+        <Tooltip
+          show={!showTitle}
+          title={name}
+        >
+          {cloneElement(icon)}
+        </Tooltip>
+        <Condition condition={showTitle}>
+          <span className={classes.title}>
+            {name}
+          </span>
+        </Condition>
+      </div>
     );
   }
 

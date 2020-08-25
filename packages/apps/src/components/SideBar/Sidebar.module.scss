@@ -57,9 +57,10 @@
   font-weight: 500;
   color: var(--color-primary);
   transition: all 200ms ease;
+  cursor: pointer;
 
-  & > svg {
-    margin-right: 13px;
+  .title {
+    margin-left: 13px;
   }
 
   &:hover {
@@ -96,7 +97,7 @@
 .wallet {
   color: #abb4d1;
 
-  .title {
+  .name {
     width: 160px;
     white-space: nowrap;
     text-overflow: ellipsis;

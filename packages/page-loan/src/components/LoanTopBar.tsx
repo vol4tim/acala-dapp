@@ -104,8 +104,8 @@ export const LoanTopBar: FC = () => {
       {
         filterEmptyLoan(loans).map((item) => (
           <LoanItem
-            key={`loan-top-bar-${item.token}`}
-            token={item.token}
+            key={`loan-top-bar-${item.currency}`}
+            token={item.currency}
           />
         ))
       }

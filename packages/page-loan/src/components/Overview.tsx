@@ -60,7 +60,7 @@ export const Overview: FC = () => {
   const tableConfig: TableConfig[] = [
     {
       align: 'left',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => (
         <Token
@@ -73,7 +73,7 @@ export const Overview: FC = () => {
     },
     {
       align: 'left',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => <StableFeeAPR currency={token} />,
       title: 'Interest Rate',
@@ -81,7 +81,7 @@ export const Overview: FC = () => {
     },
     {
       align: 'right',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => <Collateral currency={token} />,
       title: 'Deposit',
@@ -89,7 +89,7 @@ export const Overview: FC = () => {
     },
     {
       align: 'right',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => <DebitAmount currency={token} />,
       title: `Debit ${getTokenName(stableCurrency)}`,
@@ -97,7 +97,7 @@ export const Overview: FC = () => {
     },
     {
       align: 'right',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => <CollateralRate currency={token} />,
       title: 'Current Ratio',
@@ -105,7 +105,7 @@ export const Overview: FC = () => {
     },
     {
       align: 'right',
-      dataIndex: 'token',
+      dataIndex: 'currency',
       /* eslint-disable-next-line react/display-name */
       render: (token: CurrencyLike): ReactNode => {
         const handleClick = (): void => setCurrentTab(token);

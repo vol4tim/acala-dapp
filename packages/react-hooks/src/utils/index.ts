@@ -11,6 +11,6 @@ export const filterEmptyLoan = (loans: DerivedUserLoan[] | null): DerivedUserLoa
   }
 
   return loans.filter((item) => {
-    return !(item.collaterals.isEmpty && item.debits.isEmpty);
+    return !(item.collateral.isEmpty && item.debit.isEmpty);
   });
 };

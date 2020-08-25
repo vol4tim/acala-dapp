@@ -6,9 +6,11 @@ import { DerivedDexPool } from '@acala-network/api-derive';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 import { CurrencyId, OracleKey } from '@acala-network/types/interfaces';
 import { TimestampedValue } from '@open-web3/orml-types/interfaces';
+
+import { tokenEq, getValueFromTimestampValue } from '@acala-dapp/react-components';
+
 import { BaseRxStore } from './base';
 import { PriceData, StakingPoolWithHelper } from './type';
-import { tokenEq, getValueFromTimestampValue } from '../utils';
 
 type SubscribeCallbackFN = (result: PriceData[]) => void;
 

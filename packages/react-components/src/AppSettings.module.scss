@@ -1,0 +1,32 @@
+.root {
+  :global(.ant-drawer-body) {
+    overflow: hidden;
+  }
+
+  :global(.ant-drawer-content-wrapper) {
+    border-top-right-radius: 16px;
+    border-bottom-right-radius: 16px;
+    overflow: hidden;
+  }
+
+  .settingItem {
+    margin-top: 24px;
+
+    .title {
+    margin-bottom: 16px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .list {
+      list-style: none;
+    }
+
+    .listItem {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 18px;
+    }
+  }
+}

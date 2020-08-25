@@ -29,7 +29,7 @@ const Select: FC<SelectProps> = ({
   return (
     <Radio
       checked={tokenEq(currency, selected)}
-      disabled={!loan.collaterals.isEmpty}
+      disabled={!loan.collateral.isEmpty}
       label={
         <Token
           currency={currency}
@@ -64,9 +64,9 @@ export const SelectCollateral: FC = () => {
   useEffect(() => {
     if (!loans) return;
 
-    loans.forEach(({ token }) => {
-      if (loans.findIndex((item): boolean => tokenEq(item.token, token)) !== -1) {
-        collateralDisabled.current[token.toString()] = false;
+    loans.forEach(({ currency }) => {
+      if (loans.findIndex((item): boolean => tokenEq(item.currency, currency)) !== -1) {
+        collateralDisabled.current[currency.toString()] = false;
       }
     });
   }, [loans]);

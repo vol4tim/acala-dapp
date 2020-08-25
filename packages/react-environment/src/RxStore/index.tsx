@@ -14,11 +14,11 @@ export interface RxStoreData {
 export const RxStoreContext = createContext<RxStoreData>({} as RxStoreData);
 
 export const RxStoreProvider: FC<BareProps> = ({ children }) => {
-  const { api } = useApi();
+  const { api, connected } = useApi();
   const [store, setStore] = useState<RxStoreData>();
 
   useEffect(() => {
-    if (!api) return;
+    if (!connected) return;
 
     const priceStore = new PriceStore();
     const stakingStore = new StakingPoolStore();
@@ -30,10 +30,10 @@ export const RxStoreProvider: FC<BareProps> = ({ children }) => {
       price: priceStore,
       stakingPool: stakingStore
     });
-  }, [api]);
+  }, [api, connected]);
 
   if (!store) {
-    return null;
+    return <>{children}</>;
   }
 
   return (

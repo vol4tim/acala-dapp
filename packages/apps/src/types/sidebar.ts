@@ -8,6 +8,7 @@ export interface SideBarItem {
   target?: string;
   href?: string;
   isExternal?: boolean;
+  onClick?: () => void;
 }
 
 export interface SideBarConfig {

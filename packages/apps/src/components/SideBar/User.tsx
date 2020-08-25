@@ -16,7 +16,7 @@ export const User: FC = memo(() => {
         icon={<WalletIcon />}
         name={
           <div className={classes.wallet}>
-            <p className={classes.title}>{active?.meta?.name || 'Wallet'}</p>
+            <p className={classes.name}>{active?.meta?.name || 'Wallet'}</p>
             <FormatAddress address={active?.address || ''} />
           </div>
         }
