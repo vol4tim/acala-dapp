@@ -1,11 +1,7 @@
 import { Codec } from '@polkadot/types/types';
 import { Fixed18 } from '@acala-network/app-util';
-
-export const LAMINAR_WATCHER_ADDRESS = '5CLaminarAUSDCrossChainTransferxxxxxxxxxxxxxwisu';
-
-export const LAMINAR_SENDER_ADDRESS = '5DiKSJG59azdU8YkmYcPxSg2BNfXgph4dcJVKEn5vibyN6iK';
-
-export const FAUCET_ADDRESS = '5DZbNKzPgAnpb5LYfafPx4P3JMeyn1kxyeSJNuoCKddxEbXc';
+import { LAMINAR_SENDER_ADDRESS, LAMINAR_WATCHER_ADDRESS, FAUCET_ADDRESS, systemAccounts } from './accountConsts';
+import { get } from 'lodash';
 
 export const thousand = (num: string | string): string => {
   const _num = num.toString();
@@ -48,12 +44,16 @@ export const formatNumber = (num: string | number | Fixed18 | undefined, config:
 
 export const formatHash = (hash: string, name = true): string => {
   if (name) {
-    if (hash === LAMINAR_WATCHER_ADDRESS || hash === LAMINAR_SENDER_ADDRESS) {
+    if (hash === LAMINAR_SENDER_ADDRESS || hash === LAMINAR_WATCHER_ADDRESS) {
       return 'Laminar';
     }
 
     if (hash === FAUCET_ADDRESS) {
       return 'Faucet';
+    }
+
+    if (Reflect.has(systemAccounts, hash)) {
+      return get(systemAccounts, [hash, 'name']);
     }
   }
 
@@ -67,6 +67,10 @@ export const formatAddress = (address: string, isMini?: boolean): string => {
 
   if (address === FAUCET_ADDRESS) {
     return 'Faucet';
+  }
+
+  if (Reflect.has(systemAccounts, address)) {
+    return get(systemAccounts, [address, 'name']);
   }
 
   return !isMini

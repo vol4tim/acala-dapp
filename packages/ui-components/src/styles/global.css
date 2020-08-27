@@ -43,6 +43,7 @@ p, span {
   --color-green: #8fce65;
   --color-red: #e02020;
   --color-yellow: #f0fa41;
+  --color-origin: #f7b500;
   --color-white: #ffffff;
   --color-gray: #cccccc;
 
@@ -50,6 +51,7 @@ p, span {
   --color-error: var(--color-red);
   --color-alert: var(--color-yellow);
   --color-info: var(--color-blue);
+  --color-warning: var(--color-origin);
 
   --text-color-white: #ffffff;
   --text-color-primary: #333333;

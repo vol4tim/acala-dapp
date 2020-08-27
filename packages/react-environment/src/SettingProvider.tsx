@@ -76,8 +76,6 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   }, [setEndpoint]);
 
   const setLanguage = useCallback((language: Language) => {
-    console.log(language);
-
     i18n.changeLanguage(language);
     _setLanguage(language);
   }, [_setLanguage, i18n]);

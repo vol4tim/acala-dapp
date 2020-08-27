@@ -127,13 +127,13 @@ export const drawBulletBar = ($container: HTMLElement, config: BulletBarConfigIt
 
     const currentBox = currentNode.getBBox();
 
-    if (currentBox.x + currentBox.width / 2 < 10) {
-      current.attr('x', currentBox.width / 2 + barX);
+    if (currentBox.x <= 0) {
+      current.attr('x', currentBox.width / 2);
 
       return;
     }
 
-    if (canvasBox.width - currentBox.x - currentBox.width / 2 < 10) {
+    if (canvasBox.width - currentBox.x - currentBox.width / 2 <= 0) {
       current.attr('x', canvasBox.width - currentBox.width / 2);
 
       return;

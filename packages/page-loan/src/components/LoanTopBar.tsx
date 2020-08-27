@@ -5,9 +5,10 @@ import { TokenImage, TokenName, CollateralRate } from '@acala-dapp/react-compone
 import { ReactComponent as OverviewIcon } from '../assets/overview.svg';
 import { ReactComponent as AddIcon } from '../assets/add.svg';
 import classes from './LoanTopBar.module.scss';
-import { useAllUserLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
+import { useAllUserLoans, filterEmptyLoan, useLoanHelper } from '@acala-dapp/react-hooks';
 import { LoanContext } from './LoanProvider';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { getLoanStatus } from '../utils';
 
 interface LoanItemProps {
   token: CurrencyLike;
@@ -15,6 +16,14 @@ interface LoanItemProps {
 
 const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
   const { currentTab, setCurrentTab } = useContext(LoanContext);
+  const helper = useLoanHelper(token);
+  const status = useMemo(() => {
+    if (!helper) return null;
+
+    return getLoanStatus(helper.collateralRatio, helper.liquidationRatio);
+  }, [helper]);
+
+  if (!helper || !status) return null;
 
   return (
     <div
@@ -22,7 +31,9 @@ const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
         clsx(
           classes.item,
           {
-            [classes.active]: currentTab === token
+            [classes.active]: currentTab === token,
+            [classes.danger]: status.status === 'DANGEROUS',
+            [classes.warning]: status.status === 'WARNING'
           }
         )
       }
@@ -56,7 +67,7 @@ const LoanOverview: FC = () => {
         classes.item,
         classes.overview,
         {
-          [classes.active]: currentTab === 'overview'
+          [classes.active]: currentTab === 'overview',
         }
       )}
       onClick={showOverview}
