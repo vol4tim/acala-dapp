@@ -1,4 +1,4 @@
-import React, { useContext, FC, useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useContext, FC, useCallback, useMemo, useState } from 'react';
 import { noop } from 'lodash';
 import { useFormik } from 'formik';
 
@@ -6,7 +6,7 @@ import { convertToFixed18, Fixed18, calcCanGenerate } from '@acala-network/app-u
 
 import { BalanceInput, UserBalance, FormatBalance, getTokenName } from '@acala-dapp/react-components';
 import { useFormValidator, useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
-import { Button } from '@acala-dapp/ui-components';
+import { Button, nextTick } from '@acala-dapp/ui-components';
 
 import { createProviderContext } from './CreateProvider';
 import classes from './Generate.module.scss';
@@ -43,8 +43,19 @@ export const Generate: FC = () => {
       type: 'balance'
     },
     generate: {
-      max: maxGenerate.toNumber(),
-      min: minmumDebitValue.toNumber(),
+      custom: (value): string => {
+        const _value = Fixed18.fromNatural(value);
+
+        if (_value.isLessThan(minmumDebitValue)) {
+          return `Debit Value Must Greater Than ${minmumDebitValue.toNumber()}`;
+        }
+
+        if (_value.isGreaterThan(maxGenerate)) {
+          return `Debit Value Must Less Than ${maxGenerate.toNumber()}`;
+        }
+
+        return '';
+      },
       type: 'number'
     }
   });
@@ -85,20 +96,21 @@ export const Generate: FC = () => {
   }, [selectedCurrencyBalance, form]);
 
   const handleDepositChange = useCallback((value: number) => {
-    form.setFieldValue('deposit', value);
-  }, [form]);
+    setDeposit(value);
+    setColalteralAmount(value);
+
+    nextTick(() => {
+      form.setFieldValue('deposit', value);
+    });
+  }, [form, setDeposit]);
 
   const handleGenerateChange = useCallback((value: number) => {
-    form.setFieldValue('generate', value);
-  }, [form]);
+    setGenerate(value);
 
-  useEffect(() => {
-    if (!helper) return;
-
-    setDeposit(form.values.deposit);
-    setGenerate(form.values.generate);
-    setColalteralAmount(form.values.deposit);
-  }, [helper, form, setDeposit, setGenerate]);
+    nextTick(() => {
+      form.setFieldValue('generate', value);
+    });
+  }, [form, setGenerate]);
 
   if (!helper) {
     return null;
