@@ -13,7 +13,7 @@
     margin-top: 24px;
 
     .title {
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-size: 22px;
       font-weight: bold;
     }
@@ -25,7 +25,8 @@
     .listItem {
       display: flex;
       justify-content: space-between;
-      padding: 8px 0;
+      padding: 4px 16px;
+      margin: 0 -16px;
       font-size: 18px;
       cursor: pointer;
 

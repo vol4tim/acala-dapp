@@ -2,14 +2,15 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { noop, upperFirst } from 'lodash';
 import { useFormik } from 'formik';
 
-import { BalanceInput, TxButton, numToFixed18Inner, LAMINAR_WATCHER_ADDRESS, getTokenName, FormatBalance } from '@acala-dapp/react-components';
-import { useConstants, useFormValidator, useBalance } from '@acala-dapp/react-hooks';
+import { BalanceInput, TxButton, numToFixed18Inner, getTokenName, FormatBalance } from '@acala-dapp/react-components';
+import { useConstants, useFormValidator, useBalance, useAccounts } from '@acala-dapp/react-hooks';
 import { Card, Select, Grid, List } from '@acala-dapp/ui-components';
 
 import { ReactComponent as LaminarLogo } from '../../assets/laminar-logo.svg';
 import classes from './AUSD.module.scss';
 
 export const AUSD: FC = () => {
+  const { active } = useAccounts();
   const { stableCurrency } = useConstants();
   const stableCurrencyBalance = useBalance(stableCurrency);
   const validator = useFormValidator({
@@ -47,14 +48,15 @@ export const AUSD: FC = () => {
 
     if (channel === 'laminar') {
       return [
-        LAMINAR_WATCHER_ADDRESS,
         stableCurrency,
+        5001,
+        active?.address,
         numToFixed18Inner(amount)
       ];
     }
 
     return [];
-  }, [form, stableCurrency]);
+  }, [form, stableCurrency, active]);
 
   const isDisabled = useMemo((): boolean => {
     if (!form.values.amount || !form.values.channel) {
@@ -111,10 +113,10 @@ export const AUSD: FC = () => {
               <TxButton
                 className={classes.txBtn}
                 disabled={isDisabled}
-                method='transfer'
+                method='transferToParachain'
                 onExtrinsicSuccess={handleSuccess}
                 params={params}
-                section='currencies'
+                section='xTokens'
               >
                 Transfer
               </TxButton>

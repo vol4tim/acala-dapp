@@ -1,12 +1,12 @@
 import React, { createContext, FC, PropsWithChildren, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { noop } from 'lodash';
-
 import { useModal } from '@acala-dapp/react-hooks';
 
 import { DEFAULT_ENDPOINTS } from './utils/endpoints';
 
-type Language = 'zh' | 'en';
-type Theme = 'normal' | 'dark';
+export type Language = 'zh' | 'en';
+export type Theme = 'normal' | 'dark';
 type Browser = 'firefox' | 'chrome' | 'unknown' | undefined;
 
 function useSetting<T> (key: string, defaultValue?: T): { value: T; setValue: (value: T) => void } {
@@ -34,7 +34,7 @@ function useSetting<T> (key: string, defaultValue?: T): { value: T; setValue: (v
 export interface SettingDate {
   browser: Browser;
   endpoint: string;
-  language: 'zh' | 'en';
+  language: 'zh' | 'en' | string;
   theme: 'normal' | 'dark';
   changeEndpoint: (endpoints: string) => void;
   setTheme: (theme: Theme) => void;
@@ -62,8 +62,9 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   const { close: closeSetting, open: openSetting, status: settingVisible } = useModal();
   const [browser, setBrowser] = useState<Browser>();
   const { setValue: setTheme, value: theme } = useSetting<Theme>('theme', 'normal');
-  const { setValue: setLanguage, value: language } = useSetting<Language>('language', 'en');
+  const { setValue: _setLanguage, value: language } = useSetting<Language>('language', 'en');
   const [endpoint, setEndpoint] = useState<string>('');
+  const { i18n } = useTranslation();
 
   const changeEndpoint = useCallback((endpoint: string, reload?: boolean) => {
     setEndpoint(endpoint);
@@ -73,6 +74,11 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
       window.location.reload();
     }
   }, [setEndpoint]);
+
+  const setLanguage = useCallback((language: Language) => {
+    i18n.changeLanguage(language);
+    _setLanguage(language);
+  }, [_setLanguage, i18n]);
 
   useEffect(() => {
     // local setting

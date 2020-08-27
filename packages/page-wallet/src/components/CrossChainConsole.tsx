@@ -43,7 +43,9 @@ export const CrossChainConsole: FC = () => {
   }, [crossChainCurrencies]);
 
   return (
-    <Tabs>
+    <Tabs
+      className={classes.tabs}
+    >
       {
         _currencies.map((currency) => {
           return (

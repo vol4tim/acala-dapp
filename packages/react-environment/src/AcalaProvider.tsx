@@ -6,6 +6,8 @@ import { BareProps } from '@acala-dapp/ui-components/types';
 
 import { SettingProvider } from './SettingProvider';
 import { RxStoreProvider } from './RxStore';
+import './i18n';
+
 
 interface AcalaProviderProps extends BareProps {
   applicationName: string;
