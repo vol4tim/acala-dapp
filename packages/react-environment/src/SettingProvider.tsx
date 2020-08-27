@@ -76,10 +76,13 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   }, [setEndpoint]);
 
   const setLanguage = useCallback((language: Language) => {
+    console.log(language);
+
     i18n.changeLanguage(language);
     _setLanguage(language);
   }, [_setLanguage, i18n]);
 
+  // set endpoint
   useEffect(() => {
     // local setting
     const localEndpoint = window.localStorage.getItem('endpoint');
@@ -88,7 +91,7 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
     const searchParams = new URLSearchParams(window.location.href.replace(/^.*?\?/, ''));
     const urlEndpoint = searchParams.get('endpoint');
 
-    // if url endpoint exist, choose url endpoint
+    // if url endpoint exist, use url endpoint and don't store this config
     if (urlEndpoint) {
       setEndpoint(urlEndpoint);
 
@@ -104,6 +107,7 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
     setEndpoint(DEFAULT_ENDPOINTS[0].url);
   }, [setEndpoint]);
 
+  // set browser type
   useEffect(() => {
     if (window.navigator.userAgent.includes('Firefox')) {
       setBrowser('firefox');

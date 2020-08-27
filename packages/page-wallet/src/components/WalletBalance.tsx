@@ -1,4 +1,5 @@
 import React, { FC, ReactElement } from 'react';
+import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
@@ -10,9 +11,11 @@ import { useConstants, useBalance } from '@acala-dapp/react-hooks';
 import classes from './WalletBalance.module.scss';
 
 const TotalAsset: FC<BareProps> = ({ className }) => {
+  const { t } = useTranslation();
+
   return (
     <div className={clsx(className, classes.totalAsset)}>
-      <p>My Assets</p>
+      <p>{t('My Assets')}</p>
       <TotalUserAssetValue className={classes.num} />
     </div>
   );
