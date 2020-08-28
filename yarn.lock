@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@acala-network/api-derive@^0.4.0-beta.1", "@acala-network/api-derive@beta":
+"@acala-network/api-derive@0.4.0-beta.1", "@acala-network/api-derive@^0.4.0-beta.1", "@acala-network/api-derive@beta":
   version "0.4.0-beta.1"
   resolved "https://registry.yarnpkg.com/@acala-network/api-derive/-/api-derive-0.4.0-beta.1.tgz#f0c117bf6ad9c53fc2f428e41589e07b2b92007f"
   integrity sha512-mBxzAmnLBGV601MP1b1Rd5QDNA1A3t28ldDhVU2GrL6DdqGgQzTOfQF4cEjulpfRieaKX0X2JcE24yQp/TXQbA==

@@ -36,6 +36,16 @@ export const TOKEN_COLOR_MAP: Map<string, string> = new Map([
   ['DOT', '#e6007a']
 ]);
 
+export const TOKEN_NAME_MAP: Map<string, string> = new Map([
+  ['AUSD', 'aUSD(TEST)'],
+  ['ACA', 'ACA(TEST)'],
+  ['BTC', 'BTC(TEST)'],
+  ['XBTC', 'XBTC(TEST)'],
+  ['RENBTC', 'renBTC(TEST)'],
+  ['LDOT', 'LDOT(TEST)'],
+  ['DOT', 'DOT(TEST)']
+]);
+
 export function getTokenColor (token: CurrencyLike): string {
   // default color is black
   return TOKEN_COLOR_MAP.get(token.toString().toUpperCase()) || '#000000';
@@ -49,20 +59,6 @@ export function getTokenFullName (token: CurrencyLike): string {
   return Reflect.get(ICON_FULLNAMES, token.toString().toLowerCase());
 }
 
-export function getTokenName (token: CurrencyLike, upper = true): string {
-  if (!token) {
-    return '';
-  }
-
-  const _name = token.toString().toUpperCase();
-
-  if (_name === 'AUSD') {
-    return upper ? 'aUSD' : 'ausd';
-  }
-
-  if (_name === 'RENBTC') {
-    return upper ? 'renBTC' : 'renbtc';
-  }
-
-  return upper ? _name : _name.toLowerCase();
+export function getTokenName (token: CurrencyLike): string {
+  return TOKEN_NAME_MAP.get(token.toString()) || '';
 }

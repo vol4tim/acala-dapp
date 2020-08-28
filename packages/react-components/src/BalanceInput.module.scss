@@ -64,15 +64,15 @@
   }
 
   &.showIcon {
-    grid-template-columns: 1fr 160px;
+    grid-template-columns: 1fr 200px;
   }
 
   &.showMax {
-    grid-template-columns: 1fr 64px 100px;
+    grid-template-columns: 1fr 64px 160px;
   }
 
   &.showMax.showIcon {
-    grid-template-columns: 1fr 64px 160px;
+    grid-template-columns: 1fr 64px 200px;
   }
 
   .input {
