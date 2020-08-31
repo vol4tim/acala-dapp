@@ -19,6 +19,7 @@ export * from './useMemorized';
 // common
 export * from './useStateWithCallback';
 export * from './useFormValidator';
+export * from './useFormValidatorN';
 export * from './useModal';
 
 // system

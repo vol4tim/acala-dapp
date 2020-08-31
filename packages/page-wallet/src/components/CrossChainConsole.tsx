@@ -45,6 +45,7 @@ export const CrossChainConsole: FC = () => {
   return (
     <Tabs
       className={classes.tabs}
+      defaultKey='AUSD'
     >
       {
         _currencies.map((currency) => {

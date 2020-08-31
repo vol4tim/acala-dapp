@@ -1,127 +1,80 @@
 import React, { FC, useCallback, useMemo } from 'react';
 import { noop, upperFirst } from 'lodash';
 import { useFormik } from 'formik';
+import { Form } from 'antd';
 
-import { BalanceInput, TxButton, numToFixed18Inner, getTokenName, FormatBalance } from '@acala-dapp/react-components';
-import { useConstants, useFormValidator, useBalance, useAccounts } from '@acala-dapp/react-hooks';
+import { BalanceInput, TxButton, numToFixed18Inner, getTokenName, FormatBalance, UserAssetBalance } from '@acala-dapp/react-components';
+import { useConstants, useFormValidator, useBalance, useAccounts, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { Card, Select, Grid, List } from '@acala-dapp/ui-components';
 
 import { ReactComponent as LaminarLogo } from '../../assets/laminar-logo.svg';
 import classes from './AUSD.module.scss';
+import { AddressFromToInput } from './AddressFromToInput';
+
+const FormItem = Form.Item;
 
 export const AUSD: FC = () => {
   const { active } = useAccounts();
   const { stableCurrency } = useConstants();
-  const stableCurrencyBalance = useBalance(stableCurrency);
-  const validator = useFormValidator({
-    amount: {
-      currency: stableCurrency,
-      type: 'balance'
-    },
-    channel: {
-      type: 'string'
-    }
-  });
-  const form = useFormik({
-    initialValues: {
-      amount: '' as any as number,
-      channel: 'laminar'
-    },
-    onSubmit: noop,
-    validate: validator
+  const [form] = Form.useForm();
+  const balanceValidator = useBalanceValidator({
+    currency: stableCurrency,
+    fieldName: 'amount',
+    getFieldValue: form.getFieldValue
   });
 
-  const handleInput = useCallback((amount) => {
-    form.setFieldValue('amount', amount);
-  }, [form]);
-
-  const handleChannelChange = useCallback((channel) => {
-    form.setFieldValue('channel', channel);
-  }, [form]);
-
-  const handleSuccess = useCallback(() => {
-    form.resetForm();
-  }, [form]);
-
-  const params = useMemo(() => {
-    const { amount, channel } = form.values;
-
-    if (channel === 'laminar') {
-      return [
-        stableCurrency,
-        5001,
-        active?.address,
-        numToFixed18Inner(amount)
-      ];
-    }
-
-    return [];
-  }, [form, stableCurrency, active]);
-
-  const isDisabled = useMemo((): boolean => {
-    if (!form.values.amount || !form.values.channel) {
-      return true;
-    }
-
-    return !!form.errors.amount;
-  }, [form]);
+  const formLayout = useMemo(() => {
+    return {
+      labelCol: { span: 24 },
+      wrapperCol: { span: 24 }
+    };
+  }, []);
 
   return (
     <Card>
       <div className={classes.root}>
         <div className={classes.container}>
-          <Grid container>
-            <Grid item>
-              <Select
-                onChange={handleChannelChange}
-                value={form.values.channel}
-              >
-                <Select.Option value='laminar'>
-                  <LaminarLogo style={{ marginRight: 8 }} />
-                  Laminar
+          <Form
+            {...formLayout}
+            form={form}
+          >
+            <FormItem
+              initialValue='laminar'
+              label='Transfer aUSD from Acala to Laminar'
+              name='network'
+            >
+              <Select>
+                <Select.Option value={'laminar'}>
+                  <LaminarLogo />
+                  <p>Laminar</p>
                 </Select.Option>
               </Select>
-            </Grid>
-            <Grid item>
-              <p className={classes.description}>
-                Transfer {getTokenName(stableCurrency)} from Acala to {upperFirst(form.values.channel)}
-              </p>
-            </Grid>
-            <Grid item>
-              <BalanceInput
-                error={form.errors.amount}
-                onChange={handleInput}
-                token={stableCurrency}
-                value={form.values.amount}
-              />
-              <List>
-                <List.Item
-                  label='Available'
-                  value={(
-                    <FormatBalance
-                      balance={stableCurrencyBalance}
-                      currency={stableCurrency}
-                    />
-                  )}
-                />
-              </List>
-            </Grid>
-            <Grid
-              className={classes.actionArea}
-              item
+            </FormItem>
+            <FormItem
+              label='Account'
+              name='address'
             >
-              <TxButton
-                className={classes.txBtn}
-                disabled={isDisabled}
-                method='transferToParachain'
-                onExtrinsicSuccess={handleSuccess}
-                params={params}
-                section='xTokens'
-              >
-                Transfer
-              </TxButton>
-            </Grid>
-          </Grid>
+              <AddressFromToInput
+                from={active?.address}
+              />
+            </FormItem>
+            <FormItem
+              extra={
+                <div className={classes.amountExtra}>
+                  <p>Available</p>
+                  <UserAssetBalance currency={stableCurrency} />
+                </div>
+              }
+              name='amount'
+              rules={[
+                {
+                  validator: balanceValidator
+                }
+              ]}
+            >
+              <BalanceInput token={stableCurrency} />
+            </FormItem>
+          </Form>
         </div>
       </div>
     </Card>

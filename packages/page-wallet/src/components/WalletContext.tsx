@@ -11,7 +11,7 @@ export interface WalletContextData {
 export const WalletContext = createContext<WalletContextData>({} as WalletContextData);
 
 export const WalletProvider: FC<BareProps> = ({ children }) => {
-  const [tab, setTab] = useState<TAB>('acala');
+  const [tab, setTab] = useState<TAB>('cross-chain');
 
   return (
     <WalletContext.Provider value={{ changeTab: setTab, tab }} >

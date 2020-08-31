@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import AntSelect, { SelectProps, SelectValue } from 'antd/lib/select';
 
 import './Select.scss';
+import { ArrowDownIcon } from './Icon';
 
 function Select<VT extends SelectValue> ({ className, ...props }: SelectProps<VT>): ReactElement {
   // set default props
@@ -12,6 +13,7 @@ function Select<VT extends SelectValue> ({ className, ...props }: SelectProps<VT
       className={clsx('aca-select__root', className)}
       defaultActiveFirstOption
       dropdownClassName={clsx('aca-select__dropdown', props.dropdownClassName)}
+      suffixIcon={<ArrowDownIcon />}
     >
       {Children.map(props.children, (item) => {
         /* eslint-disable-next-line */

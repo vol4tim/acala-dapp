@@ -1,17 +1,22 @@
 import React, { FC, useState, useCallback, useMemo } from 'react';
+import clsx from 'clsx';
 
-import { AutoComplete, Input, InputProps } from '@acala-dapp/ui-components';
+import { AutoComplete, Input, InputProps, ArrowDownIcon } from '@acala-dapp/ui-components';
 import Identicon from '@polkadot/react-identicon';
 import { useAccounts } from '@acala-dapp/react-hooks';
 
 import classes from './AddressInput.module.scss';
-import { isValidateAddress } from './utils';
+import { isValidateAddress, formatAddress as format } from './utils';
 import { FormatAddress } from './format';
 
 interface AddressInputProps extends Omit<InputProps, 'onError' | 'onChange'>{
+  width?: number;
   onChange: (address: string) => void;
   onError: (error: boolean) => void;
+  showIdentIcon?: boolean;
+  inputClassName?: string;
   blockAddressList?: string[];
+  formatAddress?: boolean;
 }
 
 /**
@@ -20,13 +25,17 @@ interface AddressInputProps extends Omit<InputProps, 'onError' | 'onChange'>{
  */
 export const AddressInput: FC<AddressInputProps> = ({
   blockAddressList = [],
+  inputClassName,
+  formatAddress = true,
   onChange,
   onError,
+  showIdentIcon,
+  width,
   ...other
 }) => {
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [showIdentIcon, setShowIdentIcon] = useState<boolean>(false);
+  const [isValided, setIsValided] = useState<boolean>(false);
   const { addAddress, addressList } = useAccounts();
 
   const options = useMemo(() => {
@@ -69,10 +78,6 @@ export const AddressInput: FC<AddressInputProps> = ({
     }
   }, [setError, onError]);
 
-  const handleShowIdentIcon = useCallback((show: boolean): void => {
-    setShowIdentIcon(show);
-  }, [setShowIdentIcon]);
-
   const _setValue = useCallback((value: string): void => {
     setValue(value);
     insertOptions(value);
@@ -80,13 +85,13 @@ export const AddressInput: FC<AddressInputProps> = ({
     if (isValidateAddress(value)) {
       onChange(value);
       handleError(false);
-      handleShowIdentIcon(true);
+      setIsValided(true);
     } else {
       onChange('');
       handleError(true);
-      handleShowIdentIcon(false);
+      setIsValided(false);
     }
-  }, [setValue, handleError, handleShowIdentIcon, insertOptions, onChange]);
+  }, [setValue, handleError, setIsValided, insertOptions, onChange]);
 
   const handleChange = useCallback((value: string) => {
     _setValue(value);
@@ -101,18 +106,19 @@ export const AddressInput: FC<AddressInputProps> = ({
       onChange={handleChange}
       onSelect={handleSelect}
       options={options}
+      style={{ width }}
     >
       <Input
         error={error}
-        inputClassName={classes.input}
-        prefix={showIdentIcon ? (
+        inputClassName={clsx(classes.input, inputClassName)}
+        prefix={showIdentIcon && isValided ? (
           <Identicon
             className={classes.icon}
             size={32}
             value={value}
           />
         ) : undefined}
-        value={value}
+        suffix={<ArrowDownIcon />}
         {...other}
       />
     </AutoComplete>

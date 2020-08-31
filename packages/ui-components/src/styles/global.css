@@ -79,3 +79,9 @@ p, span {
 .ant-steps-item-finish .ant-steps-item-icon > .ant-steps-icon {
   color: var(--color-primary);
 }
+
+.ant-form-item-label > label {
+  font-size: 16px;
+  line-height: 19px;
+  color: var(--text-color-primary);
+}
