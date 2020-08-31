@@ -37,9 +37,9 @@ export const SlippageInputArea: FC = () => {
           suggestValues.map((suggest): ReactElement => {
             return (
               <Tag
-                color={slippage === suggest ? 'primary' : 'white'}
                 key={`suggest-${suggest}`}
                 onClick={(): void => handleClick(suggest) }
+                style={slippage === suggest ? 'primary' : 'normal'}
               >
                 {renderSuggest(suggest)}
               </Tag>

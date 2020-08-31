@@ -7,14 +7,13 @@ import classes from './ApiStatus.module.scss';
 import clsx from 'clsx';
 
 export const ApiStatus: FC<BareProps> = memo(({ className }) => {
-  const { chain, connected, error, loading } = useApi();
+  const { connected, error, loading } = useApi();
 
   return (
     <div className={
       clsx(
-        classes.root,
         className,
-        classes.status,
+        classes.root,
         {
           [classes.connected]: connected,
           [classes.error]: error,
@@ -22,7 +21,7 @@ export const ApiStatus: FC<BareProps> = memo(({ className }) => {
         }
       )
     }>
-      <p>{chain}</p>
+      <p>{loading ? 'Connecting' : 'Connected' }</p>
     </div>
   );
 });

@@ -10,6 +10,8 @@ export * from './TxButton';
 export * from './TransferButton';
 export * from './EventsWatcher';
 export * from './WatchStorage';
+export * from './ChainName';
+export * from './SelectChain';
 
 // currency
 export * from './BalanceInput';

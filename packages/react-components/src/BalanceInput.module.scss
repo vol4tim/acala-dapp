@@ -64,15 +64,15 @@
   }
 
   &.showIcon {
-    grid-template-columns: 1fr 160px;
+    grid-template-columns: 1fr 200px;
   }
 
   &.showMax {
-    grid-template-columns: 1fr 64px 100px;
+    grid-template-columns: 1fr 64px 160px;
   }
 
   &.showMax.showIcon {
-    grid-template-columns: 1fr 64px 160px;
+    grid-template-columns: 1fr 64px 200px;
   }
 
   .input {
@@ -91,10 +91,6 @@
       border-left: 1px solid #E9E9E9;
     }
 
-    &.showIcon {
-      max-width: 160px;
-    }
-
     &.left {
       border-left: 0;
       border-right: 1px solid #E9E9E9;
@@ -111,10 +107,6 @@
     line-height: 19px;
     color: var(--color-primary);
     overflow: hidden;
-
-    &.showIcon {
-      max-width: 160px;
-    }
 
     > img {
       margin-right: 16px;

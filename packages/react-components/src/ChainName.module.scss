@@ -1,0 +1,43 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  .skeleton {
+    width: 100%;
+  }
+
+  .chainName {
+    display: flex;
+    align-items: center;
+    padding: 4px;
+
+    background: #FFFFFF;
+    border: 1px solid rgba(23,61,201,0.20);
+    box-shadow: 0 0 4px 0 rgba(6,35,96,0.06);
+    border-radius: 11.5px;
+    font-size: 14px;
+    line-height: 16px;
+    color: var(--color-primary);
+    cursor: pointer;
+    transition: all 200ms ease-in;
+
+    &:hover {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+  }
+
+  .networkIcon {
+    margin-right: 8px;
+  }
+
+  .chainIcon {
+    display: block;
+    margin-right: 4.5px;
+    width: 14px;
+    height: 14px;
+    border-radius: 100%;
+    box-shadow: 0 0 4px rgba(23, 65, 212, 0.18);
+  }
+}

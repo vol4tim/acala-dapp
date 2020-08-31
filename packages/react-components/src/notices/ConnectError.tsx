@@ -4,8 +4,9 @@ import { useApi } from '@acala-dapp/react-hooks';
 import { uniqueId } from 'lodash';
 
 export const ConnectError: FC = memo(() => {
-  const { error } = useApi();
+  const { connected, error } = useApi();
   const messageKey = useRef<string>(uniqueId());
+  const isDone = useRef<boolean>(false);
 
   useEffect(() => {
     const baseConfig = {
@@ -17,14 +18,19 @@ export const ConnectError: FC = memo(() => {
 
     if (error) {
       notification.error({ ...baseConfig });
-    } else {
+
+      return;
+    }
+
+    if (connected && !isDone.current) {
       notification.success({
         ...baseConfig,
         duration: 2,
         message: 'Connect Success'
       });
+      isDone.current = true;
     }
-  }, [error]);
+  }, [error, connected]);
 
   return null;
 });

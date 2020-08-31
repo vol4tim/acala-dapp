@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { noop } from 'lodash';
 import { useModal } from '@acala-dapp/react-hooks';
 
-import { DEFAULT_ENDPOINTS } from './utils/endpoints';
+import { DEFAULT_ENDPOINTS, EndpointConfig } from './utils/endpoints';
 
 export type Language = 'zh' | 'en';
 export type Theme = 'normal' | 'dark';
-type Browser = 'firefox' | 'chrome' | 'unknown' | undefined;
+export type Browser = 'firefox' | 'chrome' | 'unknown' | undefined;
 
 function useSetting<T> (key: string, defaultValue?: T): { value: T; setValue: (value: T) => void } {
   const [value, _setValue] = useState<T>();
@@ -32,6 +32,7 @@ function useSetting<T> (key: string, defaultValue?: T): { value: T; setValue: (v
 }
 
 export interface SettingDate {
+  selectableEndpoints: EndpointConfig;
   browser: Browser;
   endpoint: string;
   language: 'zh' | 'en' | string;
@@ -52,6 +53,7 @@ export const SettingContext = createContext<SettingDate>({
   endpoint: '',
   language: 'en',
   openSetting: noop,
+  selectableEndpoints: DEFAULT_ENDPOINTS,
   setLanguage: noop as any,
   setTheme: noop as any,
   settingVisible: false,
@@ -102,7 +104,7 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
       return;
     }
 
-    setEndpoint(DEFAULT_ENDPOINTS[0].url);
+    setEndpoint(DEFAULT_ENDPOINTS.testnet[0].url);
   }, [setEndpoint]);
 
   // set browser type
@@ -131,6 +133,7 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
         endpoint,
         language,
         openSetting,
+        selectableEndpoints: DEFAULT_ENDPOINTS,
         setLanguage,
         setTheme,
         settingVisible,

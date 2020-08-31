@@ -1,30 +1,34 @@
-import React, { memo, FC } from 'react';
-import { BareProps } from './types';
-import classes from './Tag.module.scss';
+import React, { FC } from 'react';
 import clsx from 'clsx';
 
-type ColorType = 'normal' | 'white' | 'primary';
+import { BareProps, Style } from './types';
+import './Tag.scss';
 
-interface Props extends BareProps {
-  color?: ColorType;
+type Type = 'normal' | 'flag';
+
+export interface TagProps extends BareProps {
+  style?: Style;
+  type?: type;
   onClick?: () => void;
 }
 
-export const Tag: FC<Props> = memo(({
+export const Tag: FC<TagProps> = ({
   children,
   className,
-  color = 'normal',
-  onClick
+  onClick,
+  style = 'normal',
+  type = 'normal'
 }) => {
   return (
     <span
       className={
         clsx(
-          classes.root,
-          classes[color],
+          'aca-tag',
+          `aca-tag--style-${style}`,
+          `aca-tag--type-${type}`,
           className,
           {
-            [classes.clickable]: onClick
+            'aca-tag--clickable': onClick
           }
         )
       }
@@ -33,19 +37,15 @@ export const Tag: FC<Props> = memo(({
       {children}
     </span>
   );
-});
+};
 
-Tag.displayName = 'Tag';
-
-export const TagGroup: FC<BareProps> = memo(({
+export const TagGroup: FC<BareProps> = ({
   children,
   className
 }) => {
   return (
-    <div className={clsx(classes.tagGroup, className)}>
+    <div className={clsx('aca-tag__group', className)}>
       {children}
     </div>
   );
-});
-
-TagGroup.displayName = 'TagGroup';
+};

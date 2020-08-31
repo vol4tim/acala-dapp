@@ -6,3 +6,5 @@ export interface BareProps {
 }
 
 export type MessageType = 'success' | 'info' | 'warning' | 'error';
+
+export type Style = 'normal' | 'primary' | 'warning' | 'error';

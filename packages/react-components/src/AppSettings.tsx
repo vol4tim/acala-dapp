@@ -53,7 +53,7 @@ export const AppSettings: FC = () => {
           <div className={classes.settingContent}>
             <ul className={classes.list}>
               {
-                DEFAULT_ENDPOINTS.map((config) => {
+                DEFAULT_ENDPOINTS.testnet.map((config) => {
                   return (
                     <li
                       className={classes.listItem}
