@@ -1,12 +1,13 @@
-import React, { FC, memo, useEffect, useRef } from 'react';
+import React, { FC, useEffect, useRef } from 'react';
+import { uniqueId } from 'lodash';
 import { notification } from '@acala-dapp/ui-components';
 import { useApi } from '@acala-dapp/react-hooks';
-import { uniqueId } from 'lodash';
 
-export const ConnectError: FC = memo(() => {
+let globalDisplayedLock = false;
+
+export const ConnectError: FC = () => {
   const { connected, error } = useApi();
   const messageKey = useRef<string>(uniqueId());
-  const isDone = useRef<boolean>(false);
 
   useEffect(() => {
     const baseConfig = {
@@ -22,17 +23,15 @@ export const ConnectError: FC = memo(() => {
       return;
     }
 
-    if (connected && !isDone.current) {
+    if (connected && !globalDisplayedLock) {
+      globalDisplayedLock = true;
       notification.success({
         ...baseConfig,
         duration: 2,
         message: 'Connect Success'
       });
-      isDone.current = true;
     }
   }, [error, connected]);
 
   return null;
-});
-
-ConnectError.displayName = 'ConnectError';
+};

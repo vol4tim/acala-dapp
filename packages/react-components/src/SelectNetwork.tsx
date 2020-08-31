@@ -2,14 +2,13 @@ import React, { FC, useCallback, useState, useEffect } from 'react';
 
 import { useSetting } from '@acala-dapp/react-hooks';
 import { Dialog, Button, Radio } from '@acala-dapp/ui-components';
+import { EndpointConfigItem, EndpointType } from '@acala-dapp/react-environment/utils/endpoints';
 
-import classes from './SelectChain.module.scss';
-import { EndpointConfigItem, EndpointType, EndpointConfig } from '@acala-dapp/react-environment/utils/endpoints';
+import classes from './SelectNetwork.module.scss';
 
-export interface SelectChainProps {
+export interface SelectNetworkProps {
   visiable: boolean;
   onClose: () => void;
-  onConfirm: () => void;
 }
 
 const TypeNameMap: Record<EndpointType, string> = {
@@ -18,9 +17,8 @@ const TypeNameMap: Record<EndpointType, string> = {
   testnet: 'Test Networks'
 };
 
-export const SelectChain: FC<SelectChainProps> = ({
+export const SelectNetwork: FC<SelectNetworkProps> = ({
   onClose,
-  onConfirm,
   visiable
 }) => {
   const { changeEndpoint, endpoint, selectableEndpoints } = useSetting();
@@ -31,7 +29,10 @@ export const SelectChain: FC<SelectChainProps> = ({
     if (!endpoints.length) return null;
 
     return (
-      <div className={classes.endpoint}>
+      <div
+        className={classes.endpoint}
+        key={`select-endpoint-type-${type}`}
+      >
         <p className={classes.endpointType}>{TypeNameMap[type]}</p>
         <ul className={classes.endpointList}>
           {
@@ -55,6 +56,7 @@ export const SelectChain: FC<SelectChainProps> = ({
 
   const handleSelect = useCallback(() => {
     changeEndpoint(selected);
+    // reload page to ensure that network change success
     window.location.reload();
   }, [changeEndpoint, selected]);
 

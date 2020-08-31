@@ -11,7 +11,7 @@ export * from './TransferButton';
 export * from './EventsWatcher';
 export * from './WatchStorage';
 export * from './ChainName';
-export * from './SelectChain';
+export * from './SelectNetwork';
 
 // currency
 export * from './BalanceInput';

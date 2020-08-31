@@ -10,6 +10,11 @@
   }
 }
 
+.cardTitle {
+  display: flex;
+  align-items: center;
+}
+
 .item {
   min-width: 240px;
   flex: 0 0 20%;

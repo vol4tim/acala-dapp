@@ -59,7 +59,7 @@ export const WalletBalance: FC = () => {
       contentClassName={classes.cardContent}
       divider={false}
       header={
-        <div>
+        <div className={classes.cardTitle}>
           <span>Wallet Balance</span>
           <Tag
             style='error'
