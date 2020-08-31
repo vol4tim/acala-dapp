@@ -13,6 +13,10 @@
 .cardTitle {
   display: flex;
   align-items: center;
+
+  > span:nth-child(1) {
+    margin-right: 4px;
+  }
 }
 
 .item {

@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { NoAccounts, NoExtensions, ConnectError, AppSettings } from '@acala-dapp/react-components';
+import { NoAccounts, NoExtensions, ConnectStatus, AppSettings } from '@acala-dapp/react-components';
 import { ApiProvider, AccountProvider, GlobalStoreProvider } from '@acala-dapp/react-environment';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
@@ -29,7 +29,7 @@ export const AcalaProvider: FC<AcalaProviderProps> = ({
             <GlobalStoreProvider>
               <>
                 {children}
-                <ConnectError />
+                <ConnectStatus />
                 <AppSettings />
               </>
             </GlobalStoreProvider>
