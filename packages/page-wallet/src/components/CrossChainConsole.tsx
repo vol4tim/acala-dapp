@@ -8,14 +8,13 @@ import { Tabs } from '@acala-dapp/ui-components';
 import classes from './CrossChainConsole.module.scss';
 import { RenBtc } from './crosschain/RenBtc';
 import { AUSD } from './crosschain/AUSD';
+import { DOT } from './crosschain/DOT';
 
 const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
   return (
     <div className={classes.assetCard}>
       <div className={classes.assetImg}>
-        <TokenImage
-          currency={currency}
-        />
+        <TokenImage currency={currency} />
       </div>
       <div className={classes.assetName}>
         <TokenName currency={currency} />
@@ -26,32 +25,30 @@ const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
 };
 
 const crossChainConsoleList: Map<string, ReactElement> = new Map([
+  ['RENBTC', <RenBtc key='renbtc' />],
   ['AUSD', <AUSD key='ausd' />],
-  ['RENBTC', <RenBtc key='renbtc' />]
+  ['DOT', <DOT key='dot' />]
 ]);
 
-const crossChainDisabled: Map<string, boolean> = new Map([
-  ['RENBTC', false],
-  ['AUSD', false],
+const crossChainEnable: Map<string, boolean> = new Map([
+  ['RENBTC', true],
+  ['AUSD', true],
   ['DOT', true]
 ]);
 
 export const CrossChainConsole: FC = () => {
   const { crossChainCurrencies } = useConstants();
-  const _currencies = useMemo(() => {
-    return crossChainCurrencies.sort((a) => Number(crossChainDisabled.get(a.toString())) - 0.5);
-  }, [crossChainCurrencies]);
 
   return (
     <Tabs
       className={classes.tabs}
-      defaultKey='AUSD'
+      defaultKey='RENBTC'
     >
       {
-        _currencies.map((currency) => {
+        crossChainCurrencies.map((currency) => {
           return (
             <Tabs.Panel
-              disabled={crossChainDisabled.get(currency.toString())}
+              disabled={!crossChainEnable.get(currency.toString())}
               key={currency.toString()}
               tab={<AssetCard currency={currency} />}
             >

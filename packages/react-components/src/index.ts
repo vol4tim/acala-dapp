@@ -12,6 +12,7 @@ export * from './EventsWatcher';
 export * from './WatchStorage';
 export * from './ChainName';
 export * from './SelectNetwork';
+export * from './Network';
 
 // currency
 export * from './BalanceInput';

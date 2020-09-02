@@ -1,30 +1,22 @@
 .root {
-  display: grid;
-  place-items: center;
-
   .container {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     width: 512px;
     padding: 16px 0 32px 0;
   }
 
-  .description {
+  .txBtn {
+    margin: 0 auto;
+    width: 320px;
+    height: 58px;
+
     font-weight: bold;
-    color: var(--text-color-primary);
-  }
-
-  .actionArea {
-    position: relative;
-    display: grid;
-    place-items: center;
-
-    .txBtn {
-      width: 320px;
-      height: 58px;
-
-      font-weight: bold;
-      font-size: 20px;
-      line-height: 30px;
-    }
+    font-size: 20px;
+    line-height: 30px;
   }
 
   .amountExtra {

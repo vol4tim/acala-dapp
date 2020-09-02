@@ -1,9 +1,9 @@
-import React, { FC, PropsWithChildren, useState, useCallback } from 'react';
+import React, { FC, PropsWithChildren, useState, useCallback, useMemo } from 'react';
 import { isFunction, uniqueId } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { switchMap, map, timeout, finalize, take, catchError } from 'rxjs/operators';
 
-import { SubmittableResult } from '@polkadot/api';
+import { SubmittableResult, ApiRx } from '@polkadot/api';
 import { ITuple, ISubmittableResult } from '@polkadot/types/types';
 import { DispatchError, AccountInfo } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -15,11 +15,13 @@ import { FormatAddress } from './format';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 interface Props extends ButtonProps {
+  api?: ApiRx;
   affectAssets?: CurrencyLike[]; // assets which be affected in this extrinsc
   section: string; // extrinsic section
   method: string; // extrinsic method
   params: any[] | (() => any[]); // extrinsic params
 
+  preCheck?: () => Promise<boolean>;
   beforeSend?: () => void; // the callback will be executed before send
   afterSend?: () => void; // the callback will be executed after send
   onInblock?: () => void; // the callback will be executed when extrinsic in block
@@ -32,6 +34,7 @@ const MAX_TX_DURATION_TIME = 60 * 1000;
 
 export const TxButton: FC<PropsWithChildren<Props>> = ({
   afterSend,
+  api,
   beforeSend,
   children,
   className,
@@ -42,19 +45,35 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   onFinalize,
   onInblock,
   params,
+  preCheck,
   section,
   size,
   ...other
 }) => {
-  const { api } = useApi();
+  const { api: acalaApi } = useApi();
   const { active, authRequired, setAuthRequired } = useAccounts();
   const [isSending, setIsSending] = useState<boolean>(false);
   const { refresh } = useHistory();
   const allBalances = useAllBalances();
 
-  const onClick = useCallback((): void => {
+  const _api = useMemo(() => {
+    if (api) return api;
+
+    return acalaApi;
+  }, [api, acalaApi]);
+
+  const onClick = useCallback(async (): Promise<void> => {
+    // precheck params etc.
+    if (preCheck) {
+      const result = await preCheck();
+
+      if (!result) {
+        return;
+      }
+    }
+
     // ensure that the section and method are exist
-    if (!api.tx[section] || !api.tx[section][method]) {
+    if (!_api.tx[section] || !_api.tx[section][method]) {
       console.error(`can not find api.tx.${section}.${method}`);
 
       return;
@@ -71,7 +90,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       return;
     }
 
-    const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => api.query.system.account<AccountInfo>(active.address).pipe(
+    const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => _api.query.system.account<AccountInfo>(active.address).pipe(
       take(1),
       map((account) => {
         const _params = isFunction(params) ? params() : params;
@@ -79,7 +98,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         return [account, _params] as [AccountInfo, any[]];
       }),
       switchMap(([account, params]) => {
-        const signedExtrinsic = api.tx[section][method](...params);
+        const signedExtrinsic = _api.tx[section][method](...params);
 
         return signedExtrinsic.paymentInfo(active.address).pipe(
           map((result) => {
@@ -96,7 +115,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       switchMap(([account, params]) => {
         console.log(account);
 
-        return api.tx[section][method](...params).signAsync(
+        return _api.tx[section][method](...params).signAsync(
           active.address,
           { nonce: account.nonce.toNumber() }
         );
@@ -140,7 +159,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
           if (dispatchError.isModule) {
             try {
               const mod = dispatchError.asModule;
-              const error = api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
+              const error = _api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
 
               message = `${error.section}.${error.name}`;
             } catch (error) {
@@ -253,7 +272,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         }
       }
     });
-  }, [active, afterSend, api.query.system, api.registry, api.tx, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
+  }, [preCheck, active, afterSend, _api.query.system, _api.registry, _api.tx, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
 
   return (
     <Button

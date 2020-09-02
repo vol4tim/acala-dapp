@@ -1,22 +1,23 @@
 import React, { FC, useState, useCallback, useMemo } from 'react';
 import clsx from 'clsx';
 
-import { AutoComplete, Input, InputProps, ArrowDownIcon } from '@acala-dapp/ui-components';
 import Identicon from '@polkadot/react-identicon';
+
+import { AutoComplete, Input, InputProps, ArrowDownIcon, Tooltip } from '@acala-dapp/ui-components';
+import { AddressInfo } from '@acala-dapp/react-environment';
 import { useAccounts } from '@acala-dapp/react-hooks';
 
 import classes from './AddressInput.module.scss';
-import { isValidateAddress, formatAddress as format } from './utils';
+import { isValidateAddress } from './utils';
 import { FormatAddress } from './format';
 
-interface AddressInputProps extends Omit<InputProps, 'onError' | 'onChange'>{
+interface AddressInputProps extends Omit<InputProps, 'onChange'>{
+  addressList?: AddressInfo[];
   width?: number;
   onChange: (address: string) => void;
-  onError: (error: boolean) => void;
   showIdentIcon?: boolean;
   inputClassName?: string;
   blockAddressList?: string[];
-  formatAddress?: boolean;
 }
 
 /**
@@ -24,74 +25,69 @@ interface AddressInputProps extends Omit<InputProps, 'onError' | 'onChange'>{
  * @description input and auto select account
  */
 export const AddressInput: FC<AddressInputProps> = ({
+  addressList,
   blockAddressList = [],
   inputClassName,
-  formatAddress = true,
   onChange,
-  onError,
   showIdentIcon,
   width,
   ...other
 }) => {
   const [value, setValue] = useState<string>('');
-  const [error, setError] = useState<string>('');
   const [isValided, setIsValided] = useState<boolean>(false);
-  const { addAddress, addressList } = useAccounts();
+  const { addAddress, addressList: defaultAddressList } = useAccounts();
+
+  const _addressList = useMemo((): AddressInfo[] => {
+    if (addressList) return addressList;
+
+    if (defaultAddressList) return defaultAddressList;
+
+    return [];
+  }, [addressList, defaultAddressList]);
 
   const options = useMemo(() => {
-    return addressList
+    return _addressList
       .filter((item) => !blockAddressList.includes(item.address))
       .map((item) => {
         return {
           label: (
-            <div className={classes.option}>
-              <Identicon
-                className={classes.identicon}
-                size={32}
-                value={item.address}
-              />
-              <div>
-                {item?.meta?.name ? <p>{item.meta.name}</p> : null}
-                <FormatAddress
-                  address={item.address}
-                  withFullAddress
+            <Tooltip
+              mouseEnterDelay={0.5}
+              title={item.address}
+            >
+              <div className={classes.option}>
+                <Identicon
+                  className={classes.identicon}
+                  size={32}
+                  value={item.address}
                 />
+                <div>
+                  {item?.meta?.name ? <p>{item.meta.name}</p> : null}
+                  <FormatAddress address={item.address} />
+                </div>
               </div>
-            </div>
+            </Tooltip>
           ),
           value: item.address
         };
       });
-  }, [addressList, blockAddressList]);
+  }, [_addressList, blockAddressList]);
 
   const insertOptions = useCallback((value: string) => {
     addAddress(value);
   }, [addAddress]);
 
-  const handleError = useCallback((error: boolean): void => {
-    if (!error) {
-      onError(false);
-      setError('');
-    } else {
-      onError(true);
-      setError('Not an validate address');
-    }
-  }, [setError, onError]);
-
   const _setValue = useCallback((value: string): void => {
     setValue(value);
-    insertOptions(value);
+    onChange(value);
 
     if (isValidateAddress(value)) {
-      onChange(value);
-      handleError(false);
       setIsValided(true);
+      insertOptions(value);
     } else {
-      onChange('');
-      handleError(true);
       setIsValided(false);
     }
-  }, [setValue, handleError, setIsValided, insertOptions, onChange]);
+  }, [setValue, setIsValided, insertOptions, onChange]);
 
   const handleChange = useCallback((value: string) => {
     _setValue(value);
@@ -109,7 +105,6 @@ export const AddressInput: FC<AddressInputProps> = ({
       style={{ width }}
     >
       <Input
-        error={error}
         inputClassName={clsx(classes.input, inputClassName)}
         prefix={showIdentIcon && isValided ? (
           <Identicon

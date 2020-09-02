@@ -11,18 +11,12 @@ import classes from './ChainName.module.scss';
 import { SelectNetwork } from './SelectNetwork';
 
 export const ChainName: FC<BareProps> = ({ className }) => {
-  const { chain, error, loading } = useApi();
+  const { chain, loading } = useApi();
   const { close, open, status } = useModal();
 
   const openChainSelect = useCallback(() => {
     open();
   }, [open]);
-
-  useEffect(() => {
-    if (error) {
-      open();
-    }
-  }, [error, open]);
 
   return (
     <>

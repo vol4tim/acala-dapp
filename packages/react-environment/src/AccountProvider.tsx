@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, FC, useCallback, memo, ReactNode, useMemo } from 'react';
 import { uniqWith } from 'lodash';
+
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
@@ -15,7 +16,7 @@ const ADDRESS_LIST_KEY = 'saved_address_list';
 
 export const AccountContext = createContext<AccountsData>({} as AccountsData);
 
-interface AddressInfo {
+export interface AddressInfo {
   address: string;
   meta?: {
     name?: string;
