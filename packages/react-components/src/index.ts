@@ -10,6 +10,7 @@ export * from './TwoWayBalanceInput';
 export * from './SelectAccount';
 export * from './Token';
 export * from './TokenSelector';
+export * from './UploadMetadata';
 
 export * from './RxStore';
 

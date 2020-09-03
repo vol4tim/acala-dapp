@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ApiStatus } from '@acala-dapp/react-components';
+import { ApiStatus, UploadMetadata } from '@acala-dapp/react-components';
 
 import { Logo } from './Logo';
 import { Products } from './Products';
@@ -20,7 +20,8 @@ export const Sidebar: React.FC<SideBarProps> = ({ config }) => {
       <User />
       <Products data={config.products} />
       <SocialMedias data={config.socialMedia} />
-      <ApiStatus className={classes.status}/>
+      <UploadMetadata />
+      <ApiStatus className={classes.status} />
     </div>
   );
 };
