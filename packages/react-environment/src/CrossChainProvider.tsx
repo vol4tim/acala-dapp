@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, FC } from 'react';
-import BN from 'bn.js';
 import { Observable, of, combineLatest } from 'rxjs';
 
 import { web3FromAddress } from '@polkadot/extension-dapp';
@@ -57,7 +56,7 @@ export const CrossChainProvider: FC<BareProps> = ({ children }) => {
       map(([properties, result]) => {
         if (result.isEmpty) return Fixed18.ZERO;
 
-        return Fixed18.fromNatural(result.data.free.toBn().div(new BN(10 ** Number(properties.tokenDecimals.toString()))).toString());
+        return Fixed18.fromParts(result.data.free.toString() + '000000');
       })
     );
   }, [api]);

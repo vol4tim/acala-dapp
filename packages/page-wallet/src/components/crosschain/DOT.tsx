@@ -1,14 +1,12 @@
-import React, { FC, useCallback, useContext, ReactNode, useState, useRef } from 'react';
-import BN from 'bn.js';
+import React, { FC, useCallback, useContext, useState, useEffect } from 'react';
 import { Form, Skeleton } from 'antd';
-import { Subscription } from 'rxjs';
 
 import { Fixed18 } from '@acala-network/app-util';
 
 import { Network, NetworkType, getNetworkName, BalanceInput, FormatBalance, TxButton, numToFixed18Inner, UserAssetBalance } from '@acala-dapp/react-components';
-import { useConstants, useAccounts, useBalanceValidator, useAddressValidator, useCall } from '@acala-dapp/react-hooks';
+import { useAccounts, useBalanceValidator, useAddressValidator } from '@acala-dapp/react-hooks';
 import { CrossChainProvider, CrossChainContextData, CrossChainContext } from '@acala-dapp/react-environment';
-import { Card, IconButton, Grid } from '@acala-dapp/ui-components';
+import { Card, IconButton } from '@acala-dapp/ui-components';
 
 import classes from './DOT.module.scss';
 import { AddressFromInput, AddressToInput } from './AddressInput';
@@ -28,7 +26,6 @@ interface SelectNetworkProps {
 }
 
 const SelectNetwork: FC<SelectNetworkProps> = ({ onChange, value }) => {
-
   const handleChange = useCallback(() => {
     if (onChange) {
       onChange(value === 'in' ? 'out' : 'in');
@@ -58,32 +55,10 @@ const SelectNetwork: FC<SelectNetworkProps> = ({ onChange, value }) => {
 };
 
 export const TransferIn: FC = () => {
-  const { connected, getApi, getNativeBalance, setSigner } = useContext<CrossChainContextData>(CrossChainContext);
+  const { connected, getApi, getNativeBalance } = useContext<CrossChainContextData>(CrossChainContext);
   const { accounts, active } = useAccounts();
   const [nativeBalance, setNativaBalance] = useState<Fixed18>(Fixed18.ZERO);
   const [form] = Form.useForm();
-  const subscriberRef = useRef<Subscription>();
-
-  const handleFormChange = useCallback(([value]) => {
-    if (value && value.name.includes('fromAccount') && value.value) {
-      // remove cached subscription
-      if (subscriberRef.current) {
-        subscriberRef.current.unsubscribe();
-      }
-
-      setSigner(value.value);
-
-      subscriberRef.current = getNativeBalance(value.value).subscribe((result) => {
-        setNativaBalance(result);
-      });
-    }
-  }, [setSigner, setNativaBalance, getNativeBalance]);
-
-  const addressValidator = useAddressValidator({
-    fieldName: 'fromAccount',
-    getFieldVaule: form.getFieldValue,
-    required: true
-  });
 
   const handleSuccess = useCallback(() => {
     form.resetFields();
@@ -102,8 +77,21 @@ export const TransferIn: FC = () => {
   const getParams = useCallback(() => {
     const value = form.getFieldsValue();
 
-    return [5000, new BN(value.amount).mul(new BN(10 ** 12)).toString(), ''];
+    return [5000, value.amount * (10 ** 12) + '', ''];
   }, [form]);
+
+  useEffect(() => {
+    if (!connected) return;
+    if (!active?.address) return;
+
+    const subscriber = getNativeBalance(active.address).subscribe((result) => {
+      setNativaBalance(result);
+    });
+
+    return (): void => {
+      subscriber.unsubscribe();
+    };
+  }, [setNativaBalance, connected, active, getNativeBalance]);
 
   if (!connected) {
     return (
@@ -121,19 +109,12 @@ export const TransferIn: FC = () => {
   return (
     <Form
       form={form}
-      onFieldsChange={handleFormChange}
       {...formLayout}
     >
-      <FormItem
-        key='from-account-input'
-        label='Account'
-        name='fromAccount'
-        rules={[
-          { validator: addressValidator }
-        ]}
-      >
+      <FormItem label='Account'>
         <AddressFromInput
           addressList={accounts}
+          from={active?.address}
           to={active?.address}
         />
       </FormItem>
@@ -147,7 +128,6 @@ export const TransferIn: FC = () => {
             />
           </div>
         )}
-        key='amount-input'
         name='amount'
         rules={[
           {
@@ -203,7 +183,7 @@ export const TransferOut: FC = () => {
   const getParams = useCallback((): any[] => {
     const values = form.getFieldsValue();
 
-    return [values.address, numToFixed18Inner(values.amount)];
+    return [values.transferOut, numToFixed18Inner(values.amount)];
   }, [form]);
 
   const preCheck = useCallback(async (): Promise<boolean> => {

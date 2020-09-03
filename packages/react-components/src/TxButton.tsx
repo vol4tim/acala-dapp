@@ -3,6 +3,7 @@ import { isFunction, uniqueId } from 'lodash';
 import { Observable, of } from 'rxjs';
 import { switchMap, map, timeout, finalize, take, catchError } from 'rxjs/operators';
 
+import { web3FromAddress } from '@polkadot/extension-dapp';
 import { SubmittableResult, ApiRx } from '@polkadot/api';
 import { ITuple, ISubmittableResult } from '@polkadot/types/types';
 import { DispatchError, AccountInfo } from '@polkadot/types/interfaces';
@@ -16,6 +17,7 @@ import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 interface Props extends ButtonProps {
   api?: ApiRx;
+  signAddress?: string;
   affectAssets?: CurrencyLike[]; // assets which be affected in this extrinsc
   section: string; // extrinsic section
   method: string; // extrinsic method
@@ -30,7 +32,7 @@ interface Props extends ButtonProps {
   onFailed?: () => void; // the callback will be executed when extrinsic failed
 }
 
-const MAX_TX_DURATION_TIME = 60 * 1000;
+const MAX_TX_WAITING_TIME = 60 * 1000;
 
 export const TxButton: FC<PropsWithChildren<Props>> = ({
   afterSend,
@@ -47,6 +49,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   params,
   preCheck,
   section,
+  signAddress,
   size,
   ...other
 }) => {
@@ -55,6 +58,12 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   const [isSending, setIsSending] = useState<boolean>(false);
   const { refresh } = useHistory();
   const allBalances = useAllBalances();
+
+  const _signAddress = useMemo(() => {
+    if (signAddress) return signAddress;
+
+    return active?.address;
+  }, [signAddress, active]);
 
   const _api = useMemo(() => {
     if (api) return api;
@@ -80,7 +89,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     }
 
     // ensuer that account is exist
-    if (!(active && active.address)) {
+    if (!_signAddress) {
       console.error('can not find available address');
 
       if (!authRequired) {
@@ -90,7 +99,15 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       return;
     }
 
-    const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => _api.query.system.account<AccountInfo>(active.address).pipe(
+    try {
+      const injector = await web3FromAddress(_signAddress);
+
+      _api.setSigner(injector.signer);
+    } catch (e) {
+      return;
+    }
+
+    const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => _api.query.system.account<AccountInfo>(_signAddress).pipe(
       take(1),
       map((account) => {
         const _params = isFunction(params) ? params() : params;
@@ -98,9 +115,10 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         return [account, _params] as [AccountInfo, any[]];
       }),
       switchMap(([account, params]) => {
-        const signedExtrinsic = _api.tx[section][method](...params);
+        console.log(account.toHuman());
+        const signedExtrinsic = _api.tx[section][method].apply(_api, params);
 
-        return signedExtrinsic.paymentInfo(active.address).pipe(
+        return signedExtrinsic.paymentInfo(_signAddress).pipe(
           map((result) => {
             console.log(result.toString());
           }),
@@ -113,10 +131,8 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         );
       }),
       switchMap(([account, params]) => {
-        console.log(account);
-
         return _api.tx[section][method](...params).signAsync(
-          active.address,
+          _signAddress,
           { nonce: account.nonce.toNumber() }
         );
       })
@@ -124,6 +140,8 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
 
     const notify = (signedTx: SubmittableExtrinsic<'rxjs'>): [SubmittableExtrinsic<'rxjs'>, string] => {
       const hash = signedTx.hash.toString();
+
+      console.log(signedTx);
 
       const notificationKey = uniqueId(`${section}-${method}`);
 
@@ -139,7 +157,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     };
 
     const send = (signedTx: SubmittableExtrinsic<'rxjs'>): Observable<ISubmittableResult> => {
-      return signedTx.send().pipe(timeout(MAX_TX_DURATION_TIME));
+      return signedTx.send().pipe(timeout(MAX_TX_WAITING_TIME));
     };
 
     const extractEvents = (result: SubmittableResult): { isDone: boolean; errorMessage?: string } => {
@@ -272,7 +290,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         }
       }
     });
-  }, [preCheck, active, afterSend, _api.query.system, _api.registry, _api.tx, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
+  }, [preCheck, _api, _signAddress, afterSend, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
 
   return (
     <Button

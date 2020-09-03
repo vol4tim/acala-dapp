@@ -41,6 +41,7 @@ export const AddressToInput: FC<AddressToInputProps> = ({
 };
 
 export interface AddressFromInputProps {
+  from?: string;
   to?: string;
   addressList?: AddressInfo[];
   value?: string;
@@ -49,6 +50,7 @@ export interface AddressFromInputProps {
 
 export const AddressFromInput: FC<AddressFromInputProps> = ({
   addressList,
+  from,
   onChange,
   to,
   value
@@ -57,16 +59,20 @@ export const AddressFromInput: FC<AddressFromInputProps> = ({
     <div className={classes.root}>
       <div className={classes.item}>
         <p>From Account</p>
-        <AddressInput
-          addressList={addressList}
-          border={false}
-          inputClassName={classes.addressInput}
-          onChange={onChange || noop}
-          placeholder='Please Select From Account'
-          showIdentIcon={false}
-          value={value}
-          width={320}
-        />
+        {
+          from ? (<p className={classes.fixedAddress}><FormatAddress address={from} /> </p>) : (
+            <AddressInput
+              addressList={addressList}
+              border={false}
+              inputClassName={classes.addressInput}
+              onChange={onChange || noop}
+              placeholder='Please Select From Account'
+              showIdentIcon={false}
+              value={value}
+              width={320}
+            />
+          )
+        }
       </div>
       <div className={classes.item}>
         <p>To Account</p>
