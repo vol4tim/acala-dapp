@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 63.1 (92452) - https://sketch.com -->
+    <title>overview (1)</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Self-Serviced-Loan05" transform="translate(-296.000000, -102.000000)" fill-rule="nonzero">
+            <g id="overview-(1)" transform="translate(296.000000, 102.000000)">
+                <path d="M18.0624516,0.00825806452 C25.641036,0.277559401 31.7224406,6.35896399 31.9917419,13.9375484 C31.9404495,14.2348779 31.6823662,14.4519818 31.3806452,14.4516134 L17.5483866,14.4516134 L17.5483866,0.619354839 C17.5480182,0.31763376 17.7651221,0.0595504607 18.0624516,0.00825806452 Z" id="Path" fill="#FFAA60"></path>
+                <path d="M14.4516129,3.09677419 L14.4516129,17.5483871 L28.9032258,17.5483871 C28.9032258,25.5297925 22.4330183,32 14.4516129,32 C6.47020749,32 0,25.5297925 0,17.5483871 C0,9.56698168 6.47020749,3.09677419 14.4516129,3.09677419 Z" id="Path" fill="#1741D4"></path>
+            </g>
+        </g>
+    </g>
+</svg>
