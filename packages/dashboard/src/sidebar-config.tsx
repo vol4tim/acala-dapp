@@ -41,6 +41,11 @@ export const sideBarConfig: SideBarConfig = {
       icon: <OraclesSVG />,
       name: 'Oracles',
       path: 'oracles'
+    },
+    {
+      icon: <OraclesSVG />,
+      name: 'System Constants',
+      path: 'consts'
     }
   ]
 };

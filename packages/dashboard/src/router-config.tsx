@@ -19,6 +19,7 @@ const PageOraclesCharts = lazy(() => import('@acala-dapp/page-oracles-charts'));
 const PageLoanCharts = lazy(() => import('@acala-dapp/page-loan-charts'));
 const PageSwapCharts = lazy(() => import('@acala-dapp/page-swap-charts'));
 const PageTreasuryCharts = lazy(() => import('@acala-dapp/page-treasury-charts'));
+const PageConsts = lazy(() => import('@acala-dapp/page-consts'));
 
 export const config: RouterConfigData[] = [
   {
@@ -50,6 +51,10 @@ export const config: RouterConfigData[] = [
       {
         element: <Suspense fallback={<PageLoading />}><PageOraclesCharts/></Suspense>,
         path: 'oracles'
+      },
+      {
+        element: <Suspense fallback={<PageLoading />}><PageConsts /></Suspense>,
+        path: 'consts'
       },
       {
         path: '*',

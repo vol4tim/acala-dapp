@@ -1,52 +1,22 @@
 import React, { FC } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
-import { WalletBalance } from '@acala-dapp/react-components';
+import { Page } from '@acala-dapp/ui-components';
+import { useApi } from '@acala-dapp/react-hooks';
 
-import { SelectAction } from './components/SelectAction';
-import { DepositProvider } from './components/Provider';
-import { Console } from './components/Console';
-import { PoolOverview } from './components/PoolOverview';
-import { Transaction } from './components/Transaction';
-import { UserCard, SystemCard } from './components/InformationCard';
+import { Consts } from './components/Consts';
 
 const PageDeposit: FC = () => {
+  const { api } = useApi();
+
+  console.log(api);
+
   return (
-    <DepositProvider>
-      <Page>
-        <Page.Title title='Deposit & Earn' />
-        <Page.Content>
-          <Grid container>
-            <Grid item>
-              <WalletBalance />
-            </Grid>
-            <Grid container
-              item>
-              <Grid item
-                span={12}>
-                <UserCard />
-              </Grid>
-              <Grid item
-                span={12}>
-                <SystemCard />
-              </Grid>
-            </Grid>
-            <Grid item>
-              <SelectAction />
-            </Grid>
-            <Grid item>
-              <Console />
-            </Grid>
-            <Grid item>
-              <PoolOverview />
-            </Grid>
-            <Grid item>
-              <Transaction />
-            </Grid>
-          </Grid>
-        </Page.Content>
-      </Page>
-    </DepositProvider>
+    <Page fullscreen>
+      <Page.Title title='System Constants' />
+      <Page.Content>
+        <Consts />
+      </Page.Content>
+    </Page>
   );
 };
 

@@ -40,6 +40,8 @@
       "@acala-dapp/page-swap-charts/*": ["page-swap-charts/src/*"],
       "@acala-dapp/page-treasury-charts": ["page-treasury-charts/src"],
       "@acala-dapp/page-treasury-charts/*": ["page-treasury-charts/src/*"],
+      "@acala-dapp/page-consts": ["page-consts/src"],
+      "@acala-dapp/page-consts/*": ["page-consts/src/*"],
       "@acala-dapp/react-hooks/*": ["react-hooks/src/*"],
       "@acala-dapp/react-hooks": ["react-hooks/src"],
       "@acala-dapp/react-environment/*": ["react-environment/src/*"],

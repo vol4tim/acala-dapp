@@ -5,7 +5,7 @@ import { useFormik } from 'formik';
 import { Vec } from '@polkadot/types';
 import { Card } from '@acala-dapp/ui-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, DexPoolSize, DexUserShare, BalanceInputProps } from '@acala-dapp/react-components';
+import { BalanceInput, TxButton, numToFixed18Inner, DexPoolSize, DexUserShare, BalanceInputProps } from '@acala-dapp/react-components';
 import { useFormValidator, useDexShare } from '@acala-dapp/react-hooks';
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 
