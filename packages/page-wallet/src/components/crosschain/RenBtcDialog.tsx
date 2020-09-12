@@ -53,7 +53,7 @@ const BtcAddressContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
     if (!active) return;
 
     axios.post(
-      'https://apps.acala.network/faucet/ren',
+      'https://api.polkawallet.io/faucet/ren',
       { address: active.address },
       {
         headers: { 'Content-Type': 'application/json' }
