@@ -52,14 +52,14 @@ export const EventsWatcher: FC = () => {
         handler([
           {
             handler: (event): void => {
-              const data = event.event.data.toJSON() as unknown as string[]; // [ASSET, ORIGIN, TARGET, AMOUNT]
+              const data = event.event.data.toJSON() as unknown as [{ Token: string }, string, string, string]; // [ASSET, ORIGIN, TARGET, AMOUNT]
 
               if (data[2] !== active?.address) return;
 
               notification.success({
                 message: (
                   <div>
-                    <p>{`Received ${Fixed18.fromParts(Number(data[3])).toString(2, 3)} ${getTokenName(data[0])}`}</p>
+                    <p>{`Received ${Fixed18.fromParts(Number(data[3])).toString(2, 3)} ${getTokenName(data[0].Token)}`}</p>
                     <p>{`From ${formatHash(data[1])}`}</p>
                   </div>
                 )

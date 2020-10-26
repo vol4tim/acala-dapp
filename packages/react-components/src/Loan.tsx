@@ -131,7 +131,7 @@ export const DebitAmount: FC<LoanPropertyProps<FormatBalanceProps>> = ({
   return (
     <FormatBalance
       {...other}
-      balance={convertToFixed18(helper.debitAmount)}
+      balance={helper.debitAmount}
       currency={stableCurrency}
     />
   );

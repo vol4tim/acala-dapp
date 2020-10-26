@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
 
 import { AirDrop } from '@acala-dapp/react-components';
-import { Grid } from '@acala-dapp/ui-components';
+import { Grid, SubTitle } from '@acala-dapp/ui-components';
 
 import { UserCard } from './UserCard';
-import { Transaction } from './Transaction';
-import { WalletBalance } from './WalletBalance';
+import { TokenBalances } from './TokenBalances';
+import { LPBalances } from './LPBalances';
 
 export const AcalaConsole: FC = () => {
   return (
@@ -13,14 +13,18 @@ export const AcalaConsole: FC = () => {
       <Grid item>
         <UserCard />
       </Grid>
+
       <Grid item>
-        <WalletBalance />
+        <TokenBalances />
       </Grid>
+
+      <Grid item>
+        <SubTitle>LP Tokens</SubTitle>
+        <LPBalances />
+      </Grid>
+
       <Grid item>
         <AirDrop />
-      </Grid>
-      <Grid item>
-        <Transaction />
       </Grid>
     </Grid>
   );

@@ -6,8 +6,10 @@ export const useCouncilList = (): string[] => {
   const [list, setList] = useState<string[]>([]);
 
   useEffect(() => {
+    if (!api) return;
+
     setList(Object.keys(api.query).filter((key: string): boolean => key.endsWith('Council')));
-  }, [api.query]);
+  }, [api]);
 
   return list;
 };

@@ -1,0 +1,48 @@
+{
+  "en": {
+    "apps": {
+      "Self Serviced Loan": "Self Serviced Loan",
+      "Swap": "Swap",
+      "Deposit & Earn": "Deposit & Earn",
+      "Liquid DOT": "Liquid DOT",
+      "Governance": "Governanace",
+      "Setting": "Setting"
+    },
+    "page-wallet": {
+      "Wallet": "Wallet",
+      "Cross-Chain": "Cross-Chain",
+      "Change": "Change",
+      "Copy": "Copy",
+      "Transfer": "Transfer",
+      "My Address": "My Address"
+    },
+    "page-loan": {},
+    "page-swap": {},
+    "page-liquidity": {},
+    "page-homa": {},
+    "page-governance": {}
+  },
+  "zh": {
+    "apps": {
+      "Self Serviced Loan": "自助借贷",
+      "Swap": "交易",
+      "Deposit & Earn": "流动性",
+      "Liquid DOT": "流动 DOT",
+      "Governance": "治理",
+      "Setting": "设置"
+    },
+    "page-wallet": {
+      "Wallet": "钱包",
+      "Cross-Chain": "跨链转账",
+      "Change": "更改",
+      "Copy": "复制",
+      "Transfer": "转账",
+      "My Address": "我的账户"
+    },
+    "page-loan": {},
+    "page-swap": {},
+    "page-liquidity": {},
+    "page-homa": {},
+    "page-governance": {}
+  }
+}

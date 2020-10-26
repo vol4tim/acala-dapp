@@ -13,8 +13,8 @@ export const SocialMedias: FC<Props> = memo(({ data }) => {
     <div className={classes.social}>
       {data.map((item) => (
         <ProductItem
-          key={`products-${item.name}`}
-          showTitle={false}
+          key={`products-${item.content}`}
+          showContent={false}
           {...item}
         />
       ))}

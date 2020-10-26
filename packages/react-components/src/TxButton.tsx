@@ -1,106 +1,93 @@
-import React, { FC, PropsWithChildren, useState } from 'react';
-import { switchMap, map, timeout, finalize, take } from 'rxjs/operators';
+import React, { FC, PropsWithChildren, useState, useCallback, useMemo } from 'react';
+import { isFunction, uniqueId } from 'lodash';
+import { Observable, of } from 'rxjs';
+import { switchMap, map, timeout, finalize, take, catchError } from 'rxjs/operators';
 
 import { SubmittableResult, ApiRx } from '@polkadot/api';
-import { ITuple } from '@polkadot/types/types';
+import { ITuple, ISubmittableResult } from '@polkadot/types/types';
 import { DispatchError, AccountInfo } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 import { useAccounts, useApi, useHistory } from '@acala-dapp/react-hooks';
 import { Button, ButtonProps, notification, LoadingOutlined } from '@acala-dapp/ui-components';
+import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import { FormatAddress } from './format';
 
 interface Props extends ButtonProps {
-  section: string;
-  method: string;
-  params: any[];
-  beforSend?: () => void;
-  onSuccess?: () => void;
-  onFailed?: () => void;
-  onFinally?: () => void;
-  addon?: any;
+  api?: ApiRx;
+  signAddress?: string;
+  affectAssets?: CurrencyLike[]; // assets which be affected in this extrinsc
+  section: string; // extrinsic section
+  method: string; // extrinsic method
+  params: any[] | (() => any[]); // extrinsic params
+
+  preCheck?: () => Promise<boolean>;
+  beforeSend?: () => void; // the callback will be executed before send
+  afterSend?: () => void; // the callback will be executed after send
+  onInblock?: () => void; // the callback will be executed when extrinsic in block
+  onFinalize?: () => void; // the callback will be executed when extrinsic in finalize
+  onExtrinsicSuccess?: () => void; // the callback will be executed when extrinsic success
+  onFailed?: () => void; // the callback will be executed when extrinsic failed
 }
 
-const MAX_TX_DURATION_TIME = 60 * 1000;
-
-function extractEvents (api: ApiRx, result: SubmittableResult): void {
-  if (!result || !result.events) {
-    return;
-  }
-
-  result
-    .events
-    .filter((event): boolean => !!event.event)
-    .map(({ event: { data, method, section } }): void => {
-      if (section === 'system' && method === 'ExtrinsicFailed') {
-        const [dispatchError] = data as unknown as ITuple<[DispatchError]>;
-        let message = dispatchError.type;
-
-        if (dispatchError.isModule) {
-          try {
-            const mod = dispatchError.asModule;
-            const error = api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
-
-            message = `${error.section}.${error.name}`;
-          } catch (error) {
-            // swallow error
-          }
-        }
-
-        notification.error({
-          description: message,
-          message: 'some error occur'
-        });
-      } else {
-        notification.info({
-          message: `${section}.${method}`
-        });
-      }
-    });
-}
+const MAX_TX_WAITING_TIME = 60 * 1000;
 
 export const TxButton: FC<PropsWithChildren<Props>> = ({
-  beforSend,
+  afterSend,
+  api,
+  beforeSend,
   children,
   className,
   disabled,
   method,
+  onExtrinsicSuccess,
   onFailed,
-  onFinally,
-  onSuccess,
+  onFinalize,
+  onInblock,
   params,
+  preCheck,
   section,
+  signAddress,
   size,
   ...other
 }) => {
-  const { api } = useApi();
+  const { api: acalaApi } = useApi();
   const { active, authRequired, setAuthRequired } = useAccounts();
   const [isSending, setIsSending] = useState<boolean>(false);
   const { refresh } = useHistory();
 
-  const _onFailed = (): void => {
-    onFailed && onFailed();
-  };
+  const _signAddress = useMemo(() => {
+    if (signAddress) return signAddress;
 
-  const _onSuccess = (): void => {
-    onSuccess && onSuccess();
-  };
+    return active?.address;
+  }, [signAddress, active]);
 
-  const _onFinally = (): void => {
-    setIsSending(false);
-    refresh(2000);
-    onFinally && onFinally();
-  };
+  const _api = useMemo(() => {
+    if (api) return api;
 
-  const onClick = (): void => {
-    if (!api.tx[section] || !api.tx[section][method]) {
+    return acalaApi;
+  }, [api, acalaApi]);
+
+  const onClick = useCallback(async (): Promise<void> => {
+    // precheck params etc.
+    if (preCheck) {
+      const result = await preCheck();
+
+      if (!result) {
+        return;
+      }
+    }
+
+    // ensure that the section and method are exist
+    if (!_api.tx[section] || !_api.tx[section][method]) {
       console.error(`can not find api.tx.${section}.${method}`);
 
       return;
     }
 
-    if (!(active && active.address)) {
+    // ensuer that account is exist
+    if (!_signAddress) {
       console.error('can not find available address');
 
       if (!authRequired) {
@@ -110,63 +97,150 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       return;
     }
 
-    if (beforSend) {
-      beforSend();
+    const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => _api.query.system.account<AccountInfo>(_signAddress).pipe(
+      take(1),
+      map((account) => {
+        const _params = isFunction(params) ? params() : params;
+
+        return [account, _params] as [AccountInfo, any[]];
+      }),
+      switchMap(([account, params]) => {
+        console.log(account.toHuman());
+        const signedExtrinsic = _api.tx[section][method].apply(_api, params);
+
+        return signedExtrinsic.paymentInfo(_signAddress).pipe(
+          map((result) => {
+            console.log(result.toString());
+          }),
+          map(() => [account, params] as [AccountInfo, any[]]),
+          catchError((error) => {
+            console.log(error);
+
+            return of([account, params] as [AccountInfo, any[]]);
+          })
+        );
+      }),
+      switchMap(([account, params]) => {
+        return _api.tx[section][method](...params).signAsync(
+          _signAddress,
+          { nonce: account.nonce.toNumber() }
+        );
+      })
+    );
+
+    const notify = (signedTx: SubmittableExtrinsic<'rxjs'>): [SubmittableExtrinsic<'rxjs'>, string] => {
+      const hash = signedTx.hash.toString();
+
+      console.log(signedTx);
+
+      const notificationKey = uniqueId(`${section}-${method}`);
+
+      notification.info({
+        description: <FormatAddress address={hash} />,
+        duration: null,
+        icon: <LoadingOutlined spin />,
+        key: notificationKey,
+        message: `${section}: ${method}`
+      });
+
+      return [signedTx, notificationKey];
+    };
+
+    const send = (signedTx: SubmittableExtrinsic<'rxjs'>): Observable<ISubmittableResult> => {
+      return signedTx.send().pipe(timeout(MAX_TX_WAITING_TIME));
+    };
+
+    const extractEvents = (result: SubmittableResult): { isDone: boolean; errorMessage?: string } => {
+      const events = result.events.filter((event): boolean => !!event.event);
+
+      for (const { event: { data, method, section } } of events) {
+        // extrinsic success
+        if (section === 'system' && method === 'ExtrinsicSuccess') {
+          return { isDone: true };
+        }
+
+        // extrinsic failed
+        if (section === 'system' && method === 'ExtrinsicFailed') {
+          const [dispatchError] = data as unknown as ITuple<[DispatchError]>;
+          let message = dispatchError.type;
+
+          if (dispatchError.isModule) {
+            try {
+              const mod = dispatchError.asModule;
+              const error = _api.registry.findMetaError(new Uint8Array([mod.index.toNumber(), mod.error.toNumber()]));
+
+              message = `${error.section}.${error.name}`;
+            } catch (error) {
+              message = Reflect.has(error, 'toString') ? error.toString() : error;
+            }
+          }
+
+          return { errorMessage: message, isDone: true };
+        }
+      }
+
+      return { isDone: false };
+    };
+
+    let notificationKey = '';
+
+    // execute before send callback
+    if (beforeSend) {
+      beforeSend();
     }
 
     // lock btn click
     setIsSending(true);
 
-    let notificationKey = '';
+    const subscriber = createTx().pipe(
+      map(notify),
+      switchMap(([signedTx, key]) => {
+        notificationKey = key;
 
-    const subscriber = api.query.system.account<AccountInfo>(active.address).pipe(
-      switchMap((account) => {
-        return api.tx[section][method](...params).signAsync(
-          active.address,
-          {
-            nonce: account.nonce.toNumber()
-          }
+        return send(signedTx).pipe(
+          map((sendResult): boolean => {
+            if (sendResult.status.isInBlock && onInblock) {
+              onInblock();
+            }
+
+            if (sendResult.status.isFinalized && onFinalize) {
+              onFinalize();
+            }
+
+            if (
+              sendResult.status.isInBlock ||
+              sendResult.status.isFinalized
+            ) {
+              const { errorMessage, isDone } = extractEvents(sendResult);
+
+              // handle extrinsic error
+              if (isDone && errorMessage) {
+                throw new Error(errorMessage);
+              }
+
+              return isDone;
+            }
+
+            if (
+              sendResult.status.isUsurped ||
+              sendResult.status.isDropped ||
+              sendResult.status.isFinalityTimeout
+            ) {
+              throw new Error(sendResult.status.toString());
+            }
+
+            return false;
+          })
         );
       }),
-      take(1),
-      switchMap((signedTx: SubmittableExtrinsic<'rxjs'>) => {
-        const hash = signedTx.hash.toString();
-
-        notificationKey = `${section}-${method}`;
-        signedTx.paymentInfo(active.address).subscribe((result) => console.log(result.toString()));
-
-        notification.info({
-          description: <FormatAddress address={hash} />,
-          duration: null,
-          icon: <LoadingOutlined spin />,
-          key: notificationKey,
-          message: `${section}: ${method}`
-        });
-
-        return signedTx.send().pipe(timeout(MAX_TX_DURATION_TIME));
-      }),
-      map((result): boolean => {
-        if (
-          result.status.isInBlock ||
-          result.status.isFinalized
-        ) {
-          extractEvents(api, result as unknown as SubmittableResult);
-
-          return true;
-        }
-
-        if (
-          result.status.isUsurped ||
-          result.status.isDropped ||
-          result.status.isFinalityTimeout
-        ) {
-          throw new Error(result.status.toString());
-        }
-
-        return false;
-      }),
+      // exculte afterSend callback
       finalize(() => {
-        _onFinally();
+        if (afterSend) {
+          afterSend();
+        }
+
+        setIsSending(false);
+        setTimeout(refresh, 2000);
       })
     ).subscribe({
       error: (error: Error) => {
@@ -176,37 +250,41 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
             key: notificationKey,
             message: 'Extrinsic timed out, Please check manually'
           });
-        } else {
-          notification.error({
-            duration: 4,
-            key: notificationKey,
-            message: (error && error.message) ? error.message : 'Unknown Error Occurred!'
-          });
         }
 
-        _onFailed();
-        setIsSending(false);
+        notification.error({
+          duration: 4,
+          key: notificationKey,
+          message: (error && error.message) ? error.message : 'Error Occurred!'
+        });
+
+        if (onFailed) {
+          onFailed();
+        }
+
         subscriber.unsubscribe();
       },
       next: (isDone) => {
         if (isDone) {
+          if (onExtrinsicSuccess) {
+            onExtrinsicSuccess();
+          }
+
           notification.success({
             duration: 4,
             key: notificationKey,
             message: 'Submit Transaction Success'
           });
-          _onSuccess();
-          setIsSending(false);
+
           subscriber.unsubscribe();
         }
       }
     });
-  };
+  }, [preCheck, _api, _signAddress, afterSend, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
 
   return (
     <Button
       className={className}
-      color='primary'
       disabled={disabled || isSending}
       loading={isSending}
       onClick={onClick}

@@ -13,13 +13,13 @@ export const User: FC = memo(() => {
   return (
     <div className={classes.area}>
       <ProductItem
-        icon={<WalletIcon />}
-        name={
+        content={
           <div className={classes.wallet}>
-            <p className={classes.title}>{active?.meta?.name || 'Wallet'}</p>
+            <p className={classes.name}>{active?.meta?.name || 'Wallet'}</p>
             <FormatAddress address={active?.address || ''} />
           </div>
         }
+        icon={<WalletIcon />}
         path='wallet'
         rel='wallet'
       />

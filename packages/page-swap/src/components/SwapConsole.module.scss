@@ -3,19 +3,6 @@
   overflow: visible;
 }
 
-.inputAreaRoot {
-  flex: 1;
-
-  & .title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    font-size: 16px;
-    color: var(--text-color-primary);
-  }
-}
-
 .main {
   display: grid;
   grid-template-columns: 1fr 178px;
@@ -24,7 +11,12 @@
   background: var(--color-white);
   border-radius: 12px;
 
+  .extra {
+    font-weight: bold;
+  }
+
   .inputFields {
+    font-size: 12px;
     margin-right: 27px;
   }
 

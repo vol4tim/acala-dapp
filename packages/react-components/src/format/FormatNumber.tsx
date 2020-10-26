@@ -5,13 +5,14 @@ import { Fixed18 } from '@acala-network/app-util';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { formatNumber, FormatNumberConfig } from '../utils';
 import { Tooltip, TooltipProps } from '@acala-dapp/ui-components';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import classes from './format.module.scss';
 
 export type FormatterColor = 'primary' | 'error' | 'success';
 
 export type FormatNumberProps = {
-  data: number | string | Fixed18 | undefined;
+  data: number | string | Fixed18 | FixedPointNumber | undefined;
   formatNumberConfig?: FormatNumberConfig;
   withTooltips?: boolean;
   toolTipsProps?: Omit<TooltipProps, 'show'>;

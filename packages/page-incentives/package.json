@@ -1,0 +1,9 @@
+{
+  "name": "@acala-dapp/page-incentives",
+  "version": "0.2.0",
+  "description": "incentives page",
+  "main": "index.js",
+  "author": "Acala Developers <hello@acala.network>",
+  "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
+  "license": "Apache-2.0"
+}

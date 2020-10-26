@@ -1,17 +1,28 @@
 
-$select-height: 64px;
+$select-height: 60px;
 
 .aca-select__root {
   min-width: 250px;
   height: $select-height;
+
+  .ant-select-selection-item {
+    display: flex;
+    height: $select-height;
+    align-items: center;
+    padding: 0 12px;
+
+    & > svg {
+      margin-right: 8px;
+    }
+  }
 
   .ant-select-selector {
     box-shadow: none !important;
     height: $select-height !important;
     align-items: center;
     font-weight: 500 !important;
-    border-radius: 13px !important;
-    border-color: var(--color-primary) !important;
+    border-radius: 2px !important;
+    border-color: var(--border-color) !important;
     font-size: 16px !important;
     line-height: 19px !important;
     color: var(--color-primary) !important;
@@ -46,12 +57,15 @@ $select-height: 64px;
 }
 
 .aca-select__option-item {
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  height: 64px;
-  color: var(--color-primary) !important;
-  background: #ffffff !important;
+  padding: none !important;
+
+  .ant-select-item-option-content {
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    height: $select-height;
+    color: var(--color-primary) !important;
+  }
 
   .ant-select-item-option-content > svg {
     margin-right: 8px;

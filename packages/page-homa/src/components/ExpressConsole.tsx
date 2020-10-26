@@ -1,9 +1,9 @@
 import React, { FC, useMemo, useCallback, useState, useRef } from 'react';
 import { noop } from 'lodash';
 
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { Fixed18 } from '@acala-network/app-util';
 import { Card, Tabs, List } from '@acala-dapp/ui-components';
-import { TxButton, TwoWayBalanceInput, FormatBalance, eliminateGap } from '@acala-dapp/react-components';
+import { TxButton, TwoWayBalanceInput, FormatBalance, eliminateGap, focusToFixed18 } from '@acala-dapp/react-components';
 import { useConstants, useStakingPoolHelper, useBalance } from '@acala-dapp/react-hooks';
 
 import classes from './ExpressConsole.module.scss';
@@ -52,7 +52,7 @@ const StakePanel: FC = () => {
   const params = useMemo(() => {
     if (!stakingCurrencyBalance) return [];
 
-    const _amount = eliminateGap(Fixed18.fromNatural(amount), convertToFixed18(stakingCurrencyBalance), Fixed18.fromNatural(0.000001));
+    const _amount = eliminateGap(Fixed18.fromNatural(amount), focusToFixed18(stakingCurrencyBalance), Fixed18.fromNatural(0.000001));
 
     return [_amount.innerToString()];
   }, [amount, stakingCurrencyBalance]);
@@ -91,7 +91,7 @@ const StakePanel: FC = () => {
         className={classes.actionBtn}
         disabled={isDisabled}
         method='mint'
-        onSuccess={onSuccess}
+        onExtrinsicSuccess={onSuccess}
         params={params}
         section='homa'
         size='large'
@@ -125,7 +125,7 @@ const UnstakePanel: FC = () => {
   const params = useMemo(() => {
     if (!liquidCurrencyBalance) return [];
 
-    const _amount = eliminateGap(Fixed18.fromNatural(amount), convertToFixed18(liquidCurrencyBalance), Fixed18.fromNatural(0.000001));
+    const _amount = eliminateGap(Fixed18.fromNatural(amount), focusToFixed18(liquidCurrencyBalance), Fixed18.fromNatural(0.000001));
 
     return [_amount.innerToString(), 'Immediately'];
   }, [amount, liquidCurrencyBalance]);
@@ -188,7 +188,7 @@ const UnstakePanel: FC = () => {
         className={classes.actionBtn}
         disabled={isDisabled}
         method='redeem'
-        onSuccess={onSuccess}
+        onExtrinsicSuccess={onSuccess}
         params={params}
         section='homa'
         size='large'

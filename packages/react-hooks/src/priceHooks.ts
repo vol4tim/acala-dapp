@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { tokenEq } from '@acala-dapp/react-components';
-import { PriceData } from '@acala-dapp/react-components/RxStore/type';
+import { PriceData } from '@acala-dapp/react-environment/RxStore/type';
 
 import { useRxStore } from './useRxStore';
 
@@ -17,7 +16,13 @@ export const useAllPrices = (): PriceData[] => {
   const [prices, setPrices] = useState<PriceData[]>([]);
 
   useEffect(() => {
-    const subscribe = priceStore.subscribe(setPrices);
+    const subscribe = priceStore.subscribe((result) => {
+      if (!result) return;
+
+      if (!result.length) return;
+
+      setPrices(result);
+    });
 
     return (): void => subscribe.unsubscribe();
   }, [priceStore, setPrices]);
@@ -30,10 +35,18 @@ export const useAllPrices = (): PriceData[] => {
  * @description get price of `currency`
  * @param currency
  */
-export const usePrice = (currency: CurrencyId | string): Fixed18 | undefined => {
+export const usePrice = (currency: CurrencyId): FixedPointNumber => {
   const prices = useAllPrices();
+  const result = useMemo(() => {
+    // dex share should not have price
+    if (currency.isDexShare) return FixedPointNumber.ZERO;
 
-  const result = prices.find((item: PriceData): boolean => tokenEq(item.currency, currency));
+    const result = prices.find((item: PriceData): boolean => {
+      return item.currency === currency.asToken.toString();
+    });
 
-  return result ? result.price : undefined;
+    return result ? result.price : FixedPointNumber.ZERO;
+  }, [prices, currency]);
+
+  return result;
 };

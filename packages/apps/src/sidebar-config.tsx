@@ -15,70 +15,76 @@ import { SideBarConfig } from './types/sidebar';
 export const sideBarConfig: SideBarConfig = {
   products: [
     {
+      content: 'Self Serviced Loan',
       icon: <LoanSVG />,
-      name: 'Self Serviced Loan',
       path: 'loan',
       rel: 'loan'
     },
     {
+      content: 'Swap',
       icon: <ExchangeSVG />,
-      name: 'Swap',
       path: 'swap',
       rel: 'swap'
     },
     {
+      content: 'Deposit',
       icon: <DepositSVG />,
-      name: 'Deposit & Earn',
-      path: 'deposit',
-      rel: 'deposit'
+      path: 'liquidity',
+      rel: 'liquidity'
     },
     {
+      content: 'AMM',
+      icon: <DepositSVG />,
+      path: 'incentives',
+      rel: 'incentives'
+    },
+    {
+      content: 'Liquid DOT',
       icon: <LiquidSVG />,
-      name: 'Liquid DOT',
       path: 'homa',
       rel: 'homa'
     },
     {
+      content: 'Governance',
       icon: <GovernanceSVG />,
-      name: 'Governance',
       path: 'governance',
       rel: 'governance'
     }
     // {
     //   icon: <LoanSVG />,
-    //   name: 'Loan Analysis',
+    //   content: 'Loan Analysis',
     //   path: 'anal/loan'
     // }
   ],
   socialMedia: [
     {
+      content: 'Faucet',
       icon: <FaucetSVG />,
       isExternal: true,
-      name: 'Faucet',
       path: 'https://discord.gg/CmqXvMP',
       rel: 'faucet',
       target: '_blank'
     },
     {
+      content: 'Wiki',
       icon: <GuideSVG />,
       isExternal: true,
-      name: 'Wiki',
       path: 'https://github.com/AcalaNetwork/Acala/wiki',
       rel: 'wiki',
       target: '_blank'
     },
     {
+      content: 'Email',
       icon: <EmailSVG />,
       isExternal: true,
-      name: 'Email',
       path: 'mailto:hello@acala.network',
       rel: 'email',
       target: '_blank'
     },
     {
+      content: 'Twitter',
       icon: <TwitterSVG />,
       isExternal: true,
-      name: 'Twitter',
       path: 'https://twitter.com/AcalaNetwork',
       rel: 'twitter',
       target: '_blank'

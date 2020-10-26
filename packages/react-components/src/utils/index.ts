@@ -1,11 +1,9 @@
-import { Codec } from '@polkadot/types/types';
 import * as dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Fixed18 } from '@acala-network/app-util';
-import { ApiRx, ApiPromise } from '@polkadot/api';
-import { TimestampedValue } from '@open-web3/orml-types/interfaces';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 export * from './token';
 export * from './account';
@@ -22,26 +20,23 @@ export const tokenEq = (base: CurrencyId | string, target: CurrencyId | string):
     return false;
   }
 
-  return base.toString().toUpperCase() === target.toString().toUpperCase();
-};
-
-// FIXME: a trick to get value from TimestampedValue, need to fix
-export const getValueFromTimestampValue = (origin: TimestampedValue): Codec => {
-  if (origin && Reflect.has(origin.value, 'value')) {
-    return (origin.value as any).value;
-  }
-
-  return origin.value;
-};
-
-export const getCurrencyIdFromName = (api: ApiRx | ApiPromise, name: string): CurrencyId | string => {
   try {
-    const CurrencyId = api.registry.createClass('CurrencyId' as any);
+    // convert tokenSymbo to stirng
+    if (typeof base !== 'string') {
+      base = base.isToken ? base.asToken.toString() : base.asDexShare.toString();
+    }
 
-    return new CurrencyId(api.registry, name);
+    // convert tokenSymbo to stirng
+    if (typeof target !== 'string') {
+      target = target.isToken ? target.asToken.toString() : target.asDexShare.toString();
+    }
+
+    return base === target;
   } catch (e) {
-    return name;
+    // swallow error
   }
+
+  return false;
 };
 
 export const eliminateGap = (target: Fixed18, max: Fixed18, gap: Fixed18): Fixed18 => {
@@ -58,4 +53,20 @@ export const eliminateGap = (target: Fixed18, max: Fixed18, gap: Fixed18): Fixed
   }
 
   return target;
+};
+
+export const focusToFixed18 = (origin: Fixed18 | FixedPointNumber): Fixed18 => {
+  if (origin instanceof FixedPointNumber) {
+    return Fixed18.fromParts(origin.toChainData());
+  }
+
+  return origin;
+};
+
+export const focusToFixedPointNumber = (origin: Fixed18 | FixedPointNumber): FixedPointNumber => {
+  if (origin instanceof Fixed18) {
+    return FixedPointNumber._fromBN(origin.getInner());
+  }
+
+  return origin;
 };

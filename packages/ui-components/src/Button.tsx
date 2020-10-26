@@ -2,12 +2,11 @@ import React, { FC } from 'react';
 import clsx from 'clsx';
 
 import { BareProps } from './types';
-import { Loading } from './Loading';
-import classes from './Button.module.scss';
 import { IconType, getIcon } from './Icon';
+import './Button.scss';
 
 type ButtonType = 'normal' | 'ghost' | 'border';
-type ButtonColor = 'normal' | 'primary' | 'danger';
+type ButtonStyle = 'normal' | 'primary' | 'danger';
 type ButtonSize = 'small' | 'middle' | 'large';
 
 export interface ButtonProps extends BareProps {
@@ -15,18 +14,18 @@ export interface ButtonProps extends BareProps {
   disabled?: boolean;
   onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   type?: ButtonType;
-  color?: ButtonColor;
+  style?: ButtonStyle;
   size?: ButtonSize;
 }
 
 export const Button: FC<ButtonProps> = ({
   children,
   className,
-  color = 'normal',
   disabled,
   loading,
   onClick,
   size = 'middle',
+  style = 'primary',
   type = 'normal'
 }) => {
   const _onClick = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
@@ -43,25 +42,18 @@ export const Button: FC<ButtonProps> = ({
       className={
         clsx(
           className,
-          classes.root,
-          classes[size],
-          classes['type-' + type],
-          classes['color-' + color],
+          'aca-btn',
+          `aca-btn--${size}`,
+          `aca-btn--${type}`,
+          `aca-btn-style--${style}`,
           {
-            [classes.disabled]: disabled
+            'aca-btn--loading': loading,
+            disabled: disabled
           }
         )
       }
       onClick={_onClick}
     >
-      {
-        loading ? (
-          <Loading
-            className={classes.loading}
-            size='small'
-          />
-        ) : null
-      }
       {children}
     </button>
   );
@@ -81,7 +73,7 @@ export const IconButton: FC<IconButtonProps> = ({
       className={
         clsx(
           className,
-          classes.iconButton
+          'aca-icon-btn'
         )
       }
       {...other}

@@ -1,11 +1,10 @@
+import { get } from 'lodash';
+
 import { Codec } from '@polkadot/types/types';
 import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
-export const LAMINAR_WATCHER_ADDRESS = '5CLaminarAUSDCrossChainTransferxxxxxxxxxxxxxwisu';
-
-export const LAMINAR_SENDER_ADDRESS = '5DiKSJG59azdU8YkmYcPxSg2BNfXgph4dcJVKEn5vibyN6iK';
-
-export const FAUCET_ADDRESS = '5DZbNKzPgAnpb5LYfafPx4P3JMeyn1kxyeSJNuoCKddxEbXc';
+import { LAMINAR_SENDER_ADDRESS, LAMINAR_WATCHER_ADDRESS, FAUCET_ADDRESS, systemAccounts } from './account-consts';
 
 export const thousand = (num: string | string): string => {
   const _num = num.toString();
@@ -20,8 +19,16 @@ export interface FormatNumberConfig {
   removeEmptyDecimalParts: boolean;
 }
 
-export const formatNumber = (num: string | number | Fixed18 | undefined, config: FormatNumberConfig = { decimalLength: 6, removeEmptyDecimalParts: true, removeTailZero: true }): string => {
-  const _num: string = num ? (num instanceof Fixed18) ? num.toFixed(18, 2) : Fixed18.fromNatural(num).toFixed(18, 2) : '0';
+export const formatNumber = (num: string | number | Fixed18 | FixedPointNumber | undefined, config: FormatNumberConfig = { decimalLength: 6, removeEmptyDecimalParts: true, removeTailZero: true }): string => {
+  let _num = '0';
+
+  if (num instanceof Fixed18) {
+    _num = num.toFixed(18, 2);
+  } else if (num instanceof FixedPointNumber) {
+    _num = num.toString(18, 2);
+  } else {
+    _num = (new FixedPointNumber(num || 0)).toString(18, 2);
+  }
 
   let [i, d] = _num.split('.');
 
@@ -48,12 +55,16 @@ export const formatNumber = (num: string | number | Fixed18 | undefined, config:
 
 export const formatHash = (hash: string, name = true): string => {
   if (name) {
-    if (hash === LAMINAR_WATCHER_ADDRESS || hash === LAMINAR_SENDER_ADDRESS) {
+    if (hash === LAMINAR_SENDER_ADDRESS || hash === LAMINAR_WATCHER_ADDRESS) {
       return 'Laminar';
     }
 
     if (hash === FAUCET_ADDRESS) {
       return 'Faucet';
+    }
+
+    if (Reflect.has(systemAccounts, hash)) {
+      return get(systemAccounts, [hash, 'name']);
     }
   }
 
@@ -69,30 +80,32 @@ export const formatAddress = (address: string, isMini?: boolean): string => {
     return 'Faucet';
   }
 
+  if (Reflect.has(systemAccounts, address)) {
+    return get(systemAccounts, [address, 'name']);
+  }
+
   return !isMini
     ? address.replace(/(\w{6})\w*?(\w{6}$)/, '$1......$2')
     : address.replace(/(\w{6})\w*$/, '$1...');
 };
 
-export const formatBalance = (balance: Fixed18 | Codec | number | string | undefined): Fixed18 => {
-  let inner = Fixed18.ZERO;
+export const formatBalance = (balance: FixedPointNumber | Fixed18 | Codec | number | string | undefined): number => {
+  if (typeof balance === 'number') return balance;
 
-  if (!balance) {
-    return Fixed18.ZERO;
+  if (typeof balance === 'string') return Number(balance);
+
+  if (balance instanceof FixedPointNumber) return balance.toNumber(6);
+
+  if (balance instanceof Fixed18) return balance.toNumber(6, 3);
+
+  try {
+    // for Codec
+    return FixedPointNumber.fromInner(balance.toString()).toNumber(6);
+  } catch (e) {
+    // swallow error
   }
 
-  if (typeof balance === 'number' || typeof balance === 'string') {
-    return Fixed18.fromNatural(balance);
-  }
-
-  if (balance instanceof Fixed18) {
-    return balance;
-  }
-
-  // for Codec
-  inner = Fixed18.fromParts(balance.toString());
-
-  return inner;
+  return 0;
 };
 
 export const formatDuration = (duration: number): number => {

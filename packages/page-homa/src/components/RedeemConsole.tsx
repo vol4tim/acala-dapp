@@ -4,7 +4,7 @@ import { useFormik } from 'formik';
 
 import { Fixed18 } from '@acala-network/app-util';
 import { Grid, Radio, List, Condition } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInput, numToFixed18Inner, formatDuration, FormatBalance } from '@acala-dapp/react-components';
+import { TxButton, BalanceInput, numToFixed18Inner, formatDuration, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
 import { useFormValidator } from '@acala-dapp/react-hooks';
 
 import classes from './RedeemConsole.module.scss';
@@ -100,8 +100,8 @@ export const RedeemConsole: FC = () => {
     return stakingPoolHelper.claimFee(Fixed18.fromNatural(form.values.amount), targetEra);
   }, [stakingPoolHelper, targetEra, form.values.amount]);
 
-  const handleAmountInput = useCallback((value: number) => {
-    form.setFieldValue('amount', value);
+  const handleAmountInput = useCallback((value: BalanceInputValue) => {
+    form.setFieldValue('amount', value.amount);
   }, [form]);
 
   if (!stakingPoolHelper || !stakingPool) {
@@ -185,11 +185,8 @@ export const RedeemConsole: FC = () => {
       <Grid item>
         <BalanceInput
           error={form.errors.amount}
-          id='amount'
-          name='amount'
           onChange={handleAmountInput}
-          token={stakingPool.liquidCurrency}
-          value={form.values.amount}
+          value={{ amount: form.values.amount, token: stakingPool.liquidCurrency }}
         />
       </Grid>
       <Grid item>
@@ -206,7 +203,7 @@ export const RedeemConsole: FC = () => {
           className={classes.txBtn}
           disabled={checkDisabled()}
           method='redeem'
-          onSuccess={form.resetForm}
+          onExtrinsicSuccess={form.resetForm}
           params={getParams()}
           section='homa'
         >

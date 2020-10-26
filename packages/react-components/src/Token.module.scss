@@ -13,47 +13,42 @@
   }
 
   .name {
-    font-size: 16px;
-    line-height: 24px;
     font-weight: 500;
   }
 
   .fullname {
-    font-size: 14px;
-    line-height: 21px;
     color: var(--text-color-second);
     white-space: nowrap;
   }
 }
 
-.tokenImg {
+.tokenImage {
   display: block;
-  width: 42px;
-  height: 42px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.lpImages {
+  display: flex;
+  width: 55px;
+
+  > img:nth-child(1) {
+    z-index: 1;
+  }
+
+  > img:nth-child(2) {
+    transform: translate3d(-17px, 0, 0);
+  }
 }
 
 .icon {
   flex-grow: 0;
   flex-shrink: 0;
-  margin-right: 12px;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #ffffff;
-  overflow: hidden;
-
-  > img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+  margin-right: 8px;
 
   &.noName {
     margin-right: 0;
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
   }
 }

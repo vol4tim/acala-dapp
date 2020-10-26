@@ -11,9 +11,7 @@ export const UserCard: FC = () => {
   const { active, openSelectAccount } = useAccounts();
 
   const renderContent = (): ReactNode => {
-    if (!active) {
-      return null;
-    }
+    if (!active) return null;
 
     return (
       <>

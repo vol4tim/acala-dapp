@@ -1,26 +1,33 @@
-import { useEffect, useContext, useMemo } from 'react';
-import { get } from 'lodash';
+import { useEffect, useMemo } from 'react';
+import { get, isEmpty } from 'lodash';
+import { Observable, Subscription } from 'rxjs';
 import { ApiRx } from '@polkadot/api';
 
-import { globalStoreContext } from '@acala-dapp/react-environment';
+import { useStore } from '@acala-dapp/react-environment';
 
 import { useIsAppReady } from './useIsAppReady';
 import { useApi } from './useApi';
 import { CallParams } from './types';
-import { Observable } from 'rxjs';
 
 class Tracker {
-  private trackerList: {[k in string]: { refCount: number; subscriber: Observable<unknown> }}
+  private trackerList: Record<string, { refCount: number; subscriber: Subscription }>;
 
   constructor () {
     this.trackerList = {};
   }
 
-  subscribe (api: ApiRx, path: string, params: CallParams, key: string, updateFn: (key: string, valeu: any) => void): void {
-    if (!api || !path) {
-      return;
-    }
+  subscribe (
+    api: ApiRx,
+    path: string,
+    params: CallParams,
+    key: string,
+    callback: (key: string, valeu: any) => void
+  ): void {
+    if (isEmpty(api)) return;
 
+    if (!path) return;
+
+    // update tracker list
     if (this.trackerList[key]) {
       this.trackerList[key].refCount += 1;
 
@@ -29,16 +36,13 @@ class Tracker {
 
     const fn = get(api, path);
 
-    if (!fn) {
-      return;
-    }
+    if (!fn) throw new Error(`can't find method:${path} in api`);
 
-    const subscriber = fn(...params).subscribe({
-      next: (result: any) => {
-        updateFn(key, result);
-      }
+    const subscriber = (fn(...params) as Observable<unknown>).subscribe({
+      next: (result: any) => callback(key, result)
     });
 
+    // update tracker list
     this.trackerList[key] = {
       refCount: 1,
       subscriber
@@ -59,10 +63,10 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
 }): T | undefined {
   const { api } = useApi();
   const { appReadyStatus } = useIsAppReady();
-  const { setStore, store } = useContext(globalStoreContext);
+  const { get, set } = useStore('apiQueryStore');
   const key = useMemo(
     () =>
-      `${path}${params.toString() ? '-' + params.toString() : ''}${options?.cacheKey ? '-' + options.cacheKey : ''}`,
+      `${path}${params.toString() ? '-' + JSON.stringify(params) : ''}${options?.cacheKey ? '-' + options.cacheKey : ''}`,
     [path, params, options]
   );
 
@@ -71,10 +75,10 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
     // check if we have a function & that we are mounted
     if (!appReadyStatus) return;
 
-    tracker.subscribe(api, path, params, key, setStore);
+    tracker.subscribe(api, path, params, key, set);
 
     return (): void => tracker.unsubscribe(key);
-  }, [appReadyStatus, api, path, params, key, setStore]);
+  }, [appReadyStatus, api, path, params, key, set]);
 
-  return store[key];
+  return get(key);
 }

@@ -1,86 +1,23 @@
-import React, { FC, memo, useContext, ReactElement, ReactNode, useCallback, useMemo } from 'react';
-import { noop } from 'lodash';
-import { useFormik } from 'formik';
+import React, { FC, useContext, ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
+import { Form } from 'antd';
 
-import { CurrencyId } from '@acala-network/types/interfaces';
+import { ITuple } from '@polkadot/types/types';
+import { Balance } from '@acala-network/types/interfaces';
 
-import { Card, nextTick, IconButton, Condition } from '@acala-dapp/ui-components';
-import { BalanceInput, TxButton, numToFixed18Inner, DexExchangeRate, FormatBalance } from '@acala-dapp/react-components';
-import { useFormValidator, useBalance } from '@acala-dapp/react-hooks';
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { CurrencyChangeFN } from '@acala-dapp/react-components/types';
+import { Card, IconButton } from '@acala-dapp/ui-components';
+import { TxButton, BalanceInputValue, UserBalance, LPExchangeRate, getDexShareFromCurrencyId } from '@acala-dapp/react-components';
+import { useApi, useSubscription, useBalance } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
 import { SwapInfo } from './SwapInfo';
-import { SlippageInputArea } from './SlippageInputArea';
+import { SlippageInput } from './SlippageInput';
+import { SwapInput } from './SwapInput';
 import { SwapContext } from './SwapProvider';
+import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
+import { SwapTrade } from '@acala-network/sdk-swap';
+import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
 
-interface InputAreaProps {
-  addon?: ReactNode;
-  error: any;
-  title: string;
-  currencies: (CurrencyId | string)[];
-  token: CurrencyLike;
-  onTokenChange: CurrencyChangeFN;
-  value: number;
-  onChange: (value: number) => void;
-  inputName: string;
-  showMax?: boolean;
-  maxInput?: Fixed18;
-}
-
-const InputArea: FC<InputAreaProps> = ({
-  addon,
-  currencies,
-  error,
-  inputName,
-  maxInput,
-  onChange,
-  onTokenChange,
-  showMax = false,
-  title,
-  token,
-  value
-}) => {
-  const handleMax = useCallback(() => {
-    if (!onChange || !maxInput) return;
-
-    onChange(maxInput.toNumber());
-  }, [maxInput, onChange]);
-
-  return (
-    <div className={classes.inputAreaRoot}>
-      <div className={classes.title}>
-        {title}
-
-        <Condition condition={!!maxInput}>
-          <p>
-            Max:
-            <FormatBalance
-              balance={maxInput as Fixed18}
-              currency={token}
-            />
-          </p>
-        </Condition>
-      </div>
-      <BalanceInput
-        className={classes.input}
-        currencies={currencies}
-        enableTokenSelect
-        error={error}
-        name={inputName}
-        onChange={onChange}
-        onMax={handleMax}
-        onTokenChange={onTokenChange}
-        showMaxBtn={showMax}
-        token={token}
-        value={value}
-      />
-      {addon}
-    </div>
-  );
-};
+const DANGER_TRADE_IMPACT = new FixedPointNumber(0.05);
 
 interface SwapBtn {
   onClick: () => void;
@@ -90,7 +27,6 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
   return (
     <IconButton
       className={classes.swapBtn}
-      color='primary'
       icon='swap'
       onClick={onClick}
       size='large'
@@ -99,103 +35,92 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
   );
 }
 
-export const SwapConsole: FC = memo(() => {
+export const SwapConsole: FC = () => {
+  const [form] = Form.useForm();
+  const { api } = useApi();
+  const [parameters, setParameters] = useState<TradeParameters | null>(null);
+
   const {
-    calcSupply,
-    calcTarget,
-    pool,
-    priceImpact,
-    setCurrency,
-    slippage,
-    supplyCurrencies,
-    targetCurrencies
+    availableTokens,
+    swapTrade,
+    updateUserInput,
+    userInput
   } = useContext(SwapContext);
-  const supplyCurrencyBalance = useBalance(pool.supplyCurrency);
 
-  const validator = useFormValidator({
-    supply: {
-      currency: pool.supplyCurrency,
-      max: pool.supplySize,
-      min: 0,
-      type: 'balance'
-    },
-    target: {
-      max: pool.targetSize,
-      min: 0,
-      type: 'number'
-    }
-  });
-
-  const form = useFormik({
-    initialValues: {
-      supply: (('' as any) as number),
-      target: (('' as any) as number)
-    },
-    onSubmit: noop,
-    validate: validator
-  });
-
-  const onSwap = useCallback((): void => {
-    setCurrency(pool.targetCurrency, pool.supplyCurrency);
-    form.resetForm();
-  }, [setCurrency, pool.targetCurrency, pool.supplyCurrency, form]);
-
-  const onSupplyChange = useCallback((value: number): void => {
-    calcTarget(pool.supplyCurrency, pool.targetCurrency, value).subscribe((target) => {
-      nextTick(() => form.setFieldValue('target', target));
+  // reverse input and output
+  const handleReverse = useCallback(() => {
+    updateUserInput({
+      inputAmount: 0,
+      inputToken: userInput.outputToken,
+      mode: userInput.mode,
+      outputAmount: 0,
+      outputToken: userInput.inputToken
     });
+  }, [userInput, updateUserInput]);
 
-    nextTick(() => form.setFieldValue('supply', value));
-  }, [calcTarget, pool.supplyCurrency, pool.targetCurrency, form]);
+  const balance = useBalance(token2CurrencyId(api, userInput.inputToken));
 
-  const onTargetChange = useCallback((value: number): void => {
-    calcSupply(pool.supplyCurrency, pool.targetCurrency, value).subscribe((supply) => {
-      nextTick(() => form.setFieldValue('supply', supply));
+  const handleMax = useCallback(() => {
+    updateUserInput({
+      inputAmount: balance.toNumber(),
+      updateOrigin: 'outset'
     });
+  }, [balance, updateUserInput]);
 
-    nextTick(() => form.setFieldValue('target', value));
-  }, [calcSupply, pool.supplyCurrency, pool.targetCurrency, form]);
-
-  const onSupplyTokenChange = useCallback((token: CurrencyId): void => {
-    setCurrency(token, pool.targetCurrency);
-
-    calcSupply(token, pool.targetCurrency, form.values.target).subscribe((supply) => {
-      if (supply) nextTick(() => form.setFieldValue('supply', supply));
-    });
-  }, [calcSupply, form, pool.targetCurrency, setCurrency]);
-
-  const onTargetTokenChange = useCallback((token: CurrencyId): void => {
-    setCurrency(pool.supplyCurrency, token);
-
-    calcTarget(pool.supplyCurrency, token, form.values.supply).subscribe((target) => {
-      if (target) nextTick(() => form.setFieldValue('target', target));
-    });
-  }, [calcTarget, form, pool.supplyCurrency, setCurrency]);
-
-  const isDisabled = useMemo((): boolean => {
-    if (form.errors.supply || form.errors.target) {
-      return true;
-    }
-
-    if (!(form.values.target && form.values.supply)) {
-      return true;
-    }
-
-    return false;
+  const handleSuccess = useCallback(() => {
+    form.resetFields();
   }, [form]);
 
-  const maxSupplyInput = useMemo<Fixed18 | undefined>(() => {
-    return supplyCurrencyBalance ? convertToFixed18(supplyCurrencyBalance).min(Fixed18.fromNatural(pool.supplySize)) : undefined;
-  }, [supplyCurrencyBalance, pool.supplySize]);
-
   const params = useMemo(() => {
-    return [
-      pool.supplyCurrency,
-      numToFixed18Inner(form.values.supply),
-      pool.targetCurrency,
-      Fixed18.fromNatural(form.values.target).div(Fixed18.fromNatural(1 + slippage)).innerToString()
-    ];
-  }, [form, pool, slippage]);
+    if (!parameters || !swapTrade) return [];
+
+    const result = parameters.toChainData(swapTrade.mode);
+
+    return result;
+  }, [parameters, swapTrade]);
+
+  const setTradeMode = useCallback((mode: SwapTradeMode) => {
+    updateUserInput({ mode });
+  }, [updateUserInput]);
+
+  const setInput = useCallback((value: BalanceInputValue) => {
+    updateUserInput({
+      inputAmount: value.amount,
+      inputToken: currencyId2Token(value.token),
+      updateOrigin: 'outset'
+    });
+  }, [updateUserInput]);
+
+  const setOutput = useCallback((value: BalanceInputValue) => {
+    updateUserInput({
+      outputAmount: value.amount,
+      outputToken: currencyId2Token(value.token),
+      updateOrigin: 'outset'
+    });
+  }, [updateUserInput]);
+
+  useSubscription(() => {
+    if (!api) return;
+    if (!swapTrade) return;
+
+    const usedTokenPairs = swapTrade.getTradeTokenPairsByPaths();
+
+    return api.queryMulti<ITuple<[Balance, Balance]>[]>(
+      usedTokenPairs.map((item) => [api.query.dex.liquidityPool, item.toChainData()])
+    ).subscribe((result) => {
+      const pools = SwapTrade.convertLiquidityPoolsToTokenPairs(usedTokenPairs, result);
+      const parameters = swapTrade.getTradeParameters(pools);
+
+      setParameters(parameters);
+
+      updateUserInput({
+        inputAmount: parameters.input.amount.toNumber(),
+        outputAmount: parameters.output.amount.toNumber(),
+        updateOrigin: 'inner'
+      });
+    });
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [api, swapTrade, setParameters]);
 
   return (
     <Card className={classes.root}
@@ -203,61 +128,57 @@ export const SwapConsole: FC = memo(() => {
       <div className={classes.main}>
         <div className={classes.inputFields}>
           <div className={classes.inputFieldsInner}>
-            <InputArea
-              currencies={supplyCurrencies}
-              error={form.errors.supply}
-              inputName='supply'
-              maxInput={maxSupplyInput}
-              onChange={onSupplyChange}
-              onTokenChange={onSupplyTokenChange}
+            <SwapInput
+              disableTokens={[userInput.outputToken]}
+              error={''}
+              onChange={setInput}
+              onFocus={(): void => setTradeMode('EXACT_INPUT')}
+              onMax={handleMax}
+              renderExtra={(): ReactNode => {
+                return (
+                  <div className={classes.extra}>
+                    <span>max: </span>
+                    <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
+                  </div>
+                );
+              }}
+              selectableTokens={Array.from(availableTokens)}
               showMax={true}
-              title='Pay With'
-              token={pool.supplyCurrency}
-              value={form.values.supply as number}
+              title={`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}
+              value={{
+                amount: userInput.inputAmount,
+                token: token2CurrencyId(api, userInput.inputToken)
+              }}
             />
-            <SwapBtn onClick={onSwap} />
-            <InputArea
-              currencies={targetCurrencies}
-              error={form.errors.target}
-              inputName='target'
-              onChange={onTargetChange}
-              onTokenChange={onTargetTokenChange}
-              title='Receive (Estimate)'
-              token={pool.targetCurrency}
-              value={form.values.target}
-            />
-          </div>
-          <div className={classes.addon}>
-            <p>Dex Price</p>
-            <DexExchangeRate
-              supply={pool.supplyCurrency}
-              supplyAmount={form.values.supply as number}
-              target={pool.targetCurrency}
+            <SwapBtn onClick={handleReverse} />
+            <SwapInput
+              disableTokens={[userInput.inputToken]}
+              error={''}
+              onChange={setOutput}
+              onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
+              selectableTokens={Array.from(availableTokens)}
+              title={`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}
+              value={{
+                amount: userInput.outputAmount,
+                token: token2CurrencyId(api, userInput.outputToken)
+              }}
             />
           </div>
         </div>
         <TxButton
           className={classes.txBtn}
-          color={priceImpact > 0.05 ? 'danger' : 'primary'}
-          disabled={isDisabled}
-          method='swapCurrency'
-          onSuccess={form.resetForm}
+          disabled={false}
+          method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
+          onExtrinsicSuccess={handleSuccess}
           params={params}
           section='dex'
           size='large'
+          style={parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'danger' : 'primary'}
         >
-          {priceImpact > 0.05 ? 'Swap Anyway' : 'Swap'}
+          {parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'Swap Anyway' : 'Swap'}
         </TxButton>
       </div>
-      <SwapInfo
-        supply={form.values.supply}
-        supplyCurrency={pool.supplyCurrency}
-        target={form.values.target}
-        targetCurrency={pool.targetCurrency}
-      />
-      <SlippageInputArea />
+      <SlippageInput />
     </Card>
   );
-});
-
-SwapConsole.displayName = 'SwapConsole';
+};

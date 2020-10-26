@@ -3,75 +3,92 @@ import clsx from 'clsx';
 import { FormikErrors } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { useApi } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { Button, Condition, NumberInput, NumberInputProps } from '@acala-dapp/ui-components';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { Button, Condition, NumberInput, NumberInputProps, InlineBlockBox } from '@acala-dapp/ui-components';
 
 import { TokenName, TokenImage } from './Token';
 import { TokenSelector } from './TokenSelector';
-import { getCurrencyIdFromName } from './utils';
 import classes from './BalanceInput.module.scss';
-import { CurrencyChangeFN } from './types';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { useBalance } from '@acala-dapp/react-hooks/';
 
 type BalanceInputSize = 'large' | 'middle' | 'small' | 'mini';
 
+export type BalanceInputValue = {
+  amount: number;
+  token: CurrencyId;
+}
+
 export interface BalanceInputProps extends BareProps {
-  currencies?: (CurrencyId | string)[];
+  checkBalance?: boolean;
+  selectableTokens?: CurrencyId[];
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
-  onChange?: (value: number) => void;
-  onTokenChange?: CurrencyChangeFN;
+  disableTokens?: CurrencyId[];
+  onChange?: (value: BalanceInputValue) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   placeholder?: string;
-  token: CurrencyLike | string;
+  value: BalanceInputValue;
   tokenPosition?: 'left' | 'right';
-  value?: number;
   showMaxBtn?: boolean;
   showIcon?: boolean;
   showToken?: boolean;
   size?: BalanceInputSize;
+  min?: number;
+  max?: number;
   onMax?: () => void;
   border?: boolean;
-  id?: string;
-  name?: string;
   numberInputProps?: Partial<NumberInputProps>;
 }
 
 export const BalanceInput: FC<BalanceInputProps> = ({
   border = true,
   className,
-  currencies,
+  checkBalance = true,
   disabled = false,
+  disableTokens = [],
   enableTokenSelect = false,
   error,
-  id,
-  name,
+  max,
+  min,
   numberInputProps,
   onBlur,
   onChange,
   onFocus,
   onMax,
-  onTokenChange,
   placeholder,
+  selectableTokens = [],
   showIcon = true,
   showMaxBtn = false,
   showToken = true,
   size = 'large',
-  token,
   tokenPosition = 'right',
   value
 }) => {
-  const { api } = useApi();
   const [focused, setFocused] = useState<boolean>(false);
+  const isLPToken = useMemo(() => {
+    return value.token.isDexShare;
+  }, [value]);
+  const balance = useBalance(value.token);
 
-  const _token = useMemo(() => {
-    if (typeof token === 'string') return getCurrencyIdFromName(api, token);
+  const onTokenChange = useCallback((token: CurrencyId) => {
+    if (!onChange) return;
 
-    return token;
-  }, [api, token]);
+    onChange({ amount: value.amount, token });
+  }, [onChange, value]);
+
+  const onValueChange = useCallback((amount: number) => {
+    if (!onChange) return;
+
+    // hanndle check balance
+    if (checkBalance && new FixedPointNumber(amount).isGreaterThanOrEqualTo(balance)) {
+      amount = balance.toNumber();
+    }
+
+    onChange({ amount, token: value.token });
+  }, [onChange, value, balance, checkBalance]);
 
   const renderToken = useCallback((): ReactNode => {
     if (!showToken) return null;
@@ -90,21 +107,24 @@ export const BalanceInput: FC<BalanceInputProps> = ({
                 }
               )
             }
-            currencies={currencies}
+            currencies={selectableTokens}
+            disabledCurrencies={disableTokens}
             onChange={onTokenChange}
             showIcon={showIcon}
-            value={_token}
+            value={value.token}
           />
         )}
         or={(
           <div className={clsx(classes.token, { [classes.showIcon]: showIcon })}>
-            { showIcon ? <TokenImage currency={_token} /> : null }
-            <TokenName currency={_token} />
+            { showIcon ? <TokenImage currency={value.token} /> : null }
+            <InlineBlockBox margin={8}>
+              <TokenName currency={value.token} />
+            </InlineBlockBox>
           </div>
         )}
       />
     );
-  }, [showToken, enableTokenSelect, tokenPosition, showIcon, currencies, onTokenChange, _token]);
+  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);
@@ -127,9 +147,10 @@ export const BalanceInput: FC<BalanceInputProps> = ({
       [classes.error]: !!error,
       [classes.focused]: focused,
       [classes.showMax]: showMaxBtn,
-      [classes.showIcon]: showIcon
+      [classes.showIcon]: showIcon,
+      [classes.lpToken]: isLPToken
     }
-  ), [className, size, disabled, border, showToken, error, focused, showMaxBtn, showIcon]);
+  ), [className, size, disabled, border, showToken, error, focused, showMaxBtn, showIcon, isLPToken]);
 
   return (
     <div
@@ -142,18 +163,17 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         {...numberInputProps}
         className={classes.input}
         disabled={disabled}
-        id={id}
-        name={name}
+        max={max}
+        min={min}
         onBlur={_onBlur}
-        onChange={onChange}
+        onChange={onValueChange}
         onFocus={_onFocus}
         placeholder={placeholder}
-        value={value}
+        value={value.amount}
       />
       <Condition condition={showMaxBtn}>
         <Button
           className={classes.maxBtn}
-          color='primary'
           onClick={onMax}
           type='ghost'
         >

@@ -2,7 +2,7 @@ import React, { FC, useContext, useMemo } from 'react';
 
 import { Card, Step, Condition, Grid, SubTitle } from '@acala-dapp/ui-components';
 import { useConstants } from '@acala-dapp/react-hooks';
-import { TokenName } from '@acala-dapp/react-components';
+import { TokenName, getTokenName } from '@acala-dapp/react-components';
 
 import { SelectCollateral } from './SelectCollateral';
 import classes from './CreateConsole.module.scss';
@@ -37,11 +37,11 @@ const Main: FC = () => {
     }
 
     if (step === 'generate') {
-      return `Deposit ${selectedToken.toString()} as collateral to genearte ${stableCurrency}`;
+      return `Deposit ${getTokenName(selectedToken.asToken.toString())} as collateral to genearte ${getTokenName(stableCurrency.asToken.toString())}`;
     }
 
     if (step === 'confirm') {
-      return `Confirm creating a collateralized loan for ${stableCurrency}`;
+      return `Confirm creating a collateralized loan for ${getTokenName(stableCurrency.asToken.toString())}`;
     }
 
     return '';

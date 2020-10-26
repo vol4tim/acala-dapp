@@ -1,33 +1,34 @@
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-
 import AcaIcon from '../assets/coins-icon/ACA.svg';
 import AUSDIcon from '../assets/coins-icon/aUSD.svg';
 import BtcIcon from '../assets/coins-icon/BTC.svg';
 import DotIcon from '../assets/coins-icon/DOT.svg';
 import LDotIcon from '../assets/coins-icon/LDOT.svg';
 import RenIcon from '../assets/coins-icon/REN.svg';
+import { ApiRx } from '@polkadot/api';
+import { CurrencyId } from '@acala-network/types/interfaces';
+import { Token, TokenPair, currencyId2Token } from '@acala-network/sdk-core';
 
-export const ICON_IMAGES = {
-  aca: AcaIcon,
-  ausd: AUSDIcon,
-  btc: BtcIcon,
-  dot: DotIcon,
-  ldot: LDotIcon,
-  renbtc: RenIcon,
-  xbtc: BtcIcon
-};
+export const TOKEN_IMAGES: Map<string, string> = new Map([
+  ['ACA', AcaIcon],
+  ['AUSD', AUSDIcon],
+  ['BTC', BtcIcon],
+  ['DOT', DotIcon],
+  ['LDOT', LDotIcon],
+  ['RENBTC', RenIcon],
+  ['XBTC', BtcIcon]
+]);
 
-export const ICON_FULLNAMES = {
-  aca: 'Acala',
-  ausd: 'Acala Dollar',
-  btc: 'Bitcoin',
-  dot: 'Polkadot',
-  ldot: 'Liquid DOT',
-  renbtc: 'Ren Bitcoin',
-  xbtc: 'Interchain Bitcoin'
-};
+export const TOKEN_FULLNAMES: Map<string, string> = new Map([
+  ['ACA', 'Acala'],
+  ['AUSD', 'Acala Dollar'],
+  ['BTC', 'Bitcoin'],
+  ['DOT', 'Polkadot'],
+  ['LDOT', 'Liquid DOT'],
+  ['RENBTC', 'Ren Bitcoin'],
+  ['XBTC', 'Interchain Bitcoin']
+]);
 
-export const TOKEN_COLOR_MAP: Map<string, string> = new Map([
+export const TOKEN_COLOR: Map<string, string> = new Map([
   ['SYSTEM', '#173DC9'],
   ['BTC', '#F7931A'],
   ['XBTC', '#F7931A'],
@@ -36,33 +37,64 @@ export const TOKEN_COLOR_MAP: Map<string, string> = new Map([
   ['DOT', '#e6007a']
 ]);
 
-export function getTokenColor (token: CurrencyLike): string {
-  // default color is black
-  return TOKEN_COLOR_MAP.get(token.toString().toUpperCase()) || '#000000';
+export const TOKEN_NAME: Map<string, string> = new Map([
+  ['AUSD', 'aUSD'],
+  ['ACA', 'ACA'],
+  ['BTC', 'BTC'],
+  ['XBTC', 'XBTC'],
+  ['RENBTC', 'renBTC'],
+  ['LDOT', 'LDOT'],
+  ['DOT', 'DOT']
+]);
+
+export function getTokenColor (token: string): string {
+  return TOKEN_COLOR.get(token) || '#000000';
 }
 
-export function getTokenImage (token: CurrencyLike): string {
-  return Reflect.get(ICON_IMAGES, token.toString().toLowerCase()) || '';
+export function getTokenImage (token: string): string {
+  return TOKEN_IMAGES.get(token) || '';
 }
 
-export function getTokenFullName (token: CurrencyLike): string {
-  return Reflect.get(ICON_FULLNAMES, token.toString().toLowerCase());
+export function getTokenFullName (token: string): string {
+  return TOKEN_FULLNAMES.get(token) || '';
 }
 
-export function getTokenName (token: CurrencyLike, upper = true): string {
-  if (!token) {
-    return '';
+export function getTokenName (token: string): string {
+  return TOKEN_NAME.get(token) || '';
+}
+
+export function getCurrenciesFromDexShare (api: ApiRx, dexShare: CurrencyId): [CurrencyId, CurrencyId] {
+  if (!dexShare.isDexShare) {
+    return [dexShare, dexShare];
   }
 
-  const _name = token.toString().toUpperCase();
+  return [
+    api.createType('CurrencyId' as any, { token: dexShare.asDexShare[0].toString() }),
+    api.createType('CurrencyId' as any, { token: dexShare.asDexShare[1].toString() })
+  ];
+}
 
-  if (_name === 'AUSD') {
-    return upper ? 'aUSD' : 'ausd';
+export function getCurrencyIdFromName (api: ApiRx, name: string | string[]): CurrencyId {
+  if (Array.isArray(name)) return api.createType('CurrencyId' as any, { DEXShare: name });
+
+  return api.createType('CurrencyId' as any, { token: name });
+}
+
+export function getCurrencyIdFromToken (api: ApiRx, token: Token | Token[]): CurrencyId {
+  if (Array.isArray(token)) return api.createType('CurrencyId' as any, { DEXShare: [token[0].toChainData(), token[1].toChainData()] });
+
+  return api.createType('CurrencyId' as any, token.toChainData());
+}
+
+export function getDexShareFromCurrencyId (api: ApiRx, token1: CurrencyId, token2: CurrencyId): CurrencyId {
+  if (!(token1.isToken && token2.isToken)) {
+    throw new Error('token1 and token2 should be TokenSymbol type in getDexShareCurrencyIdFromCurrencyId');
   }
 
-  if (_name === 'RENBTC') {
-    return upper ? 'renBTC' : 'renbtc';
-  }
+  const pair = new TokenPair(
+    currencyId2Token(token1),
+    currencyId2Token(token2)
+  ).getPair();
 
-  return upper ? _name : _name.toLowerCase();
+  return api.createType('CurrencyId' as any, { DEXShare: [pair[0].name, pair[1].name] });
 }

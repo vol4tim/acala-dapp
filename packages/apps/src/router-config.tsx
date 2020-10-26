@@ -14,10 +14,11 @@ export interface RouterConfigData {
 }
 
 const PageWallet = lazy(() => import('@acala-dapp/page-wallet'));
-const PageDeposit = lazy(() => import('@acala-dapp/page-deposit'));
+const PageLiquidity = lazy(() => import('@acala-dapp/page-liquidity'));
 const PageLoan = lazy(() => import('@acala-dapp/page-loan'));
 const PageHoma = lazy(() => import('@acala-dapp/page-homa'));
 const PageSwap = lazy(() => import('@acala-dapp/page-swap'));
+const PageIncentives = lazy(() => import('@acala-dapp/page-incentives'));
 
 export const config: RouterConfigData[] = [
   {
@@ -27,8 +28,8 @@ export const config: RouterConfigData[] = [
         path: 'wallet'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageDeposit /></Suspense>,
-        path: 'deposit'
+        element: <Suspense fallback={<PageLoading />}><PageLiquidity /></Suspense>,
+        path: 'liquidity'
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageLoan /></Suspense>,
@@ -41,6 +42,10 @@ export const config: RouterConfigData[] = [
       {
         element: <Suspense fallback={<PageLoading />}><PageSwap /></Suspense>,
         path: 'swap'
+      },
+      {
+        element: <Suspense fallback={<PageLoading />}><PageIncentives /></Suspense>,
+        path: 'incentives'
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageGovernance /></Suspense>,

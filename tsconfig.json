@@ -26,8 +26,10 @@
       "@acala-dapp/page-loan/*": ["page-loan/src/*"],
       "@acala-dapp/page-swap": ["page-swap/src"],
       "@acala-dapp/page-swap/*": ["page-swap/src/*"],
-      "@acala-dapp/page-deposit": ["page-deposit/src"],
-      "@acala-dapp/page-deposit/*": ["page-deposit/src/*"],
+      "@acala-dapp/page-liquidity": ["page-liquidity/src"],
+      "@acala-dapp/page-liquidity/*": ["page-liquidity/src/*"],
+      "@acala-dapp/page-incentives": ["page-incentives/src"],
+      "@acala-dapp/page-incentives/*": ["page-incentives/src/*"],
       "@acala-dapp/page-governance": ["page-governance/src"],
       "@acala-dapp/page-governance/*": ["page-governance/src/*"],
       "@acala-dapp/page-dashboard-home": ["page-dashboard-home/src"],
@@ -53,6 +55,7 @@
   },
   "exclude": [
     "build/**/*",
-    "**/build/**/*"
+    "**/build/**/*",
+    "scripts/*"
   ]
 }

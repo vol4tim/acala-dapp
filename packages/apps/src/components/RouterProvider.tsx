@@ -2,7 +2,7 @@ import React, { FC, cloneElement, ReactElement, useMemo, useEffect } from 'react
 // FIXME: should remove ts-ignore when react-router@6 is avaliable
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
-import { BrowserRouter, useRoutes } from 'react-router-dom';
+import { HashRouter, useRoutes } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 
 import { RouterConfigData } from '../router-config';
@@ -57,8 +57,8 @@ export const RouterProvider: FC<Props> = ({ config }) => {
   }, [config]);
 
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes config={_config} />
-    </BrowserRouter>
+    </HashRouter>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, createContext, FC, useCallback, memo, ReactNode, useMemo } from 'react';
 import { uniqWith } from 'lodash';
+
 import { web3Accounts, web3Enable, web3FromAddress } from '@polkadot/extension-dapp';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 
@@ -15,7 +16,7 @@ const ADDRESS_LIST_KEY = 'saved_address_list';
 
 export const AccountContext = createContext<AccountsData>({} as AccountsData);
 
-interface AddressInfo {
+export interface AddressInfo {
   address: string;
   meta?: {
     name?: string;
@@ -44,7 +45,7 @@ interface Props extends BareProps {
 export const AccountProvider: FC<Props> = memo(({
   NoAccounts,
   NoExtensions,
-  applicationName = 'acala-dapp Platform',
+  applicationName = 'Acala Dapp Platform',
   children
 }) => {
   const { api } = useApi();
@@ -57,6 +58,7 @@ export const AccountProvider: FC<Props> = memo(({
   const addressListRef = useRef<string[]>([]);
   const { getStorage, setStorage } = useStorage({ useAccountPrefix: false });
   const { close, open, status } = useModal(false);
+  const loaded = useRef<boolean>(false);
 
   const loadAccounts = useCallback(async (): Promise<InjectedAccountWithMeta[]> => {
     const injected = await web3Enable(applicationName);
@@ -75,6 +77,8 @@ export const AccountProvider: FC<Props> = memo(({
   }, [applicationName]);
 
   const setActiveAccount = useCallback(async (account: InjectedAccountWithMeta): Promise<void> => {
+    if (!api) return;
+
     try {
       const injector = await web3FromAddress(account.address);
 
@@ -151,6 +155,7 @@ export const AccountProvider: FC<Props> = memo(({
         }
       })
       .catch((e: Error) => {
+        loaded.current = false;
         setError(e.message as AccountProviderError);
       });
   }, [loadAccounts, setError, active, getStorage, open, setActiveAccount]);

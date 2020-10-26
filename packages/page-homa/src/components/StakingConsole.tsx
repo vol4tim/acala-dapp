@@ -1,73 +1,69 @@
 import React, { FC, useContext, useCallback, useMemo } from 'react';
-import { noop } from 'lodash';
-import { useFormik } from 'formik';
 
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, List } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInput, numToFixed18Inner, FormatBalance } from '@acala-dapp/react-components';
-import { useFormValidator, useBalance } from '@acala-dapp/react-hooks';
+import { TxButton, BalanceInput, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
+import { useBalance, useInputValue, useConstants } from '@acala-dapp/react-hooks';
 
 import classes from './StakingConsole.module.scss';
 import { StakingPoolContext } from './StakingPoolProvider';
 
 export const StakingConsole: FC = () => {
+  const { stakingCurrency } = useConstants();
   const { rewardRate, stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
   const balance = useBalance(stakingPool ? stakingPool.stakingCurrency : '');
 
-  const validator = useFormValidator({
-    stakingBalance: {
-      currency: stakingPool && stakingPool.stakingCurrency,
-      type: 'balance'
+  const [stakingValue, setStakingValue, { ref, reset }] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: stakingPool ? stakingPool.stakingCurrency : stakingCurrency
+  }, {
+    max: (value: BalanceInputValue) => {
+      value.amount = value.amount > balance.toNumber() ? balance.toNumber() : value.amount;
+
+      return value;
+    },
+    min: (value: BalanceInputValue) => {
+      value.amount = value.amount < 0 ? 0 : value.amount;
+
+      return value;
     }
   });
 
-  const form = useFormik({
-    initialValues: {
-      stakingBalance: (('' as any) as number)
-    },
-    onSubmit: noop,
-    validate: validator
-  });
-
   const resetForm = useCallback(() => {
-    form.resetForm();
-  }, [form]);
+    reset();
+  }, [reset]);
+
+  const params = useMemo(() => {
+    return [new FixedPointNumber(stakingValue.amount).toChainData()];
+  }, [stakingValue]);
 
   const receivedLiquidToken = useMemo<Fixed18>((): Fixed18 => {
-    if (!stakingPoolHelper || !form.values.stakingBalance) return Fixed18.ZERO;
+    if (!stakingPoolHelper || !stakingValue.amount) return Fixed18.ZERO;
 
-    return stakingPoolHelper.convertToLiquid(Fixed18.fromNatural(form.values.stakingBalance));
-  }, [stakingPoolHelper, form.values.stakingBalance]);
-
-  const handleStakingBalanceChange = useCallback((value: number): void => {
-    form.setFieldValue('stakingBalance', value);
-  }, [form]);
+    return stakingPoolHelper.convertToLiquid(Fixed18.fromNatural(stakingValue.amount));
+  }, [stakingPoolHelper, stakingValue]);
 
   const profit = useMemo<Fixed18>((): Fixed18 => {
-    if (!rewardRate || !form.values.stakingBalance) return Fixed18.ZERO;
+    if (!rewardRate || !stakingValue.amount) return Fixed18.ZERO;
 
-    return Fixed18.fromNatural(form.values.stakingBalance).mul(convertToFixed18(rewardRate || 0));
-  }, [rewardRate, form.values.stakingBalance]);
+    return Fixed18.fromNatural(stakingValue.amount).mul(convertToFixed18(rewardRate || 0));
+  }, [rewardRate, stakingValue]);
+
+  const isDisable = useMemo(() => {
+    return stakingValue.amount === 0;
+  }, [stakingValue]);
+
+  const handleMax = useCallback((): void => {
+    setStakingValue({
+      amount: balance.toNumber(),
+      token: ref.current.token
+    });
+  }, [setStakingValue, ref, balance]);
 
   if (!stakingPoolHelper || !stakingPool) {
     return null;
   }
-
-  const checkDisabled = (): boolean => {
-    if (!form.values.stakingBalance) {
-      return true;
-    }
-
-    if (form.errors.stakingBalance) {
-      return true;
-    }
-
-    return false;
-  };
-
-  const handleMax = (): void => {
-    form.setFieldValue('stakingBalance', convertToFixed18(balance || 0).toNumber());
-  };
 
   return (
     <Grid
@@ -81,14 +77,10 @@ export const StakingConsole: FC = () => {
       </Grid>
       <Grid item>
         <BalanceInput
-          error={form.errors.stakingBalance}
-          id='stakingBalance'
-          name='stakingBalance'
-          onChange={handleStakingBalanceChange}
+          onChange={setStakingValue}
           onMax={handleMax}
           showMaxBtn
-          token={stakingPool.stakingCurrency}
-          value={form.values.stakingBalance}
+          value={stakingValue}
         />
       </Grid>
       <Grid
@@ -99,10 +91,10 @@ export const StakingConsole: FC = () => {
         <Grid item>
           <TxButton
             className={classes.txBtn}
-            disabled={checkDisabled()}
+            disabled={isDisable}
             method='mint'
-            onSuccess={resetForm}
-            params={[numToFixed18Inner(form.values.stakingBalance)]}
+            onExtrinsicSuccess={resetForm}
+            params={params}
             section='homa'
             size='middle'
           >

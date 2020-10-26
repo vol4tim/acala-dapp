@@ -7,13 +7,15 @@ import { BareProps } from '@acala-dapp/ui-components/types';
 import { TransferModal } from './TransferModal';
 
 interface Props extends BareProps {
-  currency: CurrencyId | string;
+  mode: 'token' | 'lp-token';
+  currency: CurrencyId;
 }
 
 export const TransferButton: FC<Props> = memo(({
   children,
   className,
-  currency
+  currency,
+  mode
 }) => {
   const { close, status, toggle } = useModal();
 
@@ -21,7 +23,6 @@ export const TransferButton: FC<Props> = memo(({
     <>
       <Button
         className={className}
-        color='primary'
         onClick={toggle}
         size='small'
       >
@@ -29,6 +30,7 @@ export const TransferButton: FC<Props> = memo(({
       </Button>
       <TransferModal
         defaultCurrency={currency}
+        mode={mode}
         onClose={close}
         visiable={status}
       />

@@ -12,7 +12,7 @@ import { BareProps } from '@acala-dapp/ui-components/types';
 
 interface UserAssetBalanceProps extends FormatBalanceProps {
   account?: AccountLike;
-  currency: CurrencyLike;
+  currency: CurrencyId;
   showCurrency?: boolean;
 }
 
@@ -48,12 +48,10 @@ interface UserAssetValueProps extends BareProps {
 export const UserAssetValue: FC<UserAssetValueProps> = ({ account, className, currency }) => {
   const amount = useValue(currency, account);
 
-  if (!amount) return null;
-
   return (
     <FormatValue
       className={className}
-      data={amount}
+      data={amount || Fixed18.ZERO}
     />
   );
 };

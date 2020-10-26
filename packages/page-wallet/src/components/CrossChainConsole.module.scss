@@ -1,3 +1,9 @@
+.tabs {
+  & :global(.aca-tabs__tab) {
+    background: transparent;
+  }
+}
+
 .assetCard {
   display: grid;
   grid-template-columns: 64px 1fr;

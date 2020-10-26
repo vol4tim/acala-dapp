@@ -1,6 +1,7 @@
 @import "../../../../ui-components/src/styles/index.scss";
 
 .root {
+  position: relative;
   display: flex;
   flex-direction: column;
   z-index: 1;
@@ -18,14 +19,23 @@
 }
 
 .logo {
-  margin: 94px auto 44px auto;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 66px auto 18px auto;
+
+  .testnet {
+    margin-bottom: 12px;
+    align-self: flex-end;
+  }
 
   @include media-breakpoint-up('md') {
-    width: 68px;
-    height: 68px;
-    margin: 0;
+    margin-top: 30px;
   }
+}
+
+.chainName {
+  margin-bottom: 16px;
 }
 
 .item {
@@ -40,9 +50,10 @@
   font-weight: 500;
   color: var(--color-primary);
   transition: all 200ms ease;
+  cursor: pointer;
 
-  & > svg {
-    margin-right: 13px;
+  .title {
+    margin-left: 13px;
   }
 
   &:hover {
@@ -79,7 +90,7 @@
 .wallet {
   color: #abb4d1;
 
-  .title {
+  .name {
     width: 160px;
     white-space: nowrap;
     text-overflow: ellipsis;

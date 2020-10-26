@@ -10,6 +10,15 @@
   }
 }
 
+.cardTitle {
+  display: flex;
+  align-items: center;
+
+  > span:nth-child(1) {
+    margin-right: 4px;
+  }
+}
+
 .item {
   flex: 0 0 20%;
   display: flex;

@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 
 import { DerivedUserLoan, DerivedLoanType, DerivedLoanOverView } from '@acala-network/api-derive';
 import { LoanHelper, Fixed18, debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
-import { Balance, Rate } from '@acala-network/types/interfaces';
+import { Balance, Rate, CurrencyId } from '@acala-network/types/interfaces';
 
 import { CurrencyLike, AccountLike } from './types';
 import { useAccounts } from './useAccounts';
@@ -13,7 +13,7 @@ import { filterEmptyLoan } from './utils';
 import { useApi } from './useApi';
 import { combineLatest, Observable } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
-import { tokenEq } from '@acala-dapp/react-components';
+import { tokenEq, focusToFixed18 } from '@acala-dapp/react-components';
 
 /**
  * @name useUserLoan
@@ -69,7 +69,7 @@ export const useAllLoansType = (): Record<string, DerivedLoanType> | undefined =
  * @name useLoanHelper
  * @description get user loan helper object
  */
-export const useLoanHelper = (currency: CurrencyLike, account?: AccountLike): LoanHelper | null => {
+export const useLoanHelper = (currency: CurrencyId, account?: AccountLike): LoanHelper | null => {
   const { stableCurrency } = useConstants();
   const loan = useUserLoan(currency, account);
   const type = useLoanType(currency);
@@ -81,15 +81,15 @@ export const useLoanHelper = (currency: CurrencyLike, account?: AccountLike): Lo
     }
 
     return new LoanHelper({
-      collateralPrice: loanCurrencyPrice,
-      collaterals: loan.collaterals,
+      collateralPrice: focusToFixed18(loanCurrencyPrice),
+      collaterals: loan.collateral,
       debitExchangeRate: type.debitExchangeRate,
-      debits: loan.debits,
+      debits: loan.debit,
       expectedBlockTime: type.expectedBlockTime.toNumber(),
       globalStableFee: type.globalStabilityFee,
       liquidationRatio: type.liquidationRatio,
       requiredCollateralRatio: type.requiredCollateralRatio,
-      stableCoinPrice: stableCurrencyPrice,
+      stableCoinPrice: focusToFixed18(stableCurrencyPrice),
       stableFee: type.stabilityFee
     });
   }, [loan, loanCurrencyPrice, stableCurrencyPrice, type]);
@@ -190,7 +190,7 @@ export const useTotalDebit = (): TotalDebitOrCollateralData | null => {
   return result;
 };
 
-export const useTotalCollatearl = (): TotalDebitOrCollateralData | null => {
+export const useTotalCollateral = (): TotalDebitOrCollateralData | null => {
   const { api } = useApi();
   const { loanCurrencies } = useConstants();
   const prices = useAllPrices();
@@ -211,14 +211,14 @@ export const useTotalCollatearl = (): TotalDebitOrCollateralData | null => {
       const amountDetail = new Map(_result.map(([currency, collateral]) => {
         const price = prices.find((item): boolean => tokenEq(item.currency, currency));
 
-        return [currency, price ? collateral.mul(price.price) : Fixed18.ZERO];
+        return [currency, price ? collateral.mul(focusToFixed18(price.price)) : Fixed18.ZERO];
       }));
 
       const amount = _result.reduce((acc, cur) => {
         const [currency, collateral] = cur;
         const price = prices.find((item): boolean => tokenEq(item.currency, currency));
 
-        return price ? acc.add(collateral.mul(price.price)) : acc;
+        return price ? acc.add(collateral.mul(focusToFixed18(price.price))) : acc;
       }, Fixed18.ZERO);
 
       setResult({

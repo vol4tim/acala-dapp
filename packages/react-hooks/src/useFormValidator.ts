@@ -1,42 +1,51 @@
 import { FormikErrors } from 'formik';
+import { useMemo } from 'react';
 
 import { ApiRx } from '@polkadot/api';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { Amount } from '@acala-network/types/interfaces';
-import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
+import { Fixed18 } from '@acala-network/app-util';
+import { tokenEq, getTokenName } from '@acala-dapp/react-components';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useApi } from './useApi';
 import { useAccounts } from './useAccounts';
 import { CurrencyLike } from './types';
-import { Observable } from 'rxjs';
+import { useAllBalances, BalanceData } from './balanceHooks';
 
-interface BalanceConfig {
-  type: 'balance';
-  currency?: CurrencyLike;
-  max?: number;
-  min?: number;
+interface BaseConfig {
+  custom?: (value: any) => string | undefined;
 }
 
-interface NumberConfig {
+interface BalanceConfig extends BaseConfig {
+  type: 'balance';
+  currency?: CurrencyId;
+  max?: number;
+  min?: number;
+  errorMsg?: string;
+}
+
+interface NumberConfig extends BaseConfig {
   type: 'number';
   max?: number;
   min?: number;
   equalMax?: boolean;
   equalMin?: boolean;
+  errorMsg?: string;
 }
 
-interface StringConfig {
+interface StringConfig extends BaseConfig {
   type: 'string';
   pattern?: RegExp;
   max?: number;
   min?: number;
+  errorMsg?: string;
 }
 
 type Config = {
   [k in string]: BalanceConfig | NumberConfig | StringConfig;
 }
 
-export function getFormValidator<T> (config: Config, api: ApiRx, active: InjectedAccountWithMeta): (values: T) => void | object | Promise<FormikErrors<T>> {
+export function getFormValidator<T> (config: Config, api: ApiRx, active: InjectedAccountWithMeta, allBalance: BalanceData[]): (values: T) => void | object | Promise<FormikErrors<T>> {
   const numberPattern = /^([1-9]\d*|0)(\.\d*)?$/;
 
   return (values: any): void | object | Promise<FormikErrors<T>> => {
@@ -48,34 +57,39 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
         const value = values[key];
 
         if (_config.type === 'balance' && _config.currency) {
-          const subscriber = ((api.derive as any).currencies.balance(active.address, _config.currency) as Observable<Amount>).subscribe((result: Amount) => {
-            const _balance = convertToFixed18(result);
-            const _value = Fixed18.fromNatural(value);
-            const _max = Fixed18.fromNatural(_config.max !== undefined ? _config.max : Number.MAX_VALUE);
-            const _min = Fixed18.fromNatural(_config.min !== undefined ? _config.min : 0);
+          const _balanceData = allBalance.find((item) => tokenEq(item.currency, _config.currency as CurrencyLike));
 
-            if (!numberPattern.test(value)) {
-              error[key] = 'Not a valid number';
-            }
+          if (!_balanceData) {
+            error[key] = `Insufficient ${getTokenName(_config.currency.asToken.toString())} Balance`;
+            resolve(error);
 
-            if (_value.isGreaterThan(_balance)) {
-              error[key] = 'Balance is too low';
-            }
+            return;
+          }
 
-            if (_value.isGreaterThan(_max)) {
-              error[key] = `Value is bigger than ${_max.toNumber()}`;
-            }
+          const _balance = _balanceData.balance;
 
-            if (_value.isLessThan(_min)) {
-              error[key] = `Value is less than ${_min.toNumber()}`;
-            }
-          });
+          const _value = Fixed18.fromNatural(value);
+          const _max = Fixed18.fromNatural(_config.max !== undefined ? _config.max : Number.MAX_VALUE);
+          const _min = Fixed18.fromNatural(_config.min !== undefined ? _config.min : 0);
 
-          subscriber.unsubscribe();
+          // ensure balance is sufficient
+          if (_value.isGreaterThan(_balance)) {
+            error[key] = `Insufficient ${getTokenName(_config.currency)} Balance`;
+          }
+
+          // ensure balance is less than max
+          if (_value.isGreaterThan(_max)) {
+            error[key] = `Value is greater than ${_max.toNumber()}`;
+          }
+
+          // ensure balance is greater than min
+          if (_value.isLessThan(_min)) {
+            error[key] = `Value is less than ${_min.toNumber()}`;
+          }
         }
 
         if (_config.type === 'number') {
-          if (!numberPattern.test(value.toString())) {
+          if (value.toString() && !numberPattern.test(value.toString())) {
             error[key] = 'Not a valid number';
           }
 
@@ -111,6 +125,12 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
             error[key] = `Value's length is less than ${_config.min}`;
           }
         }
+
+        const preCheckCustom = _config.custom ? _config.custom(value) : undefined;
+
+        if (preCheckCustom) {
+          error[key] = preCheckCustom;
+        }
       });
 
       resolve(error);
@@ -121,10 +141,19 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
 export function useFormValidator<T extends any> (_config: Config): (values: T) => void | object | Promise<FormikErrors<T>> {
   const { api } = useApi();
   const { active } = useAccounts();
+  const allBalance = useAllBalances();
 
-  if (!active) {
-    return (): object => ({ global: "can't get user address" });
-  }
+  const formValidator = useMemo(() => {
+    if (!active) {
+      return (): object => ({ global: "can't get user address" });
+    }
 
-  return getFormValidator<T>(_config, api, active);
+    if (!api) {
+      return (): object => ({ global: "can't connect endpoint" });
+    }
+
+    return getFormValidator(_config, api, active, allBalance);
+  }, [api, active, allBalance, _config]);
+
+  return formValidator;
 }

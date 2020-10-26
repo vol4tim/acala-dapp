@@ -77,7 +77,6 @@ export const Controller: FC = () => {
       {
         hasPrevious ? <Button
           className={classes.previous}
-          color='primary'
           onClick={handlePrevious}
           type='ghost'
         >
@@ -87,7 +86,6 @@ export const Controller: FC = () => {
       {
         hasNext ? <Button
           className={classes.next}
-          color='primary'
           onClick={handleNext}
           size='large'
           type='normal'
@@ -98,7 +96,6 @@ export const Controller: FC = () => {
       {
         hasReclaim ? <Button
           className={classes.next}
-          color='primary'
           onClick={openReclaimModal}
           size='large'
           type='normal'
@@ -109,7 +106,6 @@ export const Controller: FC = () => {
       {
         hasDone ? <Button
           className={classes.next}
-          color='primary'
           onClick={handleDone}
           size='large'
           type='normal'

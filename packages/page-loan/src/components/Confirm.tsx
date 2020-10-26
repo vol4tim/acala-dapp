@@ -22,12 +22,12 @@ export const Confirm: FC = () => {
     return false;
   }, []);
 
-  const params = useMemo<string[]>((): string[] => {
+  const params = useMemo<string[]>((): any[] => {
     if (!helper) return [];
 
     return [
       // token name
-      selectedToken.toString(),
+      selectedToken,
       // collateral amount
       numToFixed18Inner(deposit),
       // debit amount
@@ -111,7 +111,7 @@ export const Confirm: FC = () => {
         <TxButton
           disabled={isDisabled}
           method='adjustLoan'
-          onSuccess={handleSuccess}
+          onExtrinsicSuccess={handleSuccess}
           params={params}
           section='honzon'
           size='small'

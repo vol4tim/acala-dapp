@@ -95,9 +95,6 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
   }, [onFocus]);
 
   useEffect(() => {
-    // if the number input is in edit mode, ignore all props.value change
-    if (isInEditMode.current) return;
-
     if ((value === 0 || value === '0') && isControlled) {
       setValue('');
       valueRef.current = '';
@@ -120,6 +117,8 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
       disabled={disabled}
       id={id}
       inputMode='decimal'
+      max={max}
+      min={min}
       name={name}
       onBlur={_onBlur}
       onChange={handleChange}

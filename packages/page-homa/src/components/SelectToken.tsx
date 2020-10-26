@@ -17,7 +17,7 @@ export const SelectToken: FC = memo(() => {
           return '';
         }
 
-        return `${getTokenName(stakingPool.stakingCurrency)}/${getTokenName(stakingPool.liquidCurrency)}`;
+        return `${getTokenName(stakingPool.stakingCurrency.asToken.toString())}/${getTokenName(stakingPool.liquidCurrency.asToken.toString())}`;
       },
       value: DEFAULT_VALUE
     }

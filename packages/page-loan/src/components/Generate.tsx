@@ -1,16 +1,15 @@
-import React, { useContext, FC, useCallback, useMemo, useEffect, useState } from 'react';
-import { noop } from 'lodash';
-import { useFormik } from 'formik';
+import React, { useContext, FC, useCallback, useMemo, useState } from 'react';
 
-import { convertToFixed18, Fixed18, calcCanGenerate } from '@acala-network/app-util';
+import { Fixed18, calcCanGenerate } from '@acala-network/app-util';
 
-import { BalanceInput, UserBalance, FormatBalance, getTokenName } from '@acala-dapp/react-components';
-import { useFormValidator, useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
+import { BalanceInput, UserBalance, FormatBalance, getTokenName, BalanceInputValue } from '@acala-dapp/react-components';
+import { useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
 import { Button } from '@acala-dapp/ui-components';
 
 import { createProviderContext } from './CreateProvider';
 import classes from './Generate.module.scss';
 import { LoanContext } from './LoanProvider';
+import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 
 export const Generate: FC = () => {
   const {
@@ -25,37 +24,27 @@ export const Generate: FC = () => {
   const helper = useLoanHelper(selectedToken);
   const [collateralAmount, setColalteralAmount] = useState<number>(0);
   const maxGenerate = useMemo(() => {
-    if (!helper) return Fixed18.ZERO;
+    if (!helper) return new Fixed18(1);
 
     // calculate max generate
-    return calcCanGenerate(
+    const result = calcCanGenerate(
       helper.collaterals.add(Fixed18.fromNatural(collateralAmount || 0)).mul(helper.collateralPrice),
       helper.debitAmount,
       helper.requiredCollateralRatio,
       helper.stableCoinPrice
     );
+
+    return result.isZero() ? new Fixed18(1) : result;
   }, [collateralAmount, helper]);
 
-  const validator = useFormValidator({
-    deposit: {
-      currency: selectedToken,
-      min: 0,
-      type: 'balance'
-    },
-    generate: {
-      max: maxGenerate.toNumber(),
-      min: minmumDebitValue.toNumber(),
-      type: 'number'
-    }
+  const [depositValue, setDepositValue, { ref: depositValueRef }] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: selectedToken
   });
 
-  const form = useFormik({
-    initialValues: {
-      deposit: (('' as any) as number),
-      generate: (('' as any) as number)
-    },
-    onSubmit: noop,
-    validate: validator
+  const [generateValue, setGenerateValue] = useInputValue<BalanceInputValue>({
+    amount: 1,
+    token: stableCurrency
   });
 
   const handleNext = useCallback((): void => {
@@ -67,38 +56,35 @@ export const Generate: FC = () => {
   }, [setStep]);
 
   const isDisabled = useMemo((): boolean => {
-    if (!form.values.deposit || !form.values.generate) {
-      return true;
-    }
-
-    if (form.errors.deposit || form.errors.generate) {
-      return true;
-    }
-
-    return false;
-  }, [form]);
+    return !(generateValue.amount && depositValue.amount);
+  }, [generateValue, depositValue]);
 
   const handleDepositMax = useCallback((): void => {
-    const data = convertToFixed18(selectedCurrencyBalance || 0).toNumber();
+    setDeposit(selectedCurrencyBalance.toNumber());
+    setDepositValue({
+      amount: selectedCurrencyBalance.toNumber(),
+      token: depositValueRef.current.token
+    });
+  }, [setDepositValue, selectedCurrencyBalance, depositValueRef, setDeposit]);
 
-    form.setFieldValue('deposit', data);
-  }, [selectedCurrencyBalance, form]);
+  const handleDepositChange = useCallback((value: BalanceInputValue) => {
+    setDeposit(value.amount);
+    setColalteralAmount(value.amount);
 
-  const handleDepositChange = useCallback((value: number) => {
-    form.setFieldValue('deposit', value);
-  }, [form]);
+    setDepositValue({
+      amount: value.amount,
+      token: depositValueRef.current.token
+    });
+  }, [setDepositValue, setDeposit, setColalteralAmount, depositValueRef]);
 
-  const handleGenerateChange = useCallback((value: number) => {
-    form.setFieldValue('generate', value);
-  }, [form]);
+  const handleGenerateChange = useCallback((value: BalanceInputValue) => {
+    setGenerate(value.amount);
 
-  useEffect(() => {
-    if (!helper) return;
-
-    setDeposit(form.values.deposit);
-    setGenerate(form.values.generate);
-    setColalteralAmount(form.values.deposit);
-  }, [helper, form, setDeposit, setGenerate]);
+    setGenerateValue({
+      amount: value.amount,
+      token: generateValue.token
+    });
+  }, [setGenerateValue, setGenerate, generateValue]);
 
   if (!helper) {
     return null;
@@ -109,34 +95,31 @@ export const Generate: FC = () => {
       <div className={classes.content}>
         <div className={classes.console}>
           <p className={classes.title}>
-            How much {getTokenName(selectedToken)} would you deposit as collateral?
+            How much {getTokenName(selectedToken.asToken.toString())} would you deposit as collateral?
           </p>
           <BalanceInput
             className={classes.input}
-            error={form.errors.deposit}
-            id='deposit'
-            name='deposit'
+            error={''}
             onChange={handleDepositChange}
             onMax={handleDepositMax}
             showMaxBtn
             size='middle'
-            token={selectedToken}
-            value={form.values.deposit}
+            value={depositValue}
           />
           <div className={classes.addon}>
             <UserBalance token={selectedToken} />
             <span>Max to Lock</span>
           </div>
-          <p className={classes.title}>How much {getTokenName(stableCurrency)} would you like to borrow?</p>
+          <p className={classes.title}>How much {getTokenName(stableCurrency.asToken.toString())} would you like to borrow?</p>
           <BalanceInput
+            checkBalance={false}
             className={classes.input}
-            error={form.errors.generate}
-            id='generate'
-            name='generate'
+            error={''}
+            max={maxGenerate.toNumber()}
+            min={minmumDebitValue.toNumber()}
             onChange={handleGenerateChange}
             size='middle'
-            token={stableCurrency}
-            value={form.values.generate}
+            value={generateValue}
           />
           <div className={classes.addon}>
             <FormatBalance
@@ -173,7 +156,6 @@ export const Generate: FC = () => {
           Prev
         </Button>
         <Button
-          color='primary'
           disabled={isDisabled}
           onClick={handleNext}
           size='small'

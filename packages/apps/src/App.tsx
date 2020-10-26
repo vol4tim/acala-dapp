@@ -8,6 +8,7 @@ import { EventsWatcher } from '@acala-dapp/react-components';
 
 import { RouterProvider } from './components/RouterProvider';
 import { config as routerConfig } from './router-config';
+import './initI18n';
 
 const App: FC = () => {
   const client = useMemo<ApolloClient<any>>(() => {

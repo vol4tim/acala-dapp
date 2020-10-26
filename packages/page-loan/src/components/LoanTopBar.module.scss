@@ -19,6 +19,22 @@ $item-height: 64px;
   transition: all 200ms ease;
   overflow: hidden;
 
+  &.danger {
+    border-color: var(--color-error) !important;
+
+    .collateralRate {
+      color: var(--color-error) !important;
+    }
+  }
+
+  &.warning {
+    border-color: var(--color-warning) !important;
+
+    .collateralRate {
+      color: var(--color-warning) !important;
+    }
+  }
+
   &.active {
     border-color: var(--color-primary);
   }

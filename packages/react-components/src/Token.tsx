@@ -1,68 +1,126 @@
 import React, { FC } from 'react';
 import clsx from 'clsx';
 
+import { CurrencyId } from '@acala-network/types/interfaces/primitives';
+
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { Condition } from '@acala-dapp/ui-components';
 
 import classes from './Token.module.scss';
 import { getTokenImage, getTokenName, getTokenFullName } from './utils';
 
 interface TokenComponentProps extends BareProps {
-  currency: CurrencyLike;
+  currency: CurrencyId;
 }
 
-const generateTokenComponent = (getFN: (currency: CurrencyLike) => any, wrapperComponent: string, getProps: (data: any) => object, displayName: string): FC<TokenComponentProps> => {
-  const Component: FC<TokenComponentProps> = ({ className, currency }) => {
-    const content = getFN(currency);
-    const props = getProps(content) as any;
+function getTokensNameFromDexShare (currency: CurrencyId): [string, string] {
+  if (!currency.isDexShare) {
+    console.warn('should use dex share type currency is getTokensNameFromDexShare');
 
-    return content ? React.createElement(wrapperComponent, { ...props, className: clsx(className, props.className) }) : null;
-  };
+    return [currency.toString(), currency.toString()];
+  }
 
-  Component.displayName = displayName;
-
-  return Component;
-};
+  // sort ausd to tail
+  return [
+    currency.asDexShare[0].toString(),
+    currency.asDexShare[1].toString()
+  ].sort((i) => i === 'AUSD' ? 1 : -1) as [string, string];
+}
 
 /**
  * @name TokenImage
  * @descript show token image
  * @param currency
  */
-export const TokenImage = generateTokenComponent(
-  getTokenImage,
-  'img',
-  (data: any) => ({ className: classes.tokenImg, src: data }),
-  'TokenImage'
-);
+export const TokenImage: FC<TokenComponentProps> = ({ className, currency }) => {
+  // handle token
+  if (currency.isToken) {
+    return (
+      <img
+        className={clsx(className, classes.tokenImage)}
+        src={getTokenImage(currency.asToken.toString())}
+      />
+    );
+  }
+
+  // handle dex share
+  if (currency.isDexShare) {
+    const data = getTokensNameFromDexShare(currency);
+
+    return (
+      <div className={clsx(className, classes.lpImages)}>
+        {
+          data.map((item) => (
+            <img
+              className={clsx(classes.tokenImage)}
+              key={`currency-${item}`}
+              src={getTokenImage(item)}
+            />
+          ))
+        }
+      </div>
+    );
+  }
+
+  return null;
+};
 
 /**
  * @name TokenName
  * @descript show token name
  * @param currency
  */
-export const TokenName = generateTokenComponent(
-  getTokenName,
-  'span',
-  (data: any) => ({ children: data }),
-  'TokenName'
-);
+export const TokenName: FC<TokenComponentProps> = ({ className, currency }) => {
+  if (currency.isToken) {
+    return (
+      <span className={className}>
+        {getTokenName(currency.asToken.toString())}
+      </span>
+    );
+  }
+
+  if (currency.isDexShare) {
+    const data = getTokensNameFromDexShare(currency);
+
+    return (
+      <span className={className}>
+        {`${getTokenName(data[0])}-${getTokenName(data[1])}`}
+      </span>
+    );
+  }
+
+  return null;
+};
 
 /**
  * @name TokenFullName
- * @description show token fullname
+ * @descript show token full name
  * @param currency
  */
-export const TokenFullName = generateTokenComponent(
-  getTokenFullName,
-  'span',
-  (data: any) => ({ children: data }),
-  'TokenFullName'
-);
+export const TokenFullName: FC<TokenComponentProps> = ({ className, currency }) => {
+  if (currency.isToken) {
+    return (
+      <span className={className}>
+        {getTokenFullName(currency.asToken.toString())}
+      </span>
+    );
+  }
+
+  if (currency.isDexShare) {
+    const data = getTokensNameFromDexShare(currency);
+
+    return (
+      <span className={className}>
+        {`${getTokenFullName(data[0])} / ${getTokenFullName(data[1])}`}
+      </span>
+    );
+  }
+
+  return null;
+};
 
 export interface TokenProps extends BareProps {
-  currency: CurrencyLike;
+  currency: CurrencyId;
   imageClassName?: string;
   nameClassName?: string;
   fullnameClassName?: string;
@@ -84,9 +142,7 @@ export const Token: FC<TokenProps> = ({
   nameClassName,
   padding = false
 }) => {
-  if (!currency) {
-    return null;
-  }
+  if (!currency) return null;
 
   return (
     <div

@@ -15,9 +15,9 @@ export const FormatRatio: FC<FormatNumberProps> = ({ data, ...props }) => {
 
   return (
     <FormatNumber
-      data={_data}
+      data={_data.isFinity() ? _data : 0}
       formatNumberConfig={FormatRatioConfig}
-      suffix={_data.isFinity() ? '%' : ''}
+      suffix='%'
       {...props}
     />
   );

@@ -8,7 +8,7 @@ export * from './useApi';
 export * from './useCall';
 export * from './useIsAppReady';
 export * from './useStorage';
-export * from './userSetting';
+export * from './useSetting';
 export * from './useConstants';
 export * from './useExtrinsicHistory';
 export * from './useInterval';
@@ -19,7 +19,10 @@ export * from './useMemorized';
 // common
 export * from './useStateWithCallback';
 export * from './useFormValidator';
+export * from './useFormValidatorN';
 export * from './useModal';
+export * from './useSubscription';
+export * from './useInputValue';
 
 // system
 export * from './balanceHooks';
@@ -27,10 +30,11 @@ export * from './priceHooks';
 
 // dex
 export * from './swapHooks';
-export * from './useDexExchangeRate';
+export * from './lpHooks';
 export * from './useDexShare';
-export * from './useDexReward';
-export * from './useDexPool';
+
+// incentive
+export * from './incentiveRewardHooks';
 export * from './dexAccumulateDataHooks';
 
 // homa

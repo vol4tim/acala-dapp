@@ -2,12 +2,13 @@ import React, { FC, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { ScrollCard, Condition } from '@acala-dapp/ui-components';
+import { ScrollCard, Condition, Tag } from '@acala-dapp/ui-components';
+import { BareProps } from '@acala-dapp/ui-components/types';
 import { useConstants, useBalance } from '@acala-dapp/react-hooks';
 import { TokenImage, TokenName, UserAssetBalance, UserAssetValue, tokenEq, StakingPoolExchangeRate } from '@acala-dapp/react-components';
 
 import classes from './WalletBalance.module.scss';
-import { BareProps } from '@acala-dapp/ui-components/types';
+import { focusToFixed18 } from './utils';
 
 interface BalanceProps extends BareProps {
   currency: CurrencyId;
@@ -42,7 +43,7 @@ export const Balance: FC<BalanceProps> = ({ className, currency }) => {
           }>
           <StakingPoolExchangeRate
             className={classes.amount}
-            liquidAmount={liquidBalance}
+            liquidAmount={focusToFixed18(liquidBalance)}
             showLiquidAmount={false}
           />
         </Condition>
@@ -58,7 +59,17 @@ export const WalletBalance: FC = () => {
     <ScrollCard
       contentClassName={classes.cardContent}
       divider={false}
-      header='Wallet Balance'
+      header={
+        <div className={classes.cardTitle}>
+          <span>Wallet Balance</span>
+          <Tag
+            style='error'
+            type='flag'
+          >
+            TestNet
+          </Tag>
+        </div>
+      }
       itemClassName={classes.item}
       padding={false}
     >

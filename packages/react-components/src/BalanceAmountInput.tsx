@@ -1,89 +1,90 @@
 import React, { FC, useState, useMemo, FocusEventHandler, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
-import { useFormik } from 'formik';
-import { noop } from 'lodash';
 
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
-
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { usePrice, useBalance, useConstants, useFormValidator } from '@acala-dapp/react-hooks';
+import { usePrice, useBalance, useConstants } from '@acala-dapp/react-hooks';
 import { SwitchIcon, Condition } from '@acala-dapp/ui-components';
 
 import classes from './BalanceAmountInput.module.scss';
-import { BalanceInput } from './BalanceInput';
+import { BalanceInput, BalanceInputValue } from './BalanceInput';
 import { TokenName } from './Token';
-import { FormatFixed18 } from './format';
+import { FormatValue } from './format';
+import { CurrencyId } from '@acala-network/types/interfaces';
+import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { LPSizeWithShare } from './LPSize';
 
 type InputType = 'balance' | 'amount';
 
+export interface BalanceAmountValue {
+  balance: number;
+  amount: number;
+}
 export interface BalanceAmountInputProps {
-  currency: CurrencyLike;
-  onBalanceChange: (number: number) => void;
-  onError: (error: boolean) => void;
-  onCurrencyChange: (currency: CurrencyLike) => void;
+  currency: CurrencyId;
+  mode?: 'token' | 'lp-token';
+  onChange: (value: BalanceAmountValue) => void;
+  onError?: (error: boolean) => void;
 }
 
 export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   currency,
-  onBalanceChange,
-  onCurrencyChange,
+  mode = 'token',
+  onChange,
   onError
 }) => {
   const price = usePrice(currency);
   const balance = useBalance(currency);
   const { stableCurrency } = useConstants();
-  const [inputType, setInputType] = useState<InputType>('balance');
+  const [inputType, _setInputType] = useState<InputType>('balance');
   const [focused, setFocused] = useState<boolean>(false);
+
+  const setInputType = useCallback((value: InputType) => {
+    if (mode === 'lp-token') return;
+
+    _setInputType(value);
+  }, [mode, _setInputType]);
 
   const maxAmount = useMemo(() => {
     if (!balance || !price) return 0;
 
-    return convertToFixed18(balance).mul(price).toNumber();
+    return balance.times(price).toNumber();
   }, [balance, price]);
 
-  const validator = useFormValidator({
-    amount: {
-      max: maxAmount,
-      type: 'number'
-    },
-    balance: {
-      currency: currency,
-      type: 'balance'
-    }
+  const [balanceValue, setBalanceValue] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: currency
   });
 
-  const form = useFormik({
-    initialValues: {
-      amount: '' as any as number,
-      balance: '' as any as number
-    },
-    onSubmit: noop,
-    validate: validator
+  const [amountValue, setAmountValue] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: currency
   });
 
-  const displayAmount = useMemo(() => {
-    if (!price) return Fixed18.ZERO;
+  const amountForBalance = useMemo(() => {
+    if (!price) return FixedPointNumber.ZERO;
 
-    return Fixed18.fromNatural(form.values.balance || 0).mul(price);
-  }, [price, form.values]);
+    return new FixedPointNumber(balanceValue.amount || 0).times(price);
+  }, [price, balanceValue]);
 
-  const displayBalance = useMemo(() => {
-    if (!price) return Fixed18.ZERO;
+  const balanceForAmount = useMemo(() => {
+    if (!price) return FixedPointNumber.ZERO;
 
-    const amount = Fixed18.fromNatural(form.values.amount || 0).div(price);
-
-    return amount;
-  }, [price, form.values]);
-
-  const handleCurrencyChange = useCallback((currency: CurrencyLike): void => {
-    form.resetForm();
-    onCurrencyChange(currency);
-  }, [onCurrencyChange, form]);
+    return new FixedPointNumber(amountValue.amount).div(price);
+  }, [price, amountValue]);
 
   const handleSwitch = useCallback(() => {
+    if (mode === 'lp-token') return;
+
     setInputType(inputType === 'amount' ? 'balance' : 'amount');
-    form.resetForm();
-  }, [setInputType, inputType, form]);
+    setBalanceValue({
+      amount: 0,
+      token: currency
+    });
+    setAmountValue({
+      amount: 0,
+      token: stableCurrency
+    });
+  }, [setInputType, inputType, setBalanceValue, setAmountValue, currency, stableCurrency, mode]);
 
   const handleFocus: FocusEventHandler<HTMLInputElement> = () => {
     setFocused(true);
@@ -96,98 +97,106 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   const handleBalanceMax = useCallback(() => {
     if (!balance) return;
 
-    form.setFieldValue('balance', convertToFixed18(balance).toNumber());
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [balance]);
+    setBalanceValue({
+      amount: balance.toNumber(18, 3),
+      token: currency
+    });
+    console.log(balance.toNumber(18, 3), balance._getInner().toFixed(0));
+    onChange({
+      amount: balance.times(price).toNumber(18, 3),
+      balance: balance.toNumber(18, 3)
+    });
+  }, [setBalanceValue, balance, currency, onChange, price]);
 
   const handleAmountMax = useCallback(() => {
-    form.setFieldValue('amount', maxAmount || 0);
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [maxAmount]);
-
-  const handleAmountChange = useCallback((value: number) => {
-    form.setFieldValue('amount', value);
-  }, [form]);
-
-  const handleBalanceChange = useCallback((value: number) => {
-    form.setFieldValue('balance', value);
-  }, [form]);
+    setAmountValue({
+      amount: maxAmount || 0,
+      token: stableCurrency
+    });
+    onChange({
+      amount: maxAmount,
+      balance: new FixedPointNumber(maxAmount).div(price).toNumber()
+    });
+  }, [maxAmount, setAmountValue, price, onChange, stableCurrency]);
 
   const error = useMemo(() => {
-    if (inputType === 'amount') {
-      return form.errors.amount;
-    }
-
-    if (inputType === 'balance') {
-      return form.errors.balance;
-    }
-
-    return true;
-  }, [form, inputType]);
+    return false;
+  }, []);
 
   const rootClasses = useMemo(() => {
     return clsx(classes.root, {
       [classes.focused]: focused,
-      [classes.error]: !!error
+      [classes.error]: !!error,
+      [classes.noSwitch]: mode === 'lp-token'
     });
-  }, [focused, error]);
+  }, [focused, error, mode]);
 
   useEffect(() => {
-    onError(!!error);
+    onError && onError(!!error);
   }, [onError, error]);
 
-  useEffect(() => {
-    if (!price) return;
+  const handleBalanceChange = useCallback((value: BalanceInputValue): void => {
+    setBalanceValue(value);
+    onChange({
+      amount: new FixedPointNumber(value.amount).times(price).toNumber(),
+      balance: value.amount
+    });
+  }, [setBalanceValue, onChange, price]);
 
-    if (inputType === 'balance') {
-      onBalanceChange(form.values.balance);
-    }
-
-    if (inputType === 'amount') {
-      onBalanceChange(Fixed18.fromNatural(form.values.amount).div(price).toNumber());
-    }
-  }, [form.values, inputType, price, onBalanceChange]);
+  const handleAmountChange = useCallback((value: BalanceInputValue): void => {
+    setAmountValue(value);
+    onChange({
+      amount: value.amount,
+      balance: new FixedPointNumber(value.amount).div(price).toNumber()
+    });
+  }, [setAmountValue, onChange, price]);
 
   return (
     <div className={rootClasses}>
-      <div className={classes.switch}
-        onClick={handleSwitch}
-      >
-        <SwitchIcon />
-      </div>
+      {
+        mode === 'token' ? (
+          <div className={classes.switch}
+            onClick={handleSwitch}
+          >
+            <SwitchIcon />
+          </div>
+        ) : null
+      }
       <div className={classes.inputArea}>
         <Condition condition={inputType === 'balance'}>
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            enableTokenSelect
-            error={form.errors.balance}
-            id='balance'
-            name='balance'
+            error={''}
             onBlur={hanleBlur}
             onChange={handleBalanceChange}
             onFocus={handleFocus}
             onMax={handleBalanceMax}
-            onTokenChange={handleCurrencyChange}
             showIcon={false}
             showMaxBtn
             size='small'
-            token={currency}
-            value={form.values.balance}
+            value={balanceValue}
           />
-          <div className={classes.amountDisplay}>
-            <FormatFixed18
-              data={displayAmount}
-              prefix='≈ US$'
-            />
-            <TokenName currency={stableCurrency} />
-          </div>
+          {
+            mode === 'token' ? (
+              <div className={classes.amountDisplay}>
+                <FormatValue data={amountForBalance} />
+                <TokenName currency={stableCurrency} />
+              </div>
+            ) : (
+              <LPSizeWithShare
+                className={classes.lpSize}
+                lp={balanceValue.token}
+                share={balanceValue.amount}
+              />
+            )
+          }
         </Condition>
         <Condition condition={inputType === 'amount'}>
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            error={form.errors.amount}
+            error={''}
             id='amount'
             name='amount'
             onChange={handleAmountChange}
@@ -195,19 +204,12 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
             showIcon={false}
             showMaxBtn
             size='small'
-            token={stableCurrency}
-            value={form.values.amount}
+            value={amountValue}
           />
-          <BalanceInput
-            border={false}
-            className={classes.balanceDisplay}
-            disabled
-            enableTokenSelect
-            onTokenChange={handleCurrencyChange}
-            showIcon={false}
-            token={currency}
-            value={displayBalance.toNumber()}
-          />
+          <div className={classes.amountDisplay}>
+            <FormatValue data={balanceForAmount} />
+            <TokenName currency={currency} />
+          </div>
         </Condition>
       </div>
     </div>

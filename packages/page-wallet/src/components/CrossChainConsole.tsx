@@ -1,21 +1,20 @@
-import React, { FC, ReactElement, useMemo } from 'react';
+import React, { FC, ReactElement } from 'react';
 
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { TokenImage, TokenName, TokenFullName } from '@acala-dapp/react-components';
 import { useConstants } from '@acala-dapp/react-hooks';
 import { Tabs } from '@acala-dapp/ui-components';
 
 import classes from './CrossChainConsole.module.scss';
-import { RenBtc } from './crosschain/RenBtc';
-import { AUSD } from './crosschain/AUSD';
+import { RenBtc } from './cross-chain/RenBtc';
+import { AUSD } from './cross-chain/AUSD';
+import { DOT } from './cross-chain/DOT';
 
-const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
+const AssetCard: FC<{ currency: CurrencyId}> = ({ currency }) => {
   return (
     <div className={classes.assetCard}>
       <div className={classes.assetImg}>
-        <TokenImage
-          currency={currency}
-        />
+        <TokenImage currency={currency} />
       </div>
       <div className={classes.assetName}>
         <TokenName currency={currency} />
@@ -26,34 +25,35 @@ const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
 };
 
 const crossChainConsoleList: Map<string, ReactElement> = new Map([
+  ['RENBTC', <RenBtc key='renbtc' />],
   ['AUSD', <AUSD key='ausd' />],
-  ['RENBTC', <RenBtc key='renbtc' />]
+  ['DOT', <DOT key='dot' />]
 ]);
 
-const crossChainDisabled: Map<string, boolean> = new Map([
-  ['RENBTC', false],
+const crossChainEnable: Map<string, boolean> = new Map([
+  ['RENBTC', true],
   ['AUSD', false],
-  ['DOT', true]
+  ['DOT', false]
 ]);
 
 export const CrossChainConsole: FC = () => {
   const { crossChainCurrencies } = useConstants();
-  const _currencies = useMemo(() => {
-    return crossChainCurrencies.sort((a) => Number(crossChainDisabled.get(a.toString())) - 0.5);
-  }, [crossChainCurrencies]);
 
   return (
-    <Tabs>
+    <Tabs
+      className={classes.tabs}
+      defaultKey='RENBTC'
+    >
       {
-        _currencies.map((currency) => {
+        crossChainCurrencies.map((currency) => {
           return (
             <Tabs.Panel
-              disabled={crossChainDisabled.get(currency.toString())}
-              key={currency.toString()}
+              disabled={!crossChainEnable.get(currency.asToken.toString())}
+              key={currency.asToken.toString()}
               tab={<AssetCard currency={currency} />}
             >
               {
-                crossChainConsoleList.get(currency.toString())
+                crossChainConsoleList.get(currency.asToken.toString())
               }
             </Tabs.Panel>
           );

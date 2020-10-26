@@ -9,13 +9,14 @@ interface AlertProps extends BareProps {
   message: ReactNode;
   type?: MessageType;
   icon?: ReactNode;
+  messageClassName?: string;
 }
 
-export const Alert: FC<AlertProps> = ({ className, icon, message, type }) => {
+export const Alert: FC<AlertProps> = ({ className, icon, message, messageClassName, type }) => {
   return (
     <div className={clsx('aca-alert', type, className)}>
       { icon || <AlertIcon className='aca-alert__icon' /> }
-      <span className='aca-alert__message'>{message}</span>
+      <span className={clsx('aca-alert__message', messageClassName)}>{message}</span>
     </div>
   );
 };

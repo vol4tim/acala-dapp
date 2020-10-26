@@ -1,27 +1,27 @@
-import React, { FC, memo } from 'react';
+import React, { FC } from 'react';
 
 import AccountId from '@polkadot/types/generic/AccountId';
-import { Balance } from '@acala-network/types/interfaces';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { Balance, CurrencyId } from '@acala-network/types/interfaces';
 import { convertToFixed18 } from '@acala-network/app-util';
 
 import { useCall, useAccounts, usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { FormatValue, FormatBalance } from './format';
 
 interface Props extends BareProps {
   account?: AccountId | string;
-  token: CurrencyLike;
+  token: CurrencyId;
   showValue?: boolean;
-  withIcon?: boolean;
+  showCurrencyName?: boolean;
 }
 
-export const UserBalance: FC<Props> = memo(({
+export const UserBalance: FC<Props> = ({
   account,
   className,
+  showCurrencyName = true,
   showValue = false,
-  token,
-  withIcon = true
+  token
 }) => {
   const { active } = useAccounts();
   const _account = account !== undefined ? account : active ? active.address : '';
@@ -29,11 +29,9 @@ export const UserBalance: FC<Props> = memo(({
   const result = useCall<Balance>('derive.currencies.balance', [_account, token]);
   const price = usePrice(token);
 
-  if (!result || !price) {
-    return null;
-  }
+  if (!result) return null;
 
-  if (showValue) {
+  if (showValue && price) {
     const _value = price.mul(convertToFixed18(result));
 
     return (
@@ -46,11 +44,9 @@ export const UserBalance: FC<Props> = memo(({
 
   return (
     <FormatBalance
-      balance={convertToFixed18(result)}
+      balance={FixedPointNumber.fromInner(result.toString())}
       className={className}
-      currency={withIcon ? token : ''}
+      currency={showCurrencyName ? token : undefined}
     />
   );
-});
-
-UserBalance.displayName = 'UserBalance';
+};

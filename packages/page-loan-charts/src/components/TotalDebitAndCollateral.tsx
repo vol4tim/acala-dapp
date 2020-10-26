@@ -5,7 +5,7 @@ import { LooseObject } from 'bizcharts/lib/interface';
 import { Fixed18 } from '@acala-network/app-util';
 
 import { Card, Grid } from '@acala-dapp/ui-components';
-import { useTotalDebit, useTotalCollatearl, TotalDebitOrCollateralData } from '@acala-dapp/react-hooks';
+import { useTotalDebit, useTotalCollateral, TotalDebitOrCollateralData } from '@acala-dapp/react-hooks';
 import { getTokenColor, getTokenName, FormatValue } from '@acala-dapp/react-components';
 
 import classes from './TotalDebitAndCollateral.module.scss';
@@ -115,7 +115,7 @@ const TotalDebit: FC = () => {
 };
 
 const TotalCollateral: FC = () => {
-  const collateralDetails = useTotalCollatearl();
+  const collateralDetails = useTotalCollateral();
 
   return (
     <OverviewDataDisplay

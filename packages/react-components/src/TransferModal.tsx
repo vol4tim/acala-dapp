@@ -2,20 +2,21 @@ import React, { FC, useState, ReactNode, useCallback, useMemo, useEffect } from 
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button } from '@acala-dapp/ui-components';
-import { useModal, useConstants, useAccounts } from '@acala-dapp/react-hooks';
+import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
+import { useModal, useAccounts, useConstants, useLPCurrencies } from '@acala-dapp/react-hooks';
 
-import { getTokenName, tokenEq, numToFixed18Inner } from './utils';
+import { tokenEq } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
 import { UserAssetBalance, UserAssetValue } from './Assets';
 import classes from './TransferModal.module.scss';
 import { AddressInput } from './AddressInput';
-import { BalanceAmountInput } from './BalanceAmountInput';
+import { BalanceAmountInput, BalanceAmountValue } from './BalanceAmountInput';
 import { TxButton } from './TxButton';
+import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 interface AssetBoardProps {
-  currency: CurrencyLike;
+  currency: CurrencyId;
   openSelect: () => void;
 }
 
@@ -41,10 +42,14 @@ const AssetBoard: FC<AssetBoardProps> = ({
             />
             <ArrowDownIcon className={classes.icon} />
           </div>
-          <UserAssetValue
-            className={classes.amount}
-            currency={currency}
-          />
+          {
+            currency.isToken ? (
+              <UserAssetValue
+                className={classes.amount}
+                currency={currency}
+              />
+            ) : null
+          }
         </div>
       </div>
     </div>
@@ -52,28 +57,28 @@ const AssetBoard: FC<AssetBoardProps> = ({
 };
 
 interface SelectCurrencyProps {
-  selected: CurrencyLike;
-  onSelect: (currency: CurrencyLike) => void;
+  selectableCurrencies: CurrencyId[];
+  value: CurrencyId;
+  onChange: (currency: CurrencyId) => void;
 }
 
 const SelectCurrency: FC<SelectCurrencyProps> = ({
-  onSelect,
-  selected
+  onChange,
+  selectableCurrencies,
+  value
 }) => {
-  const { allCurrencies } = useConstants();
-
   return (
     <div className={classes.selectCurrency}>
       <ul className={classes.content}>
         {
-          allCurrencies.map((item: CurrencyId): ReactNode => {
-            const active = tokenEq(item, selected);
+          selectableCurrencies.map((item: CurrencyId): ReactNode => {
+            const active = tokenEq(item, value);
 
             return (
               <li
                 className={clsx(classes.item, { [classes.active]: active })}
                 key={`currency-${item}`}
-                onClick={(): void => onSelect(item) }
+                onClick={(): void => onChange(item) }
               >
                 { active ? <CheckedCircleIcon className={classes.selected} /> : null }
                 <TokenImage
@@ -96,24 +101,39 @@ const SelectCurrency: FC<SelectCurrencyProps> = ({
   );
 };
 
+interface AccountBalanceValue {
+  account: string;
+  balance: number;
+}
+
 interface TransferFormProps {
-  currency: CurrencyLike;
-  onCurrencyChange: (currency: CurrencyLike) => void;
-  onAccountChange: (account: string) => void;
-  onAccountError: (error: boolean) => void;
-  onBalanceChange: (balance: number) => void;
-  onBalanceError: (error: boolean) => void;
+  mode: 'token' | 'lp-token';
+  currency: CurrencyId;
+  value: AccountBalanceValue;
+  onChange: (value: AccountBalanceValue) => void;
 }
 
 const TransferForm: FC<TransferFormProps> = ({
   currency,
-  onAccountChange,
-  onAccountError,
-  onBalanceChange,
-  onBalanceError,
-  onCurrencyChange
+  mode,
+  onChange,
+  value
 }) => {
   const { active } = useAccounts();
+
+  const handleAccountChange = useCallback((account: string) => {
+    onChange({
+      account,
+      balance: value.balance
+    });
+  }, [value, onChange]);
+
+  const handleBalanceAmountInput = useCallback((result: BalanceAmountValue) => {
+    onChange({
+      account: value.account,
+      balance: result.balance
+    });
+  }, [value, onChange]);
 
   return (
     <>
@@ -123,10 +143,7 @@ const TransferForm: FC<TransferFormProps> = ({
       >
         <AddressInput
           blockAddressList={[active ? active.address : '']}
-          id='account'
-          name='account'
-          onChange={onAccountChange}
-          onError={onAccountError}
+          onChange={handleAccountChange}
         />
       </FormItem>
       <FormItem
@@ -134,9 +151,8 @@ const TransferForm: FC<TransferFormProps> = ({
       >
         <BalanceAmountInput
           currency={currency}
-          onBalanceChange={onBalanceChange}
-          onCurrencyChange={onCurrencyChange}
-          onError={onBalanceError}
+          mode={mode}
+          onChange={handleBalanceAmountInput}
         />
       </FormItem>
     </>
@@ -144,7 +160,8 @@ const TransferForm: FC<TransferFormProps> = ({
 };
 
 interface TransferModalProps {
-  defaultCurrency: CurrencyLike;
+  mode: 'token' | 'lp-token';
+  defaultCurrency: CurrencyId;
   visiable: boolean;
   onClose: () => void;
 }
@@ -155,92 +172,100 @@ interface TransferModalProps {
  */
 export const TransferModal: FC<TransferModalProps> = ({
   defaultCurrency,
+  mode,
   onClose,
   visiable
 }) => {
-  const [currency, setCurrency] = useState<CurrencyLike>(defaultCurrency);
-  const { close, open, status: selectCurrencyStatus, update } = useModal();
-  const [account, setAccount] = useState<string>('');
-  const [amount, setAmount] = useState<number>(0);
-  const [accountError, setAccountError] = useState<boolean>(true);
-  const [amountError, setAmountError] = useState<boolean>(true);
+  const { allCurrencies } = useConstants();
+  const lpCurrencies = useLPCurrencies();
+  const [selectedCurrency, setSelectedCurrency] = useState<CurrencyId>(defaultCurrency);
+  const { close, open, status: isOpenSelect } = useModal();
+  const [value, setValue, { reset }] = useInputValue<AccountBalanceValue>({
+    account: '',
+    balance: 0
+  });
 
-  const renderHeader = useCallback((): string => {
-    return `Transfer ${getTokenName(currency)}`;
-  }, [currency]);
+  const renderHeader = useCallback((): JSX.Element => {
+    return (
+      <>
+        <InlineBlockBox margin={8}>
+          <span>Transfer</span>
+        </InlineBlockBox>
+        <TokenName currency={selectedCurrency}/>
+      </>
+    );
+  }, [selectedCurrency]);
 
   const renderTransfer = useCallback((): JSX.Element => {
     return (
       <TransferForm
-        currency={currency}
-        onAccountChange={setAccount}
-        onAccountError={setAccountError}
-        onBalanceChange={setAmount}
-        onBalanceError={setAmountError}
-        onCurrencyChange={setCurrency}
+        currency={selectedCurrency}
+        mode={mode}
+        onChange={setValue}
+        value={value}
       />
     );
-  }, [currency, setAccount, setAccountError, setAmount, setAmountError, setCurrency]);
+  }, [value, setValue, selectedCurrency, mode]);
+
+  const handleTokenSelect = useCallback((value: CurrencyId): void => {
+    setSelectedCurrency(value);
+    close();
+  }, [setSelectedCurrency, close]);
 
   const renderSelect = useCallback((): ReactNode => {
-    const handleSelect = (currency: CurrencyLike): void => {
-      setCurrency(currency);
-      close();
-    };
-
     return (
       <SelectCurrency
-        onSelect={handleSelect}
-        selected={currency}
+        onChange={handleTokenSelect}
+        selectableCurrencies={mode === 'token' ? allCurrencies : lpCurrencies}
+        value={selectedCurrency}
       />
     );
-  }, [close, currency, setCurrency]);
+  }, [mode, handleTokenSelect, selectedCurrency, allCurrencies, lpCurrencies]);
 
   const params = useMemo(() => {
-    return [account, currency, numToFixed18Inner(amount)];
-  }, [account, currency, amount]);
+    return [value.account, selectedCurrency, new FixedPointNumber(value.balance).toChainData()];
+  }, [value, selectedCurrency]);
 
   const isDisabled = useMemo((): boolean => {
-    if (!amount) {
+    if (!value.account) {
       return true;
     }
 
-    if (!account) {
+    if (!value.account) {
       return true;
     }
 
-    return accountError || amountError;
-  }, [amount, account, accountError, amountError]);
+    return false;
+  }, [value]);
 
   useEffect(() => {
-    if (!visiable) {
-      setAccount('');
-      update(false);
-      setCurrency(defaultCurrency);
-    }
-  }, [visiable, setAccount, setCurrency, defaultCurrency, update]);
+    reset();
+  /* eslint-disable-next-line */
+  }, [visiable]);
 
   return (
     <Dialog
       action={
-        <>
+        <Condition condition={!isOpenSelect}>
           <Button
             onClick={onClose}
             size='small'
+            style='normal'
+            type='border'
           >
               Close
           </Button>
           <TxButton
             disabled={isDisabled}
             method='transfer'
-            onSuccess={onClose}
+            onExtrinsicSuccess={onClose}
             params={params}
             section='currencies'
             size='small'
           >
               Confirm
           </TxButton>
-        </>
+        </Condition>
       }
       onCancel={onClose}
       title={renderHeader()}
@@ -248,10 +273,10 @@ export const TransferModal: FC<TransferModalProps> = ({
       withClose
     >
       <AssetBoard
-        currency={currency}
+        currency={selectedCurrency}
         openSelect={open}
       />
-      { selectCurrencyStatus ? renderSelect() : renderTransfer() }
+      { isOpenSelect ? renderSelect() : renderTransfer() }
     </Dialog>
   );
 };

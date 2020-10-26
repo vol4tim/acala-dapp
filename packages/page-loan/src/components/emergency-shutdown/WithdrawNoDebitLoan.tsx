@@ -27,8 +27,8 @@ export const WithdrawNoDebitLoan: FC = () => {
       /* eslint-disable-next-line react/display-name */
       render: (data: DerivedUserLoan): ReactNode => (
         <FormatBalance
-          balance={convertToFixed18(data.collaterals)}
-          currency={data.token}
+          balance={convertToFixed18(data.collateral)}
+          currency={data.currency}
         />
       ),
       title: 'Collateral',
@@ -38,7 +38,7 @@ export const WithdrawNoDebitLoan: FC = () => {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
       render: (data: DerivedUserLoan): ReactNode => {
-        const params = [data.token, '-' + data.collaterals, '0'];
+        const params = [data.currency, '-' + data.collateral, '0'];
 
         return (
           <TxButton

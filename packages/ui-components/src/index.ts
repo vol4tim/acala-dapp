@@ -1,3 +1,5 @@
+import { Skeleton } from 'antd';
+
 export * from './Alert';
 export * from './AutoComplete';
 export * from './Button';
@@ -33,3 +35,7 @@ export * from './Select';
 export * from './ScrollCard';
 export * from './NumberInput';
 export * from './Statistic';
+export * from './InputField';
+export * from './Box';
+
+export { Skeleton };

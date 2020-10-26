@@ -5,13 +5,13 @@ import { LooseObject } from 'bizcharts/lib/interface';
 import { Fixed18 } from '@acala-network/app-util';
 
 import { Card } from '@acala-dapp/ui-components';
-import { useTotalCollatearl, useTotalDebit } from '@acala-dapp/react-hooks';
+import { useTotalCollateral, useTotalDebit } from '@acala-dapp/react-hooks';
 import { getTokenName, getTokenColor } from '@acala-dapp/react-components';
 
 const ONE_HUNDRED = Fixed18.fromNatural(100);
 
 export const LoanCollateralRatio: FC = () => {
-  const totalCollateral = useTotalCollatearl();
+  const totalCollateral = useTotalCollateral();
   const totalDebit = useTotalDebit();
   const data = useMemo(() => {
     if (!totalDebit || !totalCollateral) return [];

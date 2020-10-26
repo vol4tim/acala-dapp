@@ -14,7 +14,7 @@ export const Products: FC<Props> = memo(({ data }) => {
     <div className={classes.products}>
       {data.map((item) => (
         <ProductItem
-          key={`products-${item.name}`}
+          key={`products-${item.content}`}
           {...item}
         />
       ))}

@@ -2,16 +2,16 @@ import React, { FC, useMemo } from 'react';
 import clsx from 'clsx';
 
 import { Fixed18, calcCollateralRatio } from '@acala-network/app-util';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Card, BulletBar, BulletBarConfigItem } from '@acala-dapp/ui-components';
 import { useLoanHelper, usePrice } from '@acala-dapp/react-hooks';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import { getLoanStatus, LoanStatus } from '../utils';
 import classes from './Liquidation.module.scss';
 
 interface Props {
-  currency: CurrencyLike;
+  currency: CurrencyId;
 }
 
 const convertToPercentage = (data: Fixed18): number => {
@@ -64,7 +64,7 @@ export const LiquidationRatioCard: FC<Props> = ({ currency }) => {
 };
 
 interface DynamicLiquidationProps {
-  currency: CurrencyLike;
+  currency: CurrencyId;
   collateral: number;
   generate: number;
 }

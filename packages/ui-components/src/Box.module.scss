@@ -1,0 +1,17 @@
+.spaceBetweenBox {
+  display: flex;
+  justify-content: space-between;
+}
+
+.alignCenterBox {
+  display: flex;
+  align-items: center;
+}
+
+.gridBox {
+  display: grid;
+}
+
+.inlineBlockBox {
+  display: inline-block;
+}

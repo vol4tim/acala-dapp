@@ -1,21 +1,21 @@
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
-import { noop } from 'lodash';
 import clsx from 'clsx';
-import { useFormik } from 'formik';
 
 import classes from './TwoWayBalanceInput.module.scss';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { Fixed18 } from '@acala-network/app-util';
 
 import { FormatFixed18 } from './format';
 import { TokenImage, TokenName } from './Token';
-import { BalanceInput } from './BalanceInput';
+import { BalanceInput, BalanceInputValue } from './BalanceInput';
 import { Condition, SwitchIcon } from '@acala-dapp/ui-components';
-import { useFormValidator, useBalance } from '@acala-dapp/react-hooks';
+import { useBalance } from '@acala-dapp/react-hooks';
+import { focusToFixed18 } from './utils';
+import { CurrencyId } from '@acala-network/types/interfaces';
+import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 
 interface TwoWayBalanceInputProps {
   className?: string;
-  initCurrencies: [CurrencyLike, CurrencyLike];
+  initCurrencies: [CurrencyId, CurrencyId];
   onChange: (num: number) => void;
   onError?: (error: boolean) => void;
   exchangeRate: Fixed18;
@@ -38,12 +38,12 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
 }) => {
   const [direction, setDirection] = useState<Direction>('forward');
   const [focused, setFocused] = useState<boolean>(false);
-  const [primaryCurrency] = useState<CurrencyLike>(initCurrencies[0]);
-  const [referenceCurrency] = useState<CurrencyLike>(initCurrencies[1]);
+  const [primaryCurrency] = useState<CurrencyId>(initCurrencies[0]);
+  const [referenceCurrency] = useState<CurrencyId>(initCurrencies[1]);
   const primaryCurrencyBalance = useBalance(primaryCurrency);
 
   const primaryMax = useMemo<Fixed18>((): Fixed18 => {
-    const _primaryCurrencyBalance = convertToFixed18(primaryCurrencyBalance || Fixed18.ZERO);
+    const _primaryCurrencyBalance = focusToFixed18(primaryCurrencyBalance);
 
     if (max === undefined) return _primaryCurrencyBalance;
 
@@ -58,29 +58,18 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
     return primaryMax.mul(exchangeRate);
   }, [primaryMax, exchangeRate]);
 
-  const validator = useFormValidator({
-    primary: {
-      max: primaryMax.toNumber(6, 3),
-      type: 'number'
-    },
-    reference: {
-      max: referenceMax.toNumber(6, 3),
-      type: 'number'
-    }
+  const [primaryValue, setPrimarayValue] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: primaryCurrency
   });
-
-  const form = useFormik({
-    initialValues: {
-      primary: '' as any as number,
-      reference: '' as any as number
-    },
-    onSubmit: noop,
-    validate: validator
+  const [referenceValue, setReferenceValue] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: referenceCurrency
   });
 
   const showError = useMemo(() => {
-    return direction === 'forward' ? form.errors.primary : form.errors.reference;
-  }, [form, direction]);
+    return '';
+  }, []);
 
   const rootClassName = useMemo(() => {
     return clsx(classes.root, className, {
@@ -99,53 +88,67 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
 
   const handleSwitch = useCallback(() => {
     // does not save the state before exchange
-    form.resetForm();
+    setPrimarayValue({
+      amount: 0,
+      token: primaryCurrency
+    });
+    setReferenceValue({
+      amount: 0,
+      token: referenceCurrency
+    });
+    onChange(0);
     setDirection(direction === 'forward' ? 'reverse' : 'forward');
-  }, [setDirection, direction, form]);
+  }, [setPrimarayValue, setReferenceValue, primaryCurrency, referenceCurrency, setDirection, direction, onChange]);
 
-  const handlePrimaryMax = useCallback(() => {
+  const handleMax = useCallback(() => {
     if (!primaryMax) return;
 
-    form.setValues({
-      primary: primaryMax.toNumber(6, 3),
-      reference: primaryMax.mul(exchangeRate).toNumber(6, 3)
+    setPrimarayValue({
+      amount: primaryMax.toNumber(),
+      token: primaryCurrency
     });
-  }, [primaryMax, form, exchangeRate]);
-
-  const handleReferenceMax = useCallback(() => {
-    if (!referenceMax) return;
-
-    form.setValues({
-      primary: primaryMax.toNumber(6, 3),
-      reference: referenceMax.toNumber(6, 3)
+    setReferenceValue({
+      amount: referenceMax.toNumber(),
+      token: referenceCurrency
     });
-  }, [referenceMax, form, primaryMax]);
+    onChange(primaryMax.toNumber());
+  }, [setPrimarayValue, setReferenceValue, primaryMax, primaryCurrency, referenceCurrency, referenceMax, onChange]);
 
-  const handlePrimaryChange = useCallback((value: number) => {
-    form.setValues({
-      primary: value,
-      reference: Fixed18.fromNatural(value).mul(exchangeRate).toNumber(6, 3)
+  const handlePrimaryChange = useCallback((value: BalanceInputValue) => {
+    setPrimarayValue(value);
+    setReferenceValue({
+      amount: Fixed18.fromNatural(value.amount).mul(exchangeRate).toNumber(),
+      token: referenceCurrency
     });
-  }, [form, exchangeRate]);
+    onChange(value.amount);
+  }, [setPrimarayValue, setReferenceValue, exchangeRate, referenceCurrency, onChange]);
 
-  const handleReferenceChange = useCallback((value: number) => {
-    form.setValues({
-      primary: Fixed18.fromNatural(value).div(exchangeRate).toNumber(6, 3),
-      reference: value
+  const handleReferenceChange = useCallback((value: BalanceInputValue) => {
+    const primaryValue = Fixed18.fromNatural(value.amount).div(exchangeRate).toNumber();
+
+    setReferenceValue(value);
+    setPrimarayValue({
+      amount: primaryValue,
+      token: referenceCurrency
     });
-  }, [form, exchangeRate]);
+    onChange(primaryValue);
+  }, [setPrimarayValue, setReferenceValue, exchangeRate, referenceCurrency, onChange]);
 
   // expose reset action to father component
   useEffect(() => {
     if (exposeReset) {
-      exposeReset(form.resetForm);
+      exposeReset(() => {
+        setPrimarayValue({
+          amount: 0,
+          token: primaryCurrency
+        });
+        setReferenceValue({
+          amount: 0,
+          token: referenceCurrency
+        });
+      });
     }
-  }, [form, exposeReset]);
-
-  // notify father compoent the primary value
-  useEffect(() => {
-    onChange(form.values.primary);
-  }, [form.values.primary, onChange]);
+  }, [exposeReset, setPrimarayValue, setReferenceValue, primaryCurrency, referenceCurrency]);
 
   // notify father compoent error
   useEffect(() => {
@@ -164,27 +167,24 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
           <SwitchIcon />
         </div>
       </Condition>
-      <div>
+      <div className={classes.inputContainer}>
         <div className={classes.inputArea}>
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            error={direction === 'forward' ? form.errors.primary : form.errors.reference}
-            id={ direction === 'forward' ? 'primary' : 'reference'}
-            name={ direction === 'forward' ? 'primary' : 'reference'}
+            error={''}
             onBlur={handleBlur}
             onChange={direction === 'forward' ? handlePrimaryChange : handleReferenceChange}
             onFocus={handleFocus}
-            onMax={direction === 'forward' ? handlePrimaryMax : handleReferenceMax}
+            onMax={handleMax}
             showMaxBtn
-            token={direction === 'forward' ? primaryCurrency : referenceCurrency}
-            value={direction === 'forward' ? form.values.primary : form.values.reference}
+            value={direction === 'forward' ? primaryValue : referenceValue}
           />
         </div>
         <div className={classes.displayArea}>
           <FormatFixed18
             className={classes.amount}
-            data={Fixed18.fromNatural((direction === 'forward' ? form.values.reference : form.values.primary) || 0)}
+            data={Fixed18.fromNatural((direction === 'forward' ? primaryValue.amount : referenceValue.amount) || 0)}
             prefix='≈'
           />
           <div className={classes.token}>
