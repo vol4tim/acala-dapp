@@ -24,17 +24,15 @@ export const Generate: FC = () => {
   const helper = useLoanHelper(selectedToken);
   const [collateralAmount, setColalteralAmount] = useState<number>(0);
   const maxGenerate = useMemo(() => {
-    if (!helper) return new Fixed18(1);
+    if (!helper) return new Fixed18(0);
 
     // calculate max generate
-    const result = calcCanGenerate(
+    return calcCanGenerate(
       helper.collaterals.add(Fixed18.fromNatural(collateralAmount || 0)).mul(helper.collateralPrice),
       helper.debitAmount,
       helper.requiredCollateralRatio,
       helper.stableCoinPrice
     );
-
-    return result.isZero() ? new Fixed18(1) : result;
   }, [collateralAmount, helper]);
 
   const [depositValue, setDepositValue, { ref: depositValueRef }] = useInputValue<BalanceInputValue>({
@@ -43,9 +41,16 @@ export const Generate: FC = () => {
   });
 
   const [generateValue, setGenerateValue] = useInputValue<BalanceInputValue>({
-    amount: 1,
+    amount: 0,
     token: stableCurrency
   });
+
+  const isLessThanMinDebit = useMemo(() => {
+    // don't check when generate is zero
+    if (generateValue.amount === 0) return false;
+
+    return minmumDebitValue.toNumber() > generateValue.amount;
+  }, [minmumDebitValue, generateValue]);
 
   const handleNext = useCallback((): void => {
     setStep('confirm');
@@ -56,11 +61,12 @@ export const Generate: FC = () => {
   }, [setStep]);
 
   const isDisabled = useMemo((): boolean => {
-    return !(generateValue.amount && depositValue.amount);
-  }, [generateValue, depositValue]);
+    return !(generateValue.amount && depositValue.amount && !isLessThanMinDebit);
+  }, [generateValue, depositValue, isLessThanMinDebit]);
 
   const handleDepositMax = useCallback((): void => {
     setDeposit(selectedCurrencyBalance.toNumber());
+    setColalteralAmount(selectedCurrencyBalance.toNumber());
     setDepositValue({
       amount: selectedCurrencyBalance.toNumber(),
       token: depositValueRef.current.token
@@ -114,9 +120,8 @@ export const Generate: FC = () => {
           <BalanceInput
             checkBalance={false}
             className={classes.input}
-            error={''}
+            error={isLessThanMinDebit ? 'Generate must larger than minimum debit (1aUSD)' : ''}
             max={maxGenerate.toNumber()}
-            min={minmumDebitValue.toNumber()}
             onChange={handleGenerateChange}
             size='middle'
             value={generateValue}

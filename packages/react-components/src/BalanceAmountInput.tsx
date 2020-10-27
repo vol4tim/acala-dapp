@@ -98,13 +98,13 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
     if (!balance) return;
 
     setBalanceValue({
-      amount: balance.toNumber(18, 3),
+      amount: balance.toNumber(),
       token: currency
     });
-    console.log(balance.toNumber(18, 3), balance._getInner().toFixed(0));
+    console.log(balance.toNumber(), balance._getInner().toFixed(0));
     onChange({
-      amount: balance.times(price).toNumber(18, 3),
-      balance: balance.toNumber(18, 3)
+      amount: balance.times(price).toNumber(),
+      balance: balance.toNumber()
     });
   }, [setBalanceValue, balance, currency, onChange, price]);
 
