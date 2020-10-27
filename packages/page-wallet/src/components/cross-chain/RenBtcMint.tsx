@@ -66,6 +66,7 @@ const InputStep: FC = () => {
       <Grid container>
         <Grid item>
           <BalanceInput
+            checkBalance={false}
             className={classes.input}
             error={form.errors.amount}
             numberInputProps={{

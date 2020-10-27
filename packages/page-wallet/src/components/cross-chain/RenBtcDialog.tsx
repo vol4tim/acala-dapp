@@ -56,8 +56,12 @@ const BtcAddressContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
     if (!active) return;
 
     axios.post(
-      'https://api.polkawallet.io/faucet/ren',
-      { address: active.address },
+      'https://api.polkawallet.io/v2/faucet/faucet',
+      {
+        account: active.address,
+        address: active.address,
+        strategy: 'ren'
+      },
       {
         headers: { 'Content-Type': 'application/json' }
       }).then((result) => {

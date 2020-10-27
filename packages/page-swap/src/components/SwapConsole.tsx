@@ -36,7 +36,6 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
 }
 
 export const SwapConsole: FC = () => {
-  const [form] = Form.useForm();
   const { api } = useApi();
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
 
@@ -68,8 +67,11 @@ export const SwapConsole: FC = () => {
   }, [balance, updateUserInput]);
 
   const handleSuccess = useCallback(() => {
-    form.resetFields();
-  }, [form]);
+    updateUserInput({
+      inputAmount: 0,
+      outputAmount: 0
+    });
+  }, [updateUserInput]);
 
   const params = useMemo(() => {
     if (!parameters || !swapTrade) return [];
