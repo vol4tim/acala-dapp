@@ -115,6 +115,8 @@ const ManagerModel: FC<ManagerModelProps> = ({
                 </div>
               </SpaceBetweenBox>
               <BalanceInput
+                checkBalance={false}
+                max={share.share.toNumber()}
                 onChange={setWithdrawValue}
                 onMax={handleWithdrawMax}
                 showMaxBtn
@@ -201,7 +203,7 @@ const Action: FC<ActionProps> = ({ currency }) => {
           <Button
             className={classes.btn}
             onClick={(): void => open()}
-          >Deposit</Button>
+          >Manager</Button>
         )
       }
       <ManagerModel
