@@ -101,7 +101,6 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
       amount: balance.toNumber(),
       token: currency
     });
-    console.log(balance.toNumber(), balance._getInner().toFixed(0));
     onChange({
       amount: balance.times(price).toNumber(),
       balance: balance.toNumber()

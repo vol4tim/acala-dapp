@@ -109,6 +109,9 @@ export const LPAmountWithShare: FC<LPSizeWithShareProps> = ({
   }, [size, issuance, share, price1, price2]);
 
   return (
-    <FormatValue data={result} />
+    <FormatValue
+      className={className}
+      data={result}
+    />
   );
 };
