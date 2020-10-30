@@ -1,13 +1,11 @@
-import { DerivedStakingPool, DerivedUserLoan, DerivedLoanType } from '@acala-network/api-derive';
-import { StakingPoolHelper, Fixed18, LoanHelper } from '@acala-network/app-util';
+import { DerivedUserLoan, DerivedLoanType, DerivedStakingPool } from '@acala-network/api-derive';
+import { LoanHelper } from '@acala-network/app-util';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-
-export interface StakingPoolWithHelper {
-  stakingPool: DerivedStakingPool;
-  helper: StakingPoolHelper;
-}
+import { StakingPool } from '@acala-network/sdk-homa';
 
 export type PriceData = { currency: string; price: FixedPointNumber };
+
+export type StakingPoolData = { stakingPool: StakingPool; derive: DerivedStakingPool };
 
 export interface LoanWithHelper {
   loan: DerivedUserLoan;

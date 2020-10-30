@@ -4,14 +4,14 @@ import { map, shareReplay } from 'rxjs/operators';
 import { ApiRx } from '@polkadot/api';
 
 import { DerivedStakingPool } from '@acala-network/api-derive';
-import { StakingPoolHelper } from '@acala-network/app-util';
+import { StakingPool } from '@acala-network/sdk-homa';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { StakingPoolData } from './type';
 
-import { StakingPoolWithHelper } from './type';
-
-type SubscribeCallbackFN = (data: StakingPoolWithHelper) => void;
+type SubscribeCallbackFN = (data: StakingPoolData) => void;
 
 export class StakingPoolStore extends BaseRxStore {
-  public data$!: Observable<StakingPoolWithHelper>;
+  public data$!: Observable<StakingPoolData>;
   private api!: ApiRx;
 
   init (api: ApiRx): void{
@@ -23,20 +23,28 @@ export class StakingPoolStore extends BaseRxStore {
     const stakingPool$ = (this.api.derive as any).homa.stakingPool() as Observable<DerivedStakingPool>;
 
     this.data$ = stakingPool$.pipe(
-      map((stakingPool: DerivedStakingPool): StakingPoolWithHelper => {
-        const helper = new StakingPoolHelper({
-          bondingDuration: stakingPool.bondingDuration,
-          communalFree: stakingPool.freeUnbonded,
-          currentEra: stakingPool.currentEra,
-          defaultExchangeRate: stakingPool.defaultExchangeRate,
-          liquidTokenIssuance: stakingPool.liquidTokenIssuance,
-          maxClaimFee: stakingPool.maxClaimFee,
-          nextEraClaimedUnbonded: stakingPool.nextEraUnbond[1],
-          totalBonded: stakingPool.totalBonded,
-          unbondingToFree: stakingPool.unbondingToFree
+      map((data: DerivedStakingPool): StakingPoolData => {
+        const stakingPool = new StakingPool({
+          bondingDuration: data.bondingDuration.toNumber(),
+          currentEra: data.currentEra.toNumber(),
+          defaultExchangeRate: FixedPointNumber.fromInner(data.defaultExchangeRate.toString()),
+          freeUnbonded: FixedPointNumber.fromInner(data.freeUnbonded.toString()),
+          liquidTotalIssuance: FixedPointNumber.fromInner(data.liquidTokenIssuance.toString()),
+          stakingPoolParams: {
+            baseFeeRate: FixedPointNumber.fromInner(data.stakingPoolParams.baseFeeRate.toString()),
+            targetMaxFreeUnbondedRatio: FixedPointNumber.fromInner(data.stakingPoolParams.targetMaxFreeUnbondedRatio.toString()),
+            targetMinFreeUnbondedRatio: FixedPointNumber.fromInner(data.stakingPoolParams.targetMinFreeUnbondedRatio.toString()),
+            targetUnbondingToFreeRatio: FixedPointNumber.fromInner(data.stakingPoolParams.targetUnbondingToFreeRatio.toString())
+          },
+          totalBonded: FixedPointNumber.fromInner(data.totalBonded.toString()),
+          unbondNextEra: FixedPointNumber.fromInner(data.nextEraUnbond[0].toString()),
+          unbondingToFree: FixedPointNumber.fromInner(data.unbondingToFree.toString())
         });
 
-        return { helper, stakingPool };
+        return {
+          derive: data,
+          stakingPool: stakingPool
+        };
       }),
       shareReplay(1)
     );

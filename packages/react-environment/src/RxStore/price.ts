@@ -10,7 +10,7 @@ import { TimestampedValue } from '@open-web3/orml-types/interfaces';
 import { tokenEq } from '@acala-dapp/react-components';
 
 import { BaseRxStore } from './base';
-import { PriceData, StakingPoolWithHelper } from './type';
+import { PriceData, StakingPoolData } from './type';
 
 type SubscribeCallbackFN = (result: PriceData[]) => void;
 
@@ -26,7 +26,7 @@ function insertPrice (origin: PriceData[], currency: string, price: FixedPointNu
 
 export class PriceStore extends BaseRxStore {
   private data$!: Observable<PriceData[]>;
-  private stakingPool$!: Observable<StakingPoolWithHelper>;
+  private stakingPool$!: Observable<StakingPoolData>;
   private api!: ApiRx;
 
   run (): void {
@@ -44,14 +44,14 @@ export class PriceStore extends BaseRxStore {
 
     this.data$ = combineLatest([allPrices$, this.stakingPool$, dex$]).pipe(
       map(([prices, pool, acaLP]): PriceData[] => {
-        const exchangeRate = pool.helper.liquidExchangeRate;
+        const exchangeRate = pool.stakingPool.liquidExchangeRate();
 
         const result = prices.map((item) => ({
           currency: item[0].asToken.toString(),
           price: FixedPointNumber.fromInner(((item[1] as unknown as TimestampedValue)?.value as any)?.value?.toString() || 0)
         }));
 
-        const stakingCurrencyPrice = result.find((item) => tokenEq(item.currency, pool.stakingPool.stakingCurrency));
+        const stakingCurrencyPrice = result.find((item) => tokenEq(item.currency, pool.derive.stakingCurrency));
 
         // calculate native currency price
         if (acaLP) {
@@ -63,9 +63,8 @@ export class PriceStore extends BaseRxStore {
 
         // calculate and update liuquid currency price
         if (stakingCurrencyPrice && pool.stakingPool) {
-          const currency = pool.stakingPool.liquidCurrency;
-          const price = stakingCurrencyPrice.price
-            .times(FixedPointNumber._fromBN(exchangeRate.getInner()));
+          const currency = pool.derive.liquidCurrency;
+          const price = stakingCurrencyPrice.price.times(exchangeRate);
 
           insertPrice(result, currency.asToken.toString(), price);
         }

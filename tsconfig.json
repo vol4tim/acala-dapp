@@ -30,6 +30,8 @@
       "@acala-dapp/page-liquidity/*": ["page-liquidity/src/*"],
       "@acala-dapp/page-incentives": ["page-incentives/src"],
       "@acala-dapp/page-incentives/*": ["page-incentives/src/*"],
+      "@acala-dapp/page-nft": ["page-nft/src"],
+      "@acala-dapp/page-nft/*": ["page-nft/src/*"],
       "@acala-dapp/page-governance": ["page-governance/src"],
       "@acala-dapp/page-governance/*": ["page-governance/src/*"],
       "@acala-dapp/page-dashboard-home": ["page-dashboard-home/src"],

@@ -1,68 +1,51 @@
-import React, { FC, useContext, ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 import { Table, Card, TableConfig } from '@acala-dapp/ui-components';
 import { Token, FormatBalance, FormatRatio } from '@acala-dapp/react-components';
-import { CurrencyId } from '@acala-network/types/interfaces';
-import { Fixed18 } from '@acala-network/app-util';
-
-import { StakingPoolContext } from './StakingPoolProvider';
+import { useStakingPool, useConstants } from '@acala-dapp/react-hooks';
+import { StakingPoolData } from '@acala-dapp/react-environment/RxStore/type';
 
 export const StakingPool: FC = () => {
-  const { stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
+  const { stakingCurrency } = useConstants();
+  const stakingPool = useStakingPool();
   const tableConfig: TableConfig[] = [
     {
       align: 'left',
-      dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (value: CurrencyId): ReactNode => (
+      render: (): ReactNode => (
         <Token
-          currency={value}
+          currency={stakingCurrency}
           icon
         />
       ),
       title: 'Pool'
     },
     {
-      dataIndex: 'total',
       /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => <FormatBalance balance={value} />,
+      render: (value: StakingPoolData): ReactNode => <FormatBalance balance={value.stakingPool.getTotalCommunalBalance()} />,
       title: 'Total'
     },
     {
-      dataIndex: 'totalBonded',
       /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => <FormatBalance balance={value} />,
+      render: (value: StakingPoolData): ReactNode => <FormatBalance balance={value.stakingPool.getCommunalBonded()} />,
       title: 'Total Bonded'
     },
     {
-      dataIndex: 'totalFree',
       /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => <FormatBalance balance={value} />,
+      render: (value: StakingPoolData): ReactNode => <FormatBalance balance={value.stakingPool.getFreeUnbondedRatio().times(value.stakingPool.getTotalCommunalBalance())} />,
       title: 'Total Free'
     },
     {
-      dataIndex: 'totalUnbonding',
       /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => <FormatBalance balance={value} />,
+      render: (value: StakingPoolData): ReactNode => <FormatBalance balance={value.stakingPool.getUnbondingToFreeRatio().times(value.stakingPool.getTotalCommunalBalance())} />,
       title: 'Unbonding'
     },
     {
       align: 'right',
-      dataIndex: 'bondRatio',
       /* eslint-disable-next-line react/display-name */
-      render: (value: Fixed18): ReactNode => (
-        <FormatRatio data={value} />
+      render: (value: StakingPoolData): ReactNode => (
+        <FormatRatio data={value.stakingPool.getBondedRatio()} />
       ),
       title: 'Bond Ratio'
-    }
-  ];
-  const data = [
-    {
-      bondRatio: stakingPoolHelper?.communalBondedRatio,
-      token: stakingPool?.stakingCurrency,
-      total: stakingPoolHelper?.communalTotal,
-      totalBonded: stakingPoolHelper?.totalBonded,
-      totalFree: stakingPoolHelper?.communalFree,
-      totalUnbonding: stakingPoolHelper?.unbondingToFree
     }
   ];
 
@@ -71,11 +54,15 @@ export const StakingPool: FC = () => {
       header='Staking Pools'
       padding={false}
     >
-      <Table
-        config={tableConfig}
-        data={data}
-        showHeader
-      />
+      {
+        stakingPool?.stakingPool ? (
+          <Table
+            config={tableConfig}
+            data={[stakingPool]}
+            showHeader
+          />
+        ) : null
+      }
     </Card>
   );
 };

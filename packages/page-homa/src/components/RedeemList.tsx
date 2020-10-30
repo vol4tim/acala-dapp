@@ -1,16 +1,17 @@
-import React, { useContext, FC, ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 
 import { Card, TableConfig, Table, Condition } from '@acala-dapp/ui-components';
-import { useCurrentRedeem } from '@acala-dapp/react-hooks';
+import { useCurrentRedeem, useStakingPoolFreeList, useStakingPool, useConstants } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 
 import classes from './RedeemList.module.scss';
-import { StakingPoolContext } from './StakingPoolProvider';
 
 export const RedeemList: FC = () => {
+  const { stakingCurrency } = useConstants();
   const currentRedeem = useCurrentRedeem();
-  const { redeemList, stakingPool } = useContext(StakingPoolContext);
+  const redeemList = useStakingPoolFreeList();
+  const stakingPool = useStakingPool();
 
   const renderHeader = (): ReactNode => {
     return (
@@ -21,7 +22,7 @@ export const RedeemList: FC = () => {
             currentRedeem && stakingPool ? (
               <FormatBalance
                 balance={convertToFixed18(currentRedeem.amount)}
-                currency={stakingPool.stakingCurrency}
+                currency={stakingCurrency}
               />
             ) : null
           }
@@ -59,11 +60,11 @@ export const RedeemList: FC = () => {
           return '';
         }
 
-        if (stakingPool.currentEra.toNumber() >= era) {
+        if (stakingPool.derive.currentEra.toNumber() >= era) {
           return 'Done';
         }
 
-        if (stakingPool.currentEra.toNumber() < era) {
+        if (stakingPool.derive.currentEra.toNumber() < era) {
           return 'Redeeming';
         }
 
@@ -79,7 +80,7 @@ export const RedeemList: FC = () => {
         return (
           <FormatBalance
             balance={balance}
-            currency={stakingPool?.stakingCurrency}
+            currency={stakingCurrency}
           />
         );
       },

@@ -2,7 +2,7 @@ import useRequest from '@umijs/use-request';
 import { get } from 'lodash';
 import { useMemo } from 'react';
 
-import { useConstants, useIssuance, useStakingPoolHelper } from './index';
+import { useConstants, useIssuance, useStakingPool } from './index';
 
 type HooksReturnType = Record<string,
 {
@@ -35,7 +35,7 @@ const useHistory = (sql: string): any => {
 export const useDashboard = (): HooksReturnType => {
   const { stableCurrency } = useConstants();
   const audIssue = useIssuance(stableCurrency);
-  const helper = useStakingPoolHelper();
+  const stakingPool = useStakingPool();
 
   const DOTStakedHistory = useHistory(
     'SELECT mean("amount") FROM "acala"."autogen"."dot-staked" WHERE time > now() - 8d AND time < now() GROUP BY time(1d)'
@@ -52,7 +52,7 @@ export const useDashboard = (): HooksReturnType => {
     return {
       DOTStaked: {
         history: DOTStakedHistory,
-        value: helper?.communalTotal?.toString(0)
+        value: stakingPool?.stakingPool.getCommunalBonded()?.toString(0)
       },
       aUSDIssued: {
         history: aUSDIssuedHistory,
@@ -72,5 +72,5 @@ export const useDashboard = (): HooksReturnType => {
         history: []
       }
     };
-  }, [audIssue, helper, DOTStakedHistory, aUSDIssuedHistory, newAccountHistory]);
+  }, [audIssue, stakingPool, DOTStakedHistory, aUSDIssuedHistory, newAccountHistory]);
 };

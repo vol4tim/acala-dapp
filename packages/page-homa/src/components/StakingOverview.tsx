@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import clsx from 'clsx';
 
-import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Card } from '@acala-dapp/ui-components';
 
 import classes from './StakingOverview.module.scss';
@@ -59,10 +59,10 @@ const Property: FC = () => {
   const amount = useStakingTotalAmount();
   const { stakingCurrency } = useConstants();
 
-  const profitOneDay = useMemo<Fixed18>(() => {
-    if (!APR || !amount) return Fixed18.ZERO;
+  const profitOneDay = useMemo<FixedPointNumber>(() => {
+    if (!APR || !amount) return FixedPointNumber.ZERO;
 
-    return amount.mul(APR).div(Fixed18.fromNatural(365));
+    return amount.times(APR).div(new FixedPointNumber(365));
   }, [APR, amount]);
 
   return (

@@ -62,3 +62,7 @@ export * from './utils';
 // dashboard
 export * from './useRequestChart';
 export * from './dashboardHomeHooks';
+
+// nfg
+export * from './nftHooks';
+

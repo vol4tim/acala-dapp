@@ -43,7 +43,7 @@ export const Balance: FC<BalanceProps> = ({ className, currency }) => {
           }>
           <StakingPoolExchangeRate
             className={classes.amount}
-            liquidAmount={focusToFixed18(liquidBalance)}
+            liquidAmount={liquidBalance}
             showLiquidAmount={false}
           />
         </Condition>

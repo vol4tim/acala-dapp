@@ -1,14 +1,14 @@
 import React, { FC, useMemo } from 'react';
 
-import { Fixed18 } from '@acala-network/app-util';
-import { useStakingPoolHelper, useConstants } from '@acala-dapp/react-hooks';
+import { useStakingPool, useConstants } from '@acala-dapp/react-hooks';
 
 import { FormatBalance, BalancePair, FormatBalanceProps } from './format';
 import { tokenEq } from './utils';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 export interface StakingPoolExchangeRateProps extends FormatBalanceProps {
-  stakingAmount?: Fixed18;
-  liquidAmount?: Fixed18;
+  stakingAmount?: FixedPointNumber;
+  liquidAmount?: FixedPointNumber;
   showStakingAmount?: boolean;
   showLiquidAmount?: boolean;
 }
@@ -20,28 +20,28 @@ export const StakingPoolExchangeRate: FC<StakingPoolExchangeRateProps> = ({
   showStakingAmount = true,
   stakingAmount
 }) => {
-  const helper = useStakingPoolHelper();
+  const stakingPool = useStakingPool();
   const { liquidCurrency, stakingCurrency } = useConstants();
 
   const tokenPair = useMemo<BalancePair[]>((): BalancePair[] => {
-    if (!helper) return [];
+    if (!stakingPool) return [];
 
     let result = [];
 
     if (stakingAmount) {
       result = [
         { balance: stakingAmount, currency: stakingCurrency },
-        { balance: stakingAmount.mul(helper.liquidExchangeRate), currency: stakingCurrency }
+        { balance: stakingAmount.div(stakingPool.stakingPool.liquidExchangeRate()), currency: stakingCurrency }
       ];
     } else if (liquidAmount) {
       result = [
         { balance: liquidAmount, currency: liquidCurrency },
-        { balance: liquidAmount.mul(helper.liquidExchangeRate), currency: stakingCurrency }
+        { balance: liquidAmount.times(stakingPool.stakingPool.liquidExchangeRate()), currency: stakingCurrency }
       ];
     } else {
       result = [
-        { balance: Fixed18.fromNatural(1), currency: stakingCurrency },
-        { balance: helper.liquidExchangeRate, currency: liquidCurrency }
+        { balance: FixedPointNumber.ONE, currency: stakingCurrency },
+        { balance: stakingPool.stakingPool.liquidExchangeRate(), currency: liquidCurrency }
       ];
     }
 
@@ -56,7 +56,7 @@ export const StakingPoolExchangeRate: FC<StakingPoolExchangeRateProps> = ({
 
       return false;
     });
-  }, [helper, stakingAmount, liquidAmount, liquidCurrency, stakingCurrency, showStakingAmount, showLiquidAmount]);
+  }, [stakingPool, stakingAmount, liquidAmount, liquidCurrency, stakingCurrency, showStakingAmount, showLiquidAmount]);
 
   return (
     <FormatBalance

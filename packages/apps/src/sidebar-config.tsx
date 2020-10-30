@@ -27,13 +27,13 @@ export const sideBarConfig: SideBarConfig = {
       rel: 'swap'
     },
     {
-      content: 'Deposit',
+      content: 'AMM',
       icon: <DepositSVG />,
       path: 'liquidity',
       rel: 'liquidity'
     },
     {
-      content: 'AMM',
+      content: 'Earn',
       icon: <DepositSVG />,
       path: 'incentives',
       rel: 'incentives'
@@ -45,16 +45,17 @@ export const sideBarConfig: SideBarConfig = {
       rel: 'homa'
     },
     {
+      content: 'NFT',
+      icon: <DepositSVG />,
+      path: 'nft',
+      rel: 'nft'
+    },
+    {
       content: 'Governance',
       icon: <GovernanceSVG />,
       path: 'governance',
       rel: 'governance'
     }
-    // {
-    //   icon: <LoanSVG />,
-    //   content: 'Loan Analysis',
-    //   path: 'anal/loan'
-    // }
   ],
   socialMedia: [
     {

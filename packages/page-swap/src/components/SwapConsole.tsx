@@ -4,8 +4,8 @@ import { Form } from 'antd';
 import { ITuple } from '@polkadot/types/types';
 import { Balance } from '@acala-network/types/interfaces';
 
-import { Card, IconButton } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInputValue, UserBalance, LPExchangeRate, getDexShareFromCurrencyId } from '@acala-dapp/react-components';
+import { Card, IconButton, InputField } from '@acala-dapp/ui-components';
+import { TxButton, BalanceInputValue, UserBalance, LPExchangeRate, getDexShareFromCurrencyId, BalanceInput } from '@acala-dapp/react-components';
 import { useApi, useSubscription, useBalance } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
@@ -16,6 +16,7 @@ import { SwapContext } from './SwapProvider';
 import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
 import { SwapTrade } from '@acala-network/sdk-swap';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
+import { SwapTradeMode } from '@acala-network/sdk-swap/help';
 
 const DANGER_TRADE_IMPACT = new FixedPointNumber(0.05);
 
@@ -37,6 +38,8 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
 
 export const SwapConsole: FC = () => {
   const { api } = useApi();
+  const form = Form.useForm({ });
+
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
 
   const {
@@ -62,6 +65,7 @@ export const SwapConsole: FC = () => {
   const handleMax = useCallback(() => {
     updateUserInput({
       inputAmount: balance.toNumber(),
+      mode: 'EXACT_INPUT',
       updateOrigin: 'outset'
     });
   }, [balance, updateUserInput]);
@@ -128,57 +132,78 @@ export const SwapConsole: FC = () => {
     <Card className={classes.root}
       padding={false}>
       <div className={classes.main}>
-        <div className={classes.inputFields}>
-          <div className={classes.inputFieldsInner}>
-            <SwapInput
-              disableTokens={[userInput.outputToken]}
-              error={''}
-              onChange={setInput}
-              onFocus={(): void => setTradeMode('EXACT_INPUT')}
-              onMax={handleMax}
-              renderExtra={(): ReactNode => {
-                return (
-                  <div className={classes.extra}>
-                    <span>max: </span>
-                    <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
-                  </div>
-                );
-              }}
-              selectableTokens={Array.from(availableTokens)}
-              showMax={true}
-              title={`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}
-              value={{
-                amount: userInput.inputAmount,
-                token: token2CurrencyId(api, userInput.inputToken)
-              }}
-            />
-            <SwapBtn onClick={handleReverse} />
-            <SwapInput
-              disableTokens={[userInput.inputToken]}
-              error={''}
-              onChange={setOutput}
-              onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
-              selectableTokens={Array.from(availableTokens)}
-              title={`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}
-              value={{
-                amount: userInput.outputAmount,
-                token: token2CurrencyId(api, userInput.outputToken)
-              }}
-            />
-          </div>
-        </div>
-        <TxButton
-          className={classes.txBtn}
-          disabled={false}
-          method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
-          onExtrinsicSuccess={handleSuccess}
-          params={params}
-          section='dex'
-          size='large'
-          style={parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'danger' : 'primary'}
-        >
-          {parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'Swap Anyway' : 'Swap'}
-        </TxButton>
+        <InputField
+          actionRender={(): JSX.Element => {
+            return (
+              <TxButton
+                disabled={false}
+                method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
+                onExtrinsicSuccess={handleSuccess}
+                params={params}
+                section='dex'
+                size='large'
+                style={parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'danger' : 'primary'}
+              >
+                {parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'Swap Anyway' : 'Swap'}
+              </TxButton>
+            );
+          }}
+          leftRender={(): JSX.Element => {
+            return (
+              <BalanceInput
+                className={classes.inputLeft}
+                disableTokens={[token2CurrencyId(api, userInput.outputToken)]}
+                enableTokenSelect
+                error={''}
+                onChange={setInput}
+                onFocus={(): void => setTradeMode('EXACT_INPUT')}
+                onMax={handleMax}
+                selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
+                showMaxBtn={true}
+                value={{
+                  amount: userInput.inputAmount,
+                  token: token2CurrencyId(api, userInput.inputToken)
+                }}
+              />
+            );
+          }}
+          leftTitle={(): JSX.Element => {
+            return (
+              <div>
+                <p>{`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}</p>
+                <div className={classes.extra}>
+                  <span>max: </span>
+                  <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
+                </div>
+              </div>
+            );
+          }}
+          rightRender={(): JSX.Element => {
+            return (
+              <BalanceInput
+                className={classes.inputRight}
+                disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
+                enableTokenSelect
+                error={''}
+                onChange={setOutput}
+                onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
+                selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
+                value={{
+                  amount: userInput.outputAmount,
+                  token: token2CurrencyId(api, userInput.outputToken)
+                }}
+              />
+            );
+          }}
+          rightTitle={(): JSX.Element => {
+            return (
+              <div>{`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}</div>
+            );
+          }}
+          separation={(): JSX.Element => {
+            return <SwapBtn onClick={handleReverse} />;
+          }}
+        />
       </div>
       <SlippageInput />
     </Card>

@@ -40,7 +40,6 @@ export const Advanced: FC = () => {
         </Grid>
       </Grid>
       <Grid item>
-        <RedeemList />
       </Grid>
       <Grid item>
         <StakingPool />

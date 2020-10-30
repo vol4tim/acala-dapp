@@ -1,23 +1,19 @@
-import React, { FC, memo, useContext } from 'react';
+import React, { FC, memo } from 'react';
 import { noop } from 'lodash';
 
 import { Dropdown } from '@acala-dapp/ui-components';
 import { getTokenName } from '@acala-dapp/react-components';
 
 import classes from './SelectToken.module.scss';
-import { StakingPoolContext } from './StakingPoolProvider';
+import { useConstants } from '@acala-dapp/react-hooks';
 
 export const SelectToken: FC = memo(() => {
-  const { stakingPool } = useContext(StakingPoolContext);
+  const { liquidCurrency, stakingCurrency } = useConstants();
   const DEFAULT_VALUE = 'default';
   const config = [
     {
       render: (): string => {
-        if (!stakingPool) {
-          return '';
-        }
-
-        return `${getTokenName(stakingPool.stakingCurrency.asToken.toString())}/${getTokenName(stakingPool.liquidCurrency.asToken.toString())}`;
+        return `${getTokenName(stakingCurrency.asToken.toString())}/${getTokenName(liquidCurrency.asToken.toString())}`;
       },
       value: DEFAULT_VALUE
     }

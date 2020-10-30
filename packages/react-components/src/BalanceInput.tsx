@@ -83,6 +83,10 @@ export const BalanceInput: FC<BalanceInputProps> = ({
     if (!onChange) return;
 
     // hanndle check balance
+    if (checkBalance && balance.isZero()) {
+      return;
+    }
+
     if (checkBalance && new FixedPointNumber(amount).isGreaterThanOrEqualTo(balance)) {
       amount = balance.toNumber();
     }

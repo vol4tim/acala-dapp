@@ -76,11 +76,14 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
     // no matter if input completed, trigger value change
     // trigger value change event when is a valid number and is changed, otherwise do nothing
     if (isValidNumber && valueRef.current !== validNumber) {
-      setValue(validNumber);
-      valueRef.current = validNumber;
+      if (!isControlled) {
+        setValue(validNumber);
+        valueRef.current = validNumber;
+      }
+
       _onChange(Number(validNumber));
     }
-  }, [setValue, _onChange, min, max]);
+  }, [setValue, _onChange, min, max, isControlled]);
 
   const _onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
     if (onBlur) onBlur(e);

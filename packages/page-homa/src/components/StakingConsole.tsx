@@ -4,30 +4,19 @@ import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, List } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
-import { useBalance, useInputValue, useConstants } from '@acala-dapp/react-hooks';
+import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool } from '@acala-dapp/react-hooks';
 
 import classes from './StakingConsole.module.scss';
-import { StakingPoolContext } from './StakingPoolProvider';
 
 export const StakingConsole: FC = () => {
-  const { stakingCurrency } = useConstants();
-  const { rewardRate, stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
-  const balance = useBalance(stakingPool ? stakingPool.stakingCurrency : '');
+  const { stakingCurrency, liquidCurrency } = useConstants();
+  const stakingPool = useStakingPool();
+  const rewardRate = useStakingRewardAPR();
+  const balance = useBalance(stakingCurrency);
 
   const [stakingValue, setStakingValue, { ref, reset }] = useInputValue<BalanceInputValue>({
     amount: 0,
-    token: stakingPool ? stakingPool.stakingCurrency : stakingCurrency
-  }, {
-    max: (value: BalanceInputValue) => {
-      value.amount = value.amount > balance.toNumber() ? balance.toNumber() : value.amount;
-
-      return value;
-    },
-    min: (value: BalanceInputValue) => {
-      value.amount = value.amount < 0 ? 0 : value.amount;
-
-      return value;
-    }
+    token: stakingCurrency
   });
 
   const resetForm = useCallback(() => {
@@ -38,16 +27,16 @@ export const StakingConsole: FC = () => {
     return [new FixedPointNumber(stakingValue.amount).toChainData()];
   }, [stakingValue]);
 
-  const receivedLiquidToken = useMemo<Fixed18>((): Fixed18 => {
-    if (!stakingPoolHelper || !stakingValue.amount) return Fixed18.ZERO;
+  const receivedAmount = useMemo<FixedPointNumber>((): FixedPointNumber => {
+    if (!stakingPool || !stakingValue.amount) return FixedPointNumber.ZERO;
 
-    return stakingPoolHelper.convertToLiquid(Fixed18.fromNatural(stakingValue.amount));
-  }, [stakingPoolHelper, stakingValue]);
+    return stakingPool.stakingPool.getLiquidAmountInMint(new FixedPointNumber(stakingValue.amount));
+  }, [stakingPool, stakingValue]);
 
-  const profit = useMemo<Fixed18>((): Fixed18 => {
-    if (!rewardRate || !stakingValue.amount) return Fixed18.ZERO;
+  const profit = useMemo<FixedPointNumber>((): FixedPointNumber => {
+    if (!rewardRate || !stakingValue.amount) return FixedPointNumber.ZERO;
 
-    return Fixed18.fromNatural(stakingValue.amount).mul(convertToFixed18(rewardRate || 0));
+    return new FixedPointNumber(stakingValue.amount).times(rewardRate);
   }, [rewardRate, stakingValue]);
 
   const isDisable = useMemo(() => {
@@ -61,7 +50,7 @@ export const StakingConsole: FC = () => {
     });
   }, [setStakingValue, ref, balance]);
 
-  if (!stakingPoolHelper || !stakingPool) {
+  if (!stakingPool) {
     return null;
   }
 
@@ -108,8 +97,8 @@ export const StakingConsole: FC = () => {
             label='Mint'
             value={
               <FormatBalance
-                balance={receivedLiquidToken}
-                currency={stakingPool.liquidCurrency}
+                balance={receivedAmount}
+                currency={liquidCurrency}
               />
             }
           />
@@ -118,7 +107,7 @@ export const StakingConsole: FC = () => {
             value={
               <FormatBalance
                 balance={profit}
-                currency={stakingPool.stakingCurrency}
+                currency={stakingCurrency}
               />
             }
           />

@@ -4,35 +4,20 @@
 }
 
 .main {
-  display: grid;
-  grid-template-columns: 1fr 178px;
-
   padding: 24px;
   background: var(--color-white);
   border-radius: 12px;
 
+  .inputLeft {
+    margin-right: 24px;
+  }
+
+  .inputRight {
+    margin-left: 24px;
+  }
+
   .extra {
     font-weight: bold;
-  }
-
-  .inputFields {
-    font-size: 12px;
-    margin-right: 27px;
-  }
-
-  .inputFieldsInner {
-    display: grid;
-    grid-template-columns: 1fr 108px 1fr;
-  }
-
-  .swapBtn {
-    margin: 49px 25px 0 25px;
-    border-radius: 12px;
-    background: var(--color-white);
-  }
-
-  .txBtn {
-    margin-top: 49px;
   }
 
   .addon {

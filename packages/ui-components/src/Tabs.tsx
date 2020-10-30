@@ -1,10 +1,20 @@
-import React, { FC, ReactNode, useState, useEffect, useMemo, Children, useCallback, ReactElement, useRef } from 'react';
+import React, { FC, ReactNode, useState, useEffect, useMemo, Children, useCallback, ReactElement, useRef, Dispatch, SetStateAction } from 'react';
 import { has, get } from 'lodash';
 import clsx from 'clsx';
 import { Motion, spring, presets } from 'react-motion';
 
 import { BareProps } from './types';
 import './Tabs.scss';
+
+function useTabs<T> (defaultTab: T): { currentTab: T; changeTabs: Dispatch<SetStateAction<T>>} {
+  const [currentTab, changeTabs] = useState<T>(defaultTab);
+  const result = useMemo(() => ({
+    changeTabs,
+    currentTab
+  }), [currentTab, changeTabs]);
+
+  return result;
+}
 
 type TabsType = 'button' | 'line' | 'card';
 type TabsSize = 'large' | 'normal' | 'small';
@@ -149,4 +159,4 @@ const Tabs = _Tabs as TabsComponent;
 
 Tabs.Panel = Panel;
 
-export { Tabs };
+export { useTabs, Tabs };

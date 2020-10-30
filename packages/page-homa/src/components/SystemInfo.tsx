@@ -3,13 +3,15 @@ import React, { FC, useContext } from 'react';
 import { Card, List } from '@acala-dapp/ui-components';
 import { FormatRatio, FormatBalance } from '@acala-dapp/react-components';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { StakingPoolContext } from './StakingPoolProvider';
+import { useStakingPool, useConstants } from '@acala-dapp/react-hooks';
 
 export const SystemInfo: FC = () => {
-  const { stakingPool, stakingPoolHelper } = useContext(StakingPoolContext);
+  const { liquidCurrency, stakingCurrency } = useConstants();
+  const stakingPool = useStakingPool();
 
-  if (!stakingPoolHelper || !stakingPool) {
+  if (!stakingPool) {
     return null;
   }
 
@@ -23,12 +25,12 @@ export const SystemInfo: FC = () => {
             <FormatBalance
               pair={[
                 {
-                  balance: Fixed18.fromNatural(1),
-                  currency: stakingPool.stakingCurrency
+                  balance: FixedPointNumber.ONE,
+                  currency: stakingCurrency
                 },
                 {
-                  balance: Fixed18.fromNatural(1).div(stakingPoolHelper.liquidExchangeRate),
-                  currency: stakingPool.liquidCurrency
+                  balance: FixedPointNumber.ONE.div(stakingPool.stakingPool.liquidExchangeRate()),
+                  currency: liquidCurrency
 
                 }
               ]}
@@ -37,15 +39,15 @@ export const SystemInfo: FC = () => {
           }
         />
         <List.Item
-          label='Max Bonding Ratio'
+          label='Bonded Ratio'
           value={
-            <FormatRatio data={convertToFixed18(stakingPool.maxBondRatio)} />
+            <FormatRatio data={stakingPool.stakingPool.getBondedRatio()} />
           }
         />
         <List.Item
-          label='Min Bonding Ratio'
+          label='Free Ratio'
           value={
-            <FormatRatio data={convertToFixed18(stakingPool.minBondRatio)} />
+            <FormatRatio data={stakingPool.stakingPool.getFreeUnbondedRatio()} />
           }
         />
       </List>

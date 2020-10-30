@@ -11,10 +11,10 @@ import { useApi } from './useApi';
 import { useAccounts } from './useAccounts';
 import { useCall } from './useCall';
 import { useConstants } from './useConstants';
-import { CurrencyLike, AccountLike } from './types';
+import { AccountLike } from './types';
 import { usePrice, useAllPrices } from './priceHooks';
 
-export type BalanceData = { currency: CurrencyId; balance: FixedPointNumber };
+export type BalanceData = { currency: CurrencyId ; balance: FixedPointNumber };
 
 /**
  * @name useBalance
@@ -22,7 +22,7 @@ export type BalanceData = { currency: CurrencyId; balance: FixedPointNumber };
  * @param currency
  * @param account
  */
-export const useBalance = (currency: CurrencyLike, account?: AccountLike): FixedPointNumber => {
+export const useBalance = (currency: CurrencyId, account?: AccountLike): FixedPointNumber => {
   const { active } = useAccounts();
   const _account = useMemo(() => account || (active ? active.address : '_'), [account, active]);
   const balance = useCall<Balance>('derive.currencies.balance', [_account, currency]);
@@ -130,8 +130,8 @@ export const useTotalValue = (account?: AccountLike): FixedPointNumber => {
   return result;
 };
 
-export const useIssuance = (asset: CurrencyLike): FixedPointNumber => {
-  const issuance = useCall<Balance>('query.tokens.totalIssuance', [asset]);
+export const useIssuance = (currency: CurrencyId): FixedPointNumber => {
+  const issuance = useCall<Balance>('query.tokens.totalIssuance', [currency]);
 
   return issuance ? FixedPointNumber.fromInner(issuance.toString()) : FixedPointNumber.ZERO;
 };
