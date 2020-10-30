@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 
 import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
-import { LPSize, DexReward, DexRewardRatio, DexUserShare, Token, LPShare } from '@acala-dapp/react-components';
+import { LPSize, Token, LPShare } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useLPCurrencies } from '@acala-dapp/react-hooks';

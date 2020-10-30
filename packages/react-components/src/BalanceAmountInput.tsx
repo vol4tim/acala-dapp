@@ -11,7 +11,7 @@ import { FormatValue } from './format';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { LPSizeWithShare } from './LPSize';
+import { LPAmountWithShare } from './LPSize';
 
 type InputType = 'balance' | 'amount';
 
@@ -183,7 +183,7 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
                 <TokenName currency={stableCurrency} />
               </div>
             ) : (
-              <LPSizeWithShare
+              <LPAmountWithShare
                 className={classes.lpSize}
                 lp={balanceValue.token}
                 share={balanceValue.amount}
@@ -196,8 +196,6 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
             border={false}
             className={classes.balanceInput}
             error={''}
-            id='amount'
-            name='amount'
             onChange={handleAmountChange}
             onMax={handleAmountMax}
             showIcon={false}

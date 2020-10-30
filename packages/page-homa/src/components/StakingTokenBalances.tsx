@@ -17,11 +17,11 @@ export const StakingTokeBalances: FC = () => {
       padding={false}>
       <List style='list'>
         <List.Item
-          label={getTokenName(stakingCurrency)}
+          label={getTokenName(stakingCurrency.asToken.toString())}
           value={<UserBalance token={stakingCurrency}/>}
         />
         <List.Item
-          label={getTokenName(liquidCurrency)}
+          label={getTokenName(liquidCurrency.asToken.toString())}
           value={<UserBalance token={liquidCurrency}/>}
         />
       </List>

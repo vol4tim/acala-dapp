@@ -1,34 +1,34 @@
 import React, { FC, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Tabs } from '@acala-dapp/ui-components';
+import { Tabs as UITabs } from '@acala-dapp/ui-components';
 
 import { WalletContext } from './WalletProvider';
 import { AcalaConsole } from './AcalaConsole';
 import { CrossChainConsole } from './CrossChainConsole';
 
-export const OperationPanel: FC = () => {
+export const Tabs: FC = () => {
   const { t } = useTranslation('page-wallet');
   const { activeTab, changeActiveTab } = useContext(WalletContext);
 
   return (
-    <Tabs
+    <UITabs
       defaultKey={activeTab}
       onChange={changeActiveTab}
       type='button'
     >
-      <Tabs.Panel
+      <UITabs.Panel
         key='acala'
         tab='Acala'
       >
         <AcalaConsole />
-      </Tabs.Panel>
-      <Tabs.Panel
+      </UITabs.Panel>
+      <UITabs.Panel
         key='cross-chain'
         tab={t('Cross-Chain')}
       >
         <CrossChainConsole />
-      </Tabs.Panel>
-    </Tabs>
+      </UITabs.Panel>
+    </UITabs>
   );
 };

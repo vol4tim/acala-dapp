@@ -1,3 +1,5 @@
+@import '../../ui-components/src/styles/index.scss';
+
 .root {
   display: flex;
   align-items: center;
@@ -26,6 +28,11 @@
       background: var(--color-primary);
       color: var(--color-white);
     }
+
+    @include media-breakpoint-up('md') {
+      display: none;
+    }
+
   }
 
   .networkIcon {

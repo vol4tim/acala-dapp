@@ -1,6 +1,5 @@
-import React, { FC, useContext, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, List } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
@@ -9,7 +8,7 @@ import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakin
 import classes from './StakingConsole.module.scss';
 
 export const StakingConsole: FC = () => {
-  const { stakingCurrency, liquidCurrency } = useConstants();
+  const { liquidCurrency, stakingCurrency } = useConstants();
   const stakingPool = useStakingPool();
   const rewardRate = useStakingRewardAPR();
   const balance = useBalance(stakingCurrency);

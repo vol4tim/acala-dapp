@@ -29,14 +29,14 @@ export const sideBarConfig: SideBarConfig = {
     {
       content: 'AMM',
       icon: <DepositSVG />,
-      path: 'liquidity',
-      rel: 'liquidity'
+      path: 'amm',
+      rel: 'amm'
     },
     {
       content: 'Earn',
       icon: <DepositSVG />,
-      path: 'incentives',
-      rel: 'incentives'
+      path: 'earn',
+      rel: 'earn'
     },
     {
       content: 'Liquid DOT',
@@ -44,12 +44,12 @@ export const sideBarConfig: SideBarConfig = {
       path: 'homa',
       rel: 'homa'
     },
-    {
-      content: 'NFT',
-      icon: <DepositSVG />,
-      path: 'nft',
-      rel: 'nft'
-    },
+    // {
+    //   content: 'NFT',
+    //   icon: <DepositSVG />,
+    //   path: 'nft',
+    //   rel: 'nft'
+    // },
     {
       content: 'Governance',
       icon: <GovernanceSVG />,

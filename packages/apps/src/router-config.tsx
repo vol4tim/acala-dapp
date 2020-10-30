@@ -30,7 +30,7 @@ export const config: RouterConfigData[] = [
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageLiquidity /></Suspense>,
-        path: 'liquidity'
+        path: 'amm'
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageLoan /></Suspense>,
@@ -46,7 +46,7 @@ export const config: RouterConfigData[] = [
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageIncentives /></Suspense>,
-        path: 'incentives'
+        path: 'earn'
       },
       {
         element: <Suspense fallback={<PageLoading />}><PageNFT /></Suspense>,

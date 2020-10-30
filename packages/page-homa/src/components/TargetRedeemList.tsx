@@ -26,8 +26,10 @@ export const TargetRedeemList: FC<Props> = ({
   const config: DropdownConfig[] = freeList.map(({ amount, era }): DropdownConfig => {
     if (!stakingPool) return { render: (): null => null, value: '' };
 
-    const duration = formatDuration((
-      era - stakingPool.derive.currentEra.toNumber()) * Number(api.consts.polkadotBridge.eraLength.toString())
+    const duration = formatDuration(
+      (era - stakingPool.derive.currentEra.toNumber()) *
+        (api.consts.polkadotBridge.eraLength as any).toNumber() *
+        4 * 1000
     );
 
     return {
@@ -37,7 +39,7 @@ export const TargetRedeemList: FC<Props> = ({
           <div className={classes.item}>
             <span>
               {`at era ${era}(≈ ${duration} days later) has ${
-                amount.div(stakingPool.stakingPool.liquidExchangeRate())
+                amount.div(stakingPool.stakingPool.liquidExchangeRate()).toNumber()
               } ${getTokenName(liquidCurrency.asToken.toString())} to redeem`}</span>
           </div>
         );

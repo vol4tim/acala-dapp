@@ -175,7 +175,7 @@ const Action: FC<ActionProps> = ({ currency }) => {
   }, [currency]);
 
   const goToLiquidity = useCallback(() => {
-    navigate({ pathname: '/liquidity' });
+    navigate({ pathname: '/amm' });
   }, [navigate]);
 
   return (

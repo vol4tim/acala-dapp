@@ -1,11 +1,9 @@
-import React, { FC, useContext, useState, useMemo, useCallback } from 'react';
-import { noop } from 'lodash';
-import { useFormik } from 'formik';
+import React, { FC, useState, useMemo, useCallback } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, Radio, List, Condition } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInput, numToFixed18Inner, formatDuration, FormatBalance, BalanceInputValue, getTokenName } from '@acala-dapp/react-components';
-import { useFormValidator, useStakingPool, useStakingPoolFreeList, useBalance, useConstants, useInputValue } from '@acala-dapp/react-hooks';
+import { TxButton, BalanceInput, formatDuration, FormatBalance, BalanceInputValue, getTokenName } from '@acala-dapp/react-components';
+import { useStakingPool, useStakingPoolFreeList, useBalance, useConstants, useInputValue } from '@acala-dapp/react-hooks';
 
 import classes from './RedeemConsole.module.scss';
 import { TargetRedeemList } from './TargetRedeemList';
@@ -22,7 +20,14 @@ export const RedeemConsole: FC = () => {
 
   const [received, setReceived] = useState<FixedPointNumber>(FixedPointNumber.ZERO);
   const [fee, setFee] = useState<FixedPointNumber>(FixedPointNumber.ZERO);
-  const [unbondinngEar, setUnbondinngEar] = useState<number>(0);
+
+  const duration = useMemo((): number => {
+    if (!stakingPool) return 0;
+
+    const { derive: { bondingDuration, eraLength } } = stakingPool;
+
+    return eraLength.toNumber() * bondingDuration.toNumber() * 4 * 1000;
+  }, [stakingPool]);
 
   const freeLiquidityCurrencyAmount = useMemo((): FixedPointNumber => {
     if (!stakingPool) {
@@ -44,7 +49,7 @@ export const RedeemConsole: FC = () => {
     return _result.amount.div(stakingPool.stakingPool.liquidExchangeRate());
   }, [freeList, stakingPool, era]);
 
-  const getMaxLiquidCurrencyAmount = (): FixedPointNumber => {
+  const maxLiquidCurrencyAmount = useMemo((): FixedPointNumber => {
     if (redeemType === 'Immediately') {
       return freeLiquidityCurrencyAmount;
     }
@@ -58,7 +63,7 @@ export const RedeemConsole: FC = () => {
     }
 
     return FixedPointNumber.ZERO;
-  };
+  }, [freeLiquidityCurrencyAmount, freeLiquidityCurrencyAmountInTarget, liquidBalnace, redeemType]);
 
   const [liquidValue, setLiquidValue, { reset }] = useInputValue<BalanceInputValue>({
     amount: 0,
@@ -83,12 +88,6 @@ export const RedeemConsole: FC = () => {
     return stakingPool.derive.currentEra.toNumber();
   }, [stakingPool, era, redeemType]);
 
-  const climeFee = useMemo<FixedPointNumber>((): FixedPointNumber => {
-    if (!stakingPool || !redeemType) return FixedPointNumber.ZERO;
-
-    return FixedPointNumber.ZERO;
-  }, [stakingPool, redeemType]);
-
   const isDisabled = useMemo((): boolean => {
     if (liquidValue.amount) {
       return false;
@@ -99,7 +98,45 @@ export const RedeemConsole: FC = () => {
 
   const handleInput = useCallback((value: BalanceInputValue) => {
     setLiquidValue(value);
-  }, [stakingPool, liquidValue, setLiquidValue, redeemType]);
+
+    if (!stakingPool) return;
+
+    if (redeemType === 'Immediately') {
+      const result = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(
+        new FixedPointNumber(value.amount)
+      );
+
+      setReceived(result.received);
+      setFee(result.fee);
+    }
+
+    if (redeemType === 'Target') {
+      const claimedConfig = freeList.find((item) => item.era === targetEra);
+
+      if (!claimedConfig) return;
+
+      const result = stakingPool.stakingPool.getStakingAmountInClaimUnbonding(
+        new FixedPointNumber(value.amount),
+        targetEra,
+        {
+          claimedUnbonding: claimedConfig.claimedUnbonding,
+          initialClaimedUnbonding: claimedConfig.initialClaimedUnbonding,
+          unbonding: claimedConfig.unbonding
+        }
+      );
+
+      setReceived(result.received);
+      setFee(result.fee);
+    }
+
+    if (redeemType === 'WaitForUnbonding') {
+      const result = stakingPool.stakingPool.getStakingAmountInRedeemByUnbond(
+        new FixedPointNumber(value.amount)
+      );
+
+      setReceived(result.amount);
+    }
+  }, [stakingPool, setLiquidValue, redeemType, setReceived, setFee, targetEra, freeList]);
 
   const params = useMemo((): string[] => {
     const _params = [
@@ -109,12 +146,18 @@ export const RedeemConsole: FC = () => {
 
     if (redeemType === 'Target') {
       _params[1] = {
-        Target: era
+        Target: targetEra
       };
     }
 
     return _params;
-  }, [liquidValue, era, redeemType]);
+  }, [liquidValue, targetEra, redeemType]);
+
+  const handleSuccess = useCallback(() => {
+    reset();
+    setReceived(FixedPointNumber.ZERO);
+    setFee(FixedPointNumber.ZERO);
+  }, [reset, setReceived, setFee]);
 
   return (
     <Grid
@@ -129,7 +172,7 @@ export const RedeemConsole: FC = () => {
           <Radio
             checked={redeemType === 'Immediately'}
             className={classes.item}
-            label={`Redeem Now, Total Free is ${freeLiquidityCurrencyAmount} ${getTokenName(liquidCurrency.asToken.toString())}`}
+            label={`Redeem Now, Total Free is ${freeLiquidityCurrencyAmount.toNumber()} ${getTokenName(liquidCurrency.asToken.toString())}`}
             onClick={(): void => setRedeemType('Immediately')}
           />
           <Radio
@@ -149,7 +192,7 @@ export const RedeemConsole: FC = () => {
                   ) : null
                 }
                 {
-                  freeLiquidityCurrencyAmountInTarget ? `Free is ${freeLiquidityCurrencyAmountInTarget}` : null
+                  freeLiquidityCurrencyAmountInTarget ? `Free is ${freeLiquidityCurrencyAmountInTarget.toNumber()}` : null
                 }
               </div>
             )}
@@ -165,13 +208,14 @@ export const RedeemConsole: FC = () => {
       </Grid>
       <Grid item>
         <BalanceInput
+          max={maxLiquidCurrencyAmount.toNumber()}
           onChange={handleInput}
           value={liquidValue}
         />
       </Grid>
       <Grid item>
         <p className={classes.eraInfo}>
-          Current Era = {stakingPool?.derive.currentEra.toNumber()} Unbounding Period = {formatDuration(era)} Days, Era {stakingPool?.derive.bondingDuration.toNumber()}
+          Current Era = {stakingPool?.derive.currentEra.toNumber()} Unbounding Period = {formatDuration(duration)} Days, Era {stakingPool?.derive.bondingDuration.toNumber()}
         </p>
       </Grid>
       <Grid
@@ -183,7 +227,7 @@ export const RedeemConsole: FC = () => {
           className={classes.txBtn}
           disabled={isDisabled}
           method='redeem'
-          onExtrinsicSuccess={reset}
+          onExtrinsicSuccess={handleSuccess}
           params={params}
           section='homa'
         >
@@ -217,15 +261,19 @@ export const RedeemConsole: FC = () => {
               </Condition>
             }
           />
-          <List.Item
-            label='ClaimFee'
-            value={
-              <FormatBalance
-                balance={climeFee}
-                currency={liquidCurrency}
-              />
-            }
-          />
+          <Condition condition={redeemType !== 'WaitForUnbonding'}>
+            <List.Item
+              label='ClaimFee'
+              value={
+                <Condition condition={!fee.isZero()}>
+                  <FormatBalance
+                    balance={fee}
+                    currency={stakingCurrency}
+                  />
+                </Condition>
+              }
+            />
+          </Condition>
         </List>
       </Grid>
     </Grid>

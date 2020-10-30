@@ -1,32 +1,36 @@
 import React, { FC, memo, useMemo, useContext, useEffect } from 'react';
+import clsx from 'clsx';
 
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Tag } from '@acala-dapp/ui-components';
-import { FormatBalance, FormatRatio, tokenEq } from '@acala-dapp/react-components';
+import { FormatBalance, FormatRatio, tokenEq, getCurrencyIdFromName, Token, TokenImage, FormatPrice, FormatNumber } from '@acala-dapp/react-components';
 import { usePrice, useDexExchangeRate, useConstants, useApi } from '@acala-dapp/react-hooks';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import classes from './SwapConsole.module.scss';
 import { SwapContext, PoolData } from './SwapProvider';
 import { FixedPointNumber, token2CurrencyId } from '@acala-network/sdk-core';
+import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
+import { FormItemPrefixContext } from 'antd/lib/form/context';
 
 interface SwapRouteProps {
-  path: CurrencyId[];
+  parameters: TradeParameters;
 }
 
-const SwapRoute: FC<SwapRouteProps> = ({ path }) => {
+const SwapRoute: FC<SwapRouteProps> = ({ parameters }) => {
+  const { api } = useApi();
+
   return (
     <div className={clsx(classes.info, classes.swapRoute)}>
       Swap Route is
       {
-        path.map((item, index) => {
+        parameters.path.map((item): JSX.Element => {
           return (
-            <Token
-              currency={item}
-              key=`${item.toString()}`
-              icon
+            <TokenImage
+              currency={getCurrencyIdFromName(api, item.name)}
+              key={`${item.toString()}`}
             />
           );
         })
@@ -45,11 +49,11 @@ const SwapFee: FC = () => {
   );
 };
 
-interface Props { 
-  path: CurrencyId[]
+interface Props {
+  parameters: TradeParameters;
 }
 
-export const SwapInfo: FC<Props> = () => {
+export const SwapInfo: FC<Props> = ({ parameters }) => {
   const { api } = useApi();
   const {
     userInput: {
@@ -61,28 +65,31 @@ export const SwapInfo: FC<Props> = () => {
     }
   } = useContext(SwapContext);
 
-  const atLeast = useMemo((): FixedPointNumber => {
-    const result = new FixedPointNumber(outputAmount).div(FixedPointNumber.ONE.plus(acceptSlippage));
-
-    return result.isNaN() ? FixedPointNumber.ZERO : result;
-  }, [acceptSlippage, outputAmount]);
+  if (!parameters) return null;
 
   return (
     <div className={classes.swapInfoRoot}>
       <p>
         You are selling
         <Tag>
-          <FormatBalance balance={inputAmount}
+          <FormatBalance balance={parameters.input.amount}
             currency={token2CurrencyId(api, inputToken)} />
         </Tag>
         for at least
         <Tag>
           <FormatBalance
-            balance={atLeast}
+            balance={parameters.output.amount}
             currency={token2CurrencyId(api, outputToken)}
           />
         </Tag>
       </p>
+      {
+        parameters?.midPrice.isFinaite() ? (
+          <p>
+            The prices is <FormatPrice data={parameters.output.amount.div(parameters.input.amount)} />
+          </p>
+        ) : null
+      }
     </div>
   );
 };

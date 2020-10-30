@@ -9,7 +9,7 @@ const PageDeposit: FC = () => {
   return (
     <IncentivesProvider>
       <Page>
-        <Page.Title title='Incentives' />
+        <Page.Title title='Earn' />
         <Page.Content>
           <Grid container>
             <Grid item>

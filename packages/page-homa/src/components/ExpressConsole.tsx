@@ -1,5 +1,4 @@
-import React, { FC, useMemo, useCallback, useState, useRef } from 'react';
-import { noop } from 'lodash';
+import React, { FC, useMemo, useCallback, useState } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { StakingPool } from '@acala-network/sdk-homa';

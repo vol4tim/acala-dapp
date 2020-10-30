@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { AirDrop } from '@acala-dapp/react-components';
+import { AirDrop } from './AirDrop';
 import { Grid, SubTitle } from '@acala-dapp/ui-components';
 
 import { UserCard } from './UserCard';

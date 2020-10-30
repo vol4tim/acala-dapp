@@ -5,7 +5,7 @@ import clsx from 'clsx';
 
 import { Fixed18 } from '@acala-network/app-util';
 import { List, Button, Grid, Condition } from '@acala-dapp/ui-components';
-import { BalanceInput, FormatAddress, FormatBalance, getCurrenciesFromDexShare, getCurrencyIdFromName, BalanceInputValue } from '@acala-dapp/react-components';
+import { BalanceInput, FormatAddress, FormatBalance, getCurrencyIdFromName, BalanceInputValue } from '@acala-dapp/react-components';
 
 import classes from './RenBtc.module.scss';
 import { useFormValidator, useAccounts, useApi } from '@acala-dapp/react-hooks';
@@ -74,7 +74,7 @@ const InputStep: FC = () => {
               min: 0
             }}
             onChange={handleInput}
-            value={{ amount: form.values.amount, token: getCurrencyIdFromName(api, 'XBTC') }}
+            value={{ amount: form.values.amount, token: getCurrencyIdFromName(api, 'RENBTC') }}
           />
         </Grid>
         <Grid item>
@@ -132,7 +132,7 @@ const ConfirmStep: FC = () => {
     <div className={classes.step}>
       <BalanceInput
         disabled={true}
-        value={{ amount: amount, token: getCurrencyIdFromName(api, 'XBTC') }}
+        value={{ amount: amount, token: getCurrencyIdFromName(api, 'RENBTC') }}
       />
       <List
         className={classes.confirmInfo}

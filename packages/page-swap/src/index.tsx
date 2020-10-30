@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 
 import { Page, Grid } from '@acala-dapp/ui-components';
-import { WalletBalance } from '@acala-dapp/react-components';
 import { SwapConsole } from './components/SwapConsole';
 import { LPInformations } from './components/LPInformations';
 import { SwapProvider } from './components/SwapProvider';
@@ -13,9 +12,6 @@ const PageSwap: FC = () => {
         <Page.Title title='Swap' />
         <Page.Content>
           <Grid container>
-            <Grid item>
-              <WalletBalance />
-            </Grid>
             <Grid item>
               <SwapConsole />
             </Grid>

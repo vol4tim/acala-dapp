@@ -2,10 +2,9 @@ import React, { FC } from 'react';
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { UserAssetBalance, UserAssetValue, TokenImage, TokenName, TransferButton, tokenEq, StakingPoolExchangeRate, focusToFixed18, LPAmountWithShare } from '@acala-dapp/react-components';
-import { Condition } from '@acala-dapp/ui-components';
+import { UserAssetBalance, TokenImage, TokenName, TransferButton, LPAmountWithShare } from '@acala-dapp/react-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { useConstants, useBalance, useLPCurrencies } from '@acala-dapp/react-hooks';
+import { useBalance, useLPCurrencies } from '@acala-dapp/react-hooks';
 
 import classes from './TokenBalances.module.scss';
 

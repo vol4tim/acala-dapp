@@ -10,7 +10,7 @@ const PageDeposit: FC = () => {
   return (
     <LiquidityProvider>
       <Page>
-        <Page.Title title='Deposit & Earn' />
+        <Page.Title title='AMM' />
         <Page.Content>
           <Grid container>
             <Grid item>

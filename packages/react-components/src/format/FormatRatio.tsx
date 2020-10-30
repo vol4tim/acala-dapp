@@ -1,21 +1,30 @@
 import React, { FC, useMemo } from 'react';
 import { FormatNumber, FormatNumberProps } from './FormatNumber';
 import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 const FormatRatioConfig: FormatNumberProps['formatNumberConfig'] = {
-  decimalLength: 2,
+  decimalLength: 6,
   removeEmptyDecimalParts: true,
   removeTailZero: true
 };
 
 export const FormatRatio: FC<FormatNumberProps> = ({ data, ...props }) => {
   const _data = useMemo(() => {
-    return (data instanceof Fixed18 ? data : Fixed18.fromNatural(data || 0)).mul(Fixed18.fromNatural(100));
+    if (data instanceof Fixed18) {
+      return data.mul(Fixed18.fromNatural(100));
+    }
+
+    if (data instanceof FixedPointNumber) {
+      return data.times(new FixedPointNumber(100));
+    }
+
+    return (new FixedPointNumber(100)).times(new FixedPointNumber(100));
   }, [data]);
 
   return (
     <FormatNumber
-      data={_data.isFinity() ? _data : 0}
+      data={_data.isNaN() ? 0 : _data}
       formatNumberConfig={FormatRatioConfig}
       suffix='%'
       {...props}

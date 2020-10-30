@@ -10,7 +10,7 @@ import { TokenName, TokenImage } from './Token';
 import { TokenSelector } from './TokenSelector';
 import classes from './BalanceInput.module.scss';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { useBalance } from '@acala-dapp/react-hooks/';
+import { useBalance } from '@acala-dapp/react-hooks';
 
 type BalanceInputSize = 'large' | 'middle' | 'small' | 'mini';
 

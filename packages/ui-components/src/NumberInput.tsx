@@ -10,11 +10,11 @@ const getValidNumber = (input: string, min?: number, max?: number): [boolean, st
   if (numberReg.test(input)) {
     const _num = Number(input);
 
-    if (min !== undefined && _num < min) {
+    if (min !== undefined && _num <= min) {
       input = String(min);
     }
 
-    if (max !== undefined && _num > max) {
+    if (max !== undefined && _num >= max) {
       input = String(max);
     }
 
@@ -76,28 +76,13 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
     // no matter if input completed, trigger value change
     // trigger value change event when is a valid number and is changed, otherwise do nothing
     if (isValidNumber && valueRef.current !== validNumber) {
-      if (!isControlled) {
-        setValue(validNumber);
-        valueRef.current = validNumber;
-      }
-
+      setValue(validNumber);
+      valueRef.current = validNumber;
       _onChange(Number(validNumber));
     }
-  }, [setValue, _onChange, min, max, isControlled]);
+  }, [setValue, _onChange, min, max]);
 
-  const _onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    if (onBlur) onBlur(e);
-
-    isInEditMode.current = false;
-  }, [onBlur]);
-
-  const _onFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    if (onFocus) onFocus(e);
-
-    isInEditMode.current = true;
-  }, [onFocus]);
-
-  useEffect(() => {
+  const handleValueChange = useCallback(() => {
     if ((value === 0 || value === '0') && isControlled) {
       setValue('');
       valueRef.current = '';
@@ -112,6 +97,24 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
       valueRef.current = validNumber;
     }
   }, [value, isControlled, max, min]);
+
+  const _onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    if (onBlur) onBlur(e);
+
+    isInEditMode.current = false;
+
+    handleValueChange();
+  }, [onBlur, handleValueChange]);
+
+  const _onFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
+    if (onFocus) onFocus(e);
+
+    isInEditMode.current = true;
+  }, [onFocus]);
+
+  useEffect(() => {
+    handleValueChange();
+  }, [handleValueChange]);
 
   return (
     <input

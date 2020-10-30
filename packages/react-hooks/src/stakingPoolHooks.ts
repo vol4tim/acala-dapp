@@ -13,6 +13,7 @@ import { useConstants } from './useConstants';
 import { usePrice } from './priceHooks';
 import { StakingPoolData } from '@acala-dapp/react-environment/RxStore/type';
 import { useSubscription } from './useSubscription';
+import { useAccounts } from './useAccounts';
 
 export const useStakingPool = (): StakingPoolData | null => {
   const [stakingPool, setStakingPool] = useState<StakingPoolData | null>(null);
@@ -32,6 +33,9 @@ export const useStakingPool = (): StakingPoolData | null => {
 interface FreeListItem {
   era: number;
   amount: FixedPointNumber;
+  claimedUnbonding: FixedPointNumber;
+  initialClaimedUnbonding: FixedPointNumber;
+  unbonding: FixedPointNumber;
 }
 
 export const useStakingPoolFreeList = (): FreeListItem[] => {
@@ -50,9 +54,12 @@ export const useStakingPoolFreeList = (): FreeListItem[] => {
       eraArray.map((duration: number) => api.query.stakingPool.unbonding<[Amount, Amount, Amount]>(duration))
     ).pipe(
       map((result) => eraArray.map((era, index) => {
-        const amount = FixedPointNumber.fromInner(result[index][0].toString()).minus(FixedPointNumber.fromInner(result[index][1].toString()));
+        const unbonding = FixedPointNumber.fromInner(result[index][0].toString());
+        const claimedUnbonding = FixedPointNumber.fromInner(result[index][1].toString());
+        const initialClaimedUnbonding = FixedPointNumber.fromInner(result[index][2].toString());
+        const amount = unbonding.minus(claimedUnbonding);
 
-        return { amount, era };
+        return { amount, claimedUnbonding, era, initialClaimedUnbonding, unbonding };
       })),
       map((result) => result.filter((item): boolean => !item.amount.isZero()))
     ).subscribe((result) => {
@@ -61,6 +68,40 @@ export const useStakingPoolFreeList = (): FreeListItem[] => {
   }, [api, stakingPool]);
 
   return freeList;
+};
+
+export interface RedeemItem {
+  era: number;
+  balance: FixedPointNumber;
+}
+
+export const useRedeemList = (): RedeemItem[] => {
+  const { api } = useApi();
+  const { active } = useAccounts();
+  const stakingPool = useStakingPool();
+  const [redeemList, setRedeemList] = useState<RedeemItem[]>([]);
+
+  useSubscription((): Observable<{ era: number; balance: Fixed18}[]> => {
+    if (!stakingPool || !active) return;
+
+    const duration = stakingPool.derive.bondingDuration.toNumber();
+    const start = stakingPool.derive.currentEra.toNumber();
+    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index + 2);
+
+    return combineLatest(
+      eraArray.map((era: number) => api.query.stakingPool.claimedUnbond<Balance>(active.address, era))
+    ).pipe(
+      map((result) => eraArray.map((era, index) => ({
+        balance: result[index].isEmpty ? FixedPointNumber.ZERO : FixedPointNumber.fromInner(result[index].toString()),
+        era
+      }))),
+      map((result) => result.filter((item): boolean => !item.balance.isZero()))
+    ).subscribe((result) => {
+      setRedeemList(result);
+    });
+  }, [stakingPool, active, api.query.stakingPool]);
+
+  return redeemList;
 };
 
 /**
@@ -110,7 +151,7 @@ const YEAR = 365 * 24 * 60 * 60 * 1000;
 
 export const useStakingRewardAPR = (): FixedPointNumber => {
   const { api } = useApi();
-  const subAccountStatus = useCall<SubAccountStatus>('query.polkadotBridge.subAccounts', [0]);
+  const subAccountStatus = useCall<SubAccountStatus>('query.polkadotBridge.subAccounts', [1]);
 
   const arp = useMemo<FixedPointNumber>(() => {
     if (!subAccountStatus) return FixedPointNumber.ZERO;

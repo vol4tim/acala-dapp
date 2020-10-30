@@ -7,7 +7,6 @@ import { SelectToken } from './SelectToken';
 import { SystemInfo } from './SystemInfo';
 import { Console } from './Console';
 import { StakingPool } from './StakingPool';
-import { Transaction } from './Transaction';
 import { RedeemList } from './RedeemList';
 
 export const Advanced: FC = () => {
@@ -40,12 +39,10 @@ export const Advanced: FC = () => {
         </Grid>
       </Grid>
       <Grid item>
+        <RedeemList />
       </Grid>
       <Grid item>
         <StakingPool />
-      </Grid>
-      <Grid item>
-        <Transaction />
       </Grid>
     </Grid>
   );

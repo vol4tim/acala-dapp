@@ -27,11 +27,11 @@ export * from './WalletBalance';
 export * from './Assets';
 export * from './UserBalance';
 
-// price
-export * from './Price';
-
 // airdrop
 export * from './AirDropAmount';
+
+// price
+export * from './Price';
 
 // loan
 export * from './Loan';

@@ -111,5 +111,5 @@ export const formatBalance = (balance: FixedPointNumber | Fixed18 | Codec | numb
 export const formatDuration = (duration: number): number => {
   const DAY = 1000 * 60 * 60 * 24;
 
-  return Fixed18.fromRational(duration, DAY).toNumber(6, 2);
+  return FixedPointNumber.fromRational(duration, DAY).toNumber();
 };

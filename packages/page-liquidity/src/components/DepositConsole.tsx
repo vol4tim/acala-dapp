@@ -1,4 +1,4 @@
-import React, { FC, useState, useContext, useCallback, useMemo, useEffect } from 'react';
+import React, { FC, useContext, useCallback, useMemo, useEffect } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { Card, Alert, Grid, InputField, List, SpaceBetweenBox } from '@acala-dapp/ui-components';
@@ -13,11 +13,11 @@ export const DepositConsole: FC = () => {
   const { api } = useApi();
   const { lpEnableCurrencies } = useContext(LiquidityContext);
 
-  const [token1Info, setToken1Info, { ref: token1InfoRef, reset: token1InfoReset }] = useInputValue<BalanceInputValue>({
+  const [token1Info, setToken1Info, { ref: token1Ref, reset: token1InfoReset }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: lpEnableCurrencies.filter((item) => item.asToken.toString() !== 'AUSD')[0]
   });
-  const [token2Info, setToken2Info, { ref: token2InfoRef, reset: token2InfoReset }] = useInputValue<BalanceInputValue>({
+  const [token2Info, setToken2Info, { ref: token2Ref, reset: token2InfoReset }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: getCurrencyIdFromName(api, 'AUSD') // default set token2
   });
@@ -98,6 +98,19 @@ export const DepositConsole: FC = () => {
       token: token1Info.token
     });
   }, [setToken1Info, setToken2Info, token1Info, getAddLPSuggestAmount]);
+
+  useEffect(() => {
+    if (!availableLP) {
+      setToken1Info({
+        amount: 0,
+        token: token1Ref.current.token
+      });
+      setToken2Info({
+        amount: 0,
+        token: token2Ref.current.token
+      });
+    }
+  }, [availableLP, setToken1Info, setToken2Info, token1Ref, token2Ref]);
 
   return (
     <Card>

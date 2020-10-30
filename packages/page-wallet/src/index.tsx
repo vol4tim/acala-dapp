@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { Page } from '@acala-dapp/ui-components';
 import { WalletProvider } from './components/WalletProvider';
-import { OperationPanel } from './components/OperationPanel';
+import { Tabs } from './components/Tabs';
 
 const PageWallet: FC = () => {
   const { t } = useTranslation('page-wallet');
@@ -13,7 +13,7 @@ const PageWallet: FC = () => {
       <Page>
         <Page.Title title={t('Wallet')} />
         <Page.Content>
-          <OperationPanel />
+          <Tabs />
         </Page.Content>
       </Page>
     </WalletProvider>

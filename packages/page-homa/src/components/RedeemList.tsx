@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 
 import { Card, TableConfig, Table, Condition } from '@acala-dapp/ui-components';
-import { useCurrentRedeem, useStakingPoolFreeList, useStakingPool, useConstants } from '@acala-dapp/react-hooks';
+import { useCurrentRedeem, useStakingPoolFreeList, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 
@@ -10,7 +10,7 @@ import classes from './RedeemList.module.scss';
 export const RedeemList: FC = () => {
   const { stakingCurrency } = useConstants();
   const currentRedeem = useCurrentRedeem();
-  const redeemList = useStakingPoolFreeList();
+  const redeemList = useRedeemList();
   const stakingPool = useStakingPool();
 
   const renderHeader = (): ReactNode => {

@@ -20,11 +20,11 @@ export const PoolRate: FC<PoolRateProps> = ({
   return (
     <div>
       <FormatBalance
-        balance={totalReward}
+        balance={totalReward.times(new FixedPointNumber(60))}
         currency={rewardCurrency}
       /> /
       <FormatBlockTime
-        block={accumulatePeriod}
+        block={accumulatePeriod * 60}
         to='hour'
       />
     </div>
@@ -48,11 +48,11 @@ export const UserPoolRate: FC<UserPoolRateProps> = ({
   return (
     <div>
       <FormatBalance
-        balance={totalReward.times(share.ratio)}
+        balance={totalReward.times(share.ratio).times(new FixedPointNumber(60))}
         currency={rewardCurrency}
       /> /
       <FormatBlockTime
-        block={accumulatePeriod}
+        block={accumulatePeriod * 60}
         to='hour'
       />
     </div>

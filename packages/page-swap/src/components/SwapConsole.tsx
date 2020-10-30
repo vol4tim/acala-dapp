@@ -1,24 +1,22 @@
-import React, { FC, useContext, ReactElement, ReactNode, useCallback, useMemo, useState } from 'react';
-import { Form } from 'antd';
+import React, { FC, useContext, ReactElement, useCallback, useMemo, useState } from 'react';
 
 import { ITuple } from '@polkadot/types/types';
 import { Balance } from '@acala-network/types/interfaces';
 
-import { Card, IconButton, InputField } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInputValue, UserBalance, LPExchangeRate, getDexShareFromCurrencyId, BalanceInput } from '@acala-dapp/react-components';
+import { Card, IconButton, InputField, SpaceBetweenBox } from '@acala-dapp/ui-components';
+import { TxButton, BalanceInputValue, UserBalance, BalanceInput } from '@acala-dapp/react-components';
 import { useApi, useSubscription, useBalance } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInput } from './SlippageInput';
-import { SwapInput } from './SwapInput';
 import { SwapContext } from './SwapProvider';
 import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
 import { SwapTrade } from '@acala-network/sdk-swap';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
 import { SwapTradeMode } from '@acala-network/sdk-swap/help';
 
-const DANGER_TRADE_IMPACT = new FixedPointNumber(0.05);
+// const DANGER_TRADE_IMPACT = new FixedPointNumber(0.05);
 
 interface SwapBtn {
   onClick: () => void;
@@ -38,7 +36,6 @@ function SwapBtn ({ onClick }: SwapBtn): ReactElement {
 
 export const SwapConsole: FC = () => {
   const { api } = useApi();
-  const form = Form.useForm({ });
 
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
 
@@ -58,6 +55,7 @@ export const SwapConsole: FC = () => {
       outputAmount: 0,
       outputToken: userInput.inputToken
     });
+    setParameters(null);
   }, [userInput, updateUserInput]);
 
   const balance = useBalance(token2CurrencyId(api, userInput.inputToken));
@@ -142,9 +140,8 @@ export const SwapConsole: FC = () => {
                 params={params}
                 section='dex'
                 size='large'
-                style={parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'danger' : 'primary'}
               >
-                {parameters?.priceImpact.isGreaterThan(DANGER_TRADE_IMPACT) ? 'Swap Anyway' : 'Swap'}
+                Swap
               </TxButton>
             );
           }}
@@ -169,13 +166,13 @@ export const SwapConsole: FC = () => {
           }}
           leftTitle={(): JSX.Element => {
             return (
-              <div>
+              <SpaceBetweenBox>
                 <p>{`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}</p>
                 <div className={classes.extra}>
                   <span>max: </span>
                   <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
                 </div>
-              </div>
+              </SpaceBetweenBox>
             );
           }}
           rightRender={(): JSX.Element => {
@@ -205,6 +202,11 @@ export const SwapConsole: FC = () => {
           }}
         />
       </div>
+      {
+        parameters ? (
+          <SwapInfo parameters={parameters} />
+        ) : null
+      }
       <SlippageInput />
     </Card>
   );
