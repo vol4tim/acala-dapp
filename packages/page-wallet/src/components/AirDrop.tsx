@@ -41,11 +41,11 @@ export const AirDrop: FC = () => {
   useEffect(() => {
     const alreadyShow = getStorage('already-show-candy');
 
-    if (!alreadyShow) {
-      open();
+    if (!alreadyShow && showClaimed) {
+      // open();
       setStorage('already-show-candy', 'true');
     }
-  }, [open, setStorage, getStorage]);
+  }, [open, setStorage, getStorage, showClaimed]);
 
   return (
     <Card
@@ -70,10 +70,14 @@ export const AirDrop: FC = () => {
         data={keys}
         showHeader
       />
-      <Candy
-        onClose={close}
-        status={status}
-      />
+      {
+        showClaimed ? (
+          <Candy
+            onClose={close}
+            status={status}
+          />
+        ) : null
+      }
     </Card>
   );
 };

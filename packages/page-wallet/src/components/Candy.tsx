@@ -90,7 +90,7 @@ export const Candy: FC<Props> = ({
       {
         isInitialized ? (
           <div>
-            <p className={classes.title}>You have received a gift for participated in previous acala testnetwork.</p>
+            <p className={classes.title}>You have received a gift for participated in previous acala testnet.</p>
             <div className={classes.candyList}>
               <span>ACA(MainNet)</span>
               <span>{candy.candy.length}</span>
