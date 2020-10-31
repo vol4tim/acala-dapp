@@ -72,7 +72,7 @@ export const Candy: FC<Props> = ({
   return (
     <Dialog
       action={
-        candy.claimed ? <p className={classes.claimed}>Already Claimed</p> : (
+        candy.claimed ? <p className={classes.claimed}>Already Claimed</p> : candy.candy.length > 0 ? (
           <Button
             className={classes.claimedBtn}
             disabled={candy.claimed && candy.candy.length === 0}
@@ -80,7 +80,7 @@ export const Candy: FC<Props> = ({
           >
             Claim
           </Button>
-        )
+        ) : null
       }
       onCancel={onClose}
       title='Candy Claimed'
@@ -90,15 +90,23 @@ export const Candy: FC<Props> = ({
       {
         isInitialized ? (
           <div>
-            <p className={classes.title}>You have received a gift for participated in previous acala testnet.</p>
-            <div className={classes.candyList}>
-              <span>ACA(MainNet)</span>
-              <span>{candy.candy.length}</span>
-            </div>
-            <div className={classes.candyList}>
-              <span>KAR</span>
-              <span>{candy.candy.length}</span>
-            </div>
+            {
+              candy.candy.length > 0 ? (
+                <>
+                  <p className={classes.title}>You have received a gift for participated in previous acala testnet.</p>
+                  <div className={classes.candyList}>
+                    <span>ACA(MainNet)</span>
+                    <span>{candy.candy.length}</span>
+                  </div>
+                  <div className={classes.candyList}>
+                    <span>KAR</span>
+                    <span>{candy.candy.length}</span>
+                  </div>
+                </>
+              ) : (
+                <p className={classes.title}>The account has no airdrop, please waiting for the next acala testnet.</p>
+              )
+            }
           </div>
         ) : <Skeleton />
       }
