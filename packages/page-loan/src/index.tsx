@@ -79,9 +79,6 @@ const Inner: FC = () => {
                         <Grid item>
                           <LoanConsole />
                         </Grid>
-                        <Grid item>
-                          <Transaction />
-                        </Grid>
                       </>
                     )}
                   />
