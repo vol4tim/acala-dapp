@@ -28,6 +28,9 @@
   }
 
   @include media-breakpoint-up('md') {
+    &::before {
+      transform: translate3d(50%, 0, 0);
+    }
     p {
       display: none;
     }
