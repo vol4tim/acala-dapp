@@ -115,6 +115,8 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
   }, [onFocus]);
 
   useEffect(() => {
+    if (isInEditMode.current) return;
+
     if ((value === 0 || value === '0') && isControlled) {
       setValue('');
       valueRef.current = '';
