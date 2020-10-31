@@ -83,7 +83,7 @@ export const Candy: FC<Props> = ({
         ) : null
       }
       onCancel={onClose}
-      title='Candy Claimed'
+      title='Candy Claim'
       visiable={status}
       withClose
     >

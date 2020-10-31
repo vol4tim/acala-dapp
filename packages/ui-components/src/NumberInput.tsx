@@ -10,7 +10,7 @@ const getValidNumber = (input: string, min?: number, max?: number): [boolean, st
   if (numberReg.test(input)) {
     const _num = Number(input);
 
-    if (min !== undefined && _num <= min) {
+    if (min !== undefined && _num < min) {
       input = String(min);
     }
 
@@ -83,6 +83,8 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
   }, [setValue, _onChange, min, max]);
 
   const handleValueChange = useCallback(() => {
+    if (isInEditMode.current) return;
+
     if ((value === 0 || value === '0') && isControlled) {
       setValue('');
       valueRef.current = '';
@@ -96,7 +98,7 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
       setValue(validNumber);
       valueRef.current = validNumber;
     }
-  }, [value, isControlled, max, min]);
+  }, [value, isControlled, max, min, isInEditMode]);
 
   const _onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
     if (onBlur) onBlur(e);
@@ -113,8 +115,20 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
   }, [onFocus]);
 
   useEffect(() => {
-    handleValueChange();
-  }, [handleValueChange]);
+    if ((value === 0 || value === '0') && isControlled) {
+      setValue('');
+      valueRef.current = '';
+
+      return;
+    }
+
+    const [isValidNumber, validNumber] = getValidNumber(String(value), min, max);
+
+    if (isValidNumber && isControlled) {
+      setValue(validNumber);
+      valueRef.current = validNumber;
+    }
+  }, [value, isControlled, max, min, isInEditMode]);
 
   return (
     <input

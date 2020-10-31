@@ -11,17 +11,6 @@ export const AirDrop: FC = () => {
   const keys = (api.registry.createType('AirDropCurrencyId' as any) as AirDropCurrencyId).defKeys;
   const { close, open, status } = useModal();
   const { getStorage, setStorage } = useStorage({ useAccountPrefix: false });
-  const [showClaimed, setShowClaimed] = useState<boolean>(false);
-
-  useInterval(() => {
-    const current = dayjs();
-    const startTime = dayjs('2020-10-31T12:00:07.208Z');
-
-    if (current.isAfter(startTime)) {
-      setShowClaimed(true);
-    }
-  }, 1000);
-
   const tableConfig: TableConfig[] = [
     {
       align: 'left',
@@ -41,11 +30,11 @@ export const AirDrop: FC = () => {
   useEffect(() => {
     const alreadyShow = getStorage('already-show-candy');
 
-    if (showClaimed && !alreadyShow) {
+    if (!alreadyShow) {
       open();
       setStorage('already-show-candy', 'true');
     }
-  }, [open, setStorage, getStorage, showClaimed]);
+  }, [open, setStorage, getStorage]);
 
   return (
     <Card
@@ -53,13 +42,11 @@ export const AirDrop: FC = () => {
         <SpaceBetweenBox>
           <p>AirDrop</p>
           {
-            showClaimed ? (
-              <Button
-                onClick={open}
-              >
-                Candy Claim
-              </Button>
-            ) : null
+            <Button
+              onClick={open}
+            >
+              Candy Claim
+            </Button>
           }
         </SpaceBetweenBox>
       }
@@ -70,14 +57,10 @@ export const AirDrop: FC = () => {
         data={keys}
         showHeader
       />
-      {
-        showClaimed ? (
-          <Candy
-            onClose={close}
-            status={status}
-          />
-        ) : null
-      }
+      <Candy
+        onClose={close}
+        status={status}
+      />
     </Card>
   );
 };
