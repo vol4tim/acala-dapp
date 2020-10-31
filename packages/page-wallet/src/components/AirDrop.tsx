@@ -1,7 +1,6 @@
-import React, { FC, ReactNode, useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
+import React, { FC, ReactNode, useEffect } from 'react';
 import { Card, TableConfig, Table, SpaceBetweenBox, Button } from '@acala-dapp/ui-components';
-import { useApi, useModal, useStorage, useInterval } from '@acala-dapp/react-hooks';
+import { useApi, useModal, useStorage } from '@acala-dapp/react-hooks';
 import { tokenEq, AirDropAmount } from '@acala-dapp/react-components';
 import { AirDropCurrencyId } from '@acala-network/types/interfaces';
 import { Candy } from './Candy';
@@ -45,7 +44,7 @@ export const AirDrop: FC = () => {
             <Button
               onClick={open}
             >
-              Candy Claim
+              Claim Rewards
             </Button>
           }
         </SpaceBetweenBox>

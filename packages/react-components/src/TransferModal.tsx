@@ -231,7 +231,7 @@ export const TransferModal: FC<TransferModalProps> = ({
       return true;
     }
 
-    if (!value.account) {
+    if (!value.balance) {
       return true;
     }
 

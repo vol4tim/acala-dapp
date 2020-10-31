@@ -104,7 +104,13 @@ export const Candy: FC<Props> = ({
                   </div>
                 </>
               ) : (
-                <p className={classes.title}>The account has no airdrop, please waiting for the next acala testnet.</p>
+                <p className={classes.title}>
+                  You are new to the community, please head to <a
+                    href='https://discord.gg/vdbFVCH'
+                    rel='noopener noreferrer'
+                    target='_blank'
+                  >Discord</a> to participate
+                </p>
               )
             }
           </div>

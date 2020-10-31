@@ -167,7 +167,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         {...numberInputProps}
         className={classes.input}
         disabled={disabled}
-        max={max}
+        max={max || (checkBalance ? balance.toNumber() : 0)}
         min={min}
         onBlur={_onBlur}
         onChange={onValueChange}
