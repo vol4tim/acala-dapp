@@ -75,10 +75,10 @@ export const Candy: FC<Props> = ({
         candy.claimed ? <p className={classes.claimed}>Already Claimed</p> : (
           <Button
             className={classes.claimedBtn}
-            disabled={candy.claimed}
+            disabled={candy.claimed && candy.candy.length === 0}
             onClick={handleClaimed}
           >
-            Claime
+            Claim
           </Button>
         )
       }

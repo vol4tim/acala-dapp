@@ -41,8 +41,8 @@ export const AirDrop: FC = () => {
   useEffect(() => {
     const alreadyShow = getStorage('already-show-candy');
 
-    if (!alreadyShow && showClaimed) {
-      // open();
+    if (showClaimed && !alreadyShow) {
+      open();
       setStorage('already-show-candy', 'true');
     }
   }, [open, setStorage, getStorage, showClaimed]);
