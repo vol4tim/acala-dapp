@@ -72,7 +72,7 @@ export const WithdrawConsole: FC = () => {
               <TxButton
                 disabled={isDisabled}
                 method='removeLiquidity'
-                onExtrinsicSuccess={handleSuccess}
+                onInblock={handleSuccess}
                 params={params}
                 section='dex'
                 size='large'

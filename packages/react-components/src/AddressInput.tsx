@@ -5,16 +5,15 @@ import Identicon from '@polkadot/react-identicon';
 
 import { AutoComplete, Input, InputProps, ArrowDownIcon, Tooltip } from '@acala-dapp/ui-components';
 import { AddressInfo } from '@acala-dapp/react-environment';
-import { useAccounts } from '@acala-dapp/react-hooks';
+import { useAccounts, useAddressValidator } from '@acala-dapp/react-hooks';
 
 import classes from './AddressInput.module.scss';
-import { isValidateAddress } from './utils';
 import { FormatAddress } from './format';
 
 interface AddressInputProps extends Omit<InputProps, 'onChange'>{
   addressList?: AddressInfo[];
   width?: number;
-  onChange: (address: string) => void;
+  onChange: (value: { address: string; error?: string }) => void;
   showIdentIcon?: boolean;
   inputClassName?: string;
   blockAddressList?: string[];
@@ -34,8 +33,9 @@ export const AddressInput: FC<AddressInputProps> = ({
   ...other
 }) => {
   const [value, setValue] = useState<string>('');
-  const [isValided, setIsValided] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
   const { addAddress, addressList: defaultAddressList } = useAccounts();
+  const addressValidator = useAddressValidator({ required: true });
 
   const _addressList = useMemo((): AddressInfo[] => {
     if (addressList) return addressList;
@@ -79,15 +79,16 @@ export const AddressInput: FC<AddressInputProps> = ({
 
   const _setValue = useCallback((value: string): void => {
     setValue(value);
-    onChange(value);
 
-    if (isValidateAddress(value)) {
-      setIsValided(true);
+    addressValidator(value).then(() => {
+      setError('');
       insertOptions(value);
-    } else {
-      setIsValided(false);
-    }
-  }, [setValue, setIsValided, insertOptions, onChange]);
+      onChange({ address: value });
+    }).catch((e) => {
+      setError(e.message);
+      onChange({ address: value, error: e.message });
+    });
+  }, [setValue, addressValidator, insertOptions, onChange]);
 
   const handleChange = useCallback((value: string) => {
     _setValue(value);
@@ -105,8 +106,9 @@ export const AddressInput: FC<AddressInputProps> = ({
       style={{ width }}
     >
       <Input
+        error={error}
         inputClassName={clsx(classes.input, inputClassName)}
-        prefix={showIdentIcon && isValided ? (
+        prefix={showIdentIcon && !error ? (
           <Identicon
             className={classes.icon}
             size={32}

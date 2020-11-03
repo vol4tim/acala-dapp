@@ -1,9 +1,10 @@
 import React, { useContext, FC, useCallback, useMemo, useState } from 'react';
 
 import { Fixed18, calcCanGenerate } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { BalanceInput, UserBalance, FormatBalance, getTokenName, BalanceInputValue } from '@acala-dapp/react-components';
-import { useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
+import { BalanceInput, UserBalance, FormatBalance, getTokenName, BalanceInputValue, focusToFixedPointNumber } from '@acala-dapp/react-components';
+import { useConstants, useBalance, useLoanHelper, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { Button } from '@acala-dapp/ui-components';
 
 import { createProviderContext } from './CreateProvider';
@@ -24,33 +25,46 @@ export const Generate: FC = () => {
   const helper = useLoanHelper(selectedToken);
   const [collateralAmount, setColalteralAmount] = useState<number>(0);
   const maxGenerate = useMemo(() => {
-    if (!helper) return new Fixed18(0);
+    if (!helper) return FixedPointNumber.ZERO;
 
     // calculate max generate
-    return calcCanGenerate(
+    return focusToFixedPointNumber(calcCanGenerate(
       helper.collaterals.add(Fixed18.fromNatural(collateralAmount || 0)).mul(helper.collateralPrice),
       helper.debitAmount,
       helper.requiredCollateralRatio,
       helper.stableCoinPrice
-    );
+    ));
   }, [collateralAmount, helper]);
 
-  const [depositValue, setDepositValue, { ref: depositValueRef }] = useInputValue<BalanceInputValue>({
+  const [depositValue, setDepositValue, {
+    error: depositError,
+    ref: depositValueRef,
+    setValidator: setDepositValidator
+  }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: selectedToken
   });
 
-  const [generateValue, setGenerateValue] = useInputValue<BalanceInputValue>({
+  const [generateValue, setGenerateValue, {
+    error: generateError,
+    setValidator: setGenerateValidator
+  }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: stableCurrency
   });
 
-  const isLessThanMinDebit = useMemo(() => {
-    // don't check when generate is zero
-    if (generateValue.amount === 0) return false;
+  useBalanceValidator({
+    currency: selectedToken,
+    updateValidator: setDepositValidator
+  });
 
-    return minmumDebitValue.toNumber() > generateValue.amount;
-  }, [minmumDebitValue, generateValue]);
+  useBalanceValidator({
+    checkBalance: false,
+    currency: stableCurrency,
+    max: [maxGenerate, ''],
+    min: [FixedPointNumber.ONE, 'Generate must larger than minimum debit (1aUSD)'],
+    updateValidator: setGenerateValidator
+  });
 
   const handleNext = useCallback((): void => {
     setStep('confirm');
@@ -61,8 +75,12 @@ export const Generate: FC = () => {
   }, [setStep]);
 
   const isDisabled = useMemo((): boolean => {
-    return !(generateValue.amount && depositValue.amount && !isLessThanMinDebit);
-  }, [generateValue, depositValue, isLessThanMinDebit]);
+    if (depositError) return true;
+
+    if (generateError) return true;
+
+    return !(generateValue.amount && depositValue.amount);
+  }, [generateValue, depositValue, depositError, generateError]);
 
   const handleDepositMax = useCallback((): void => {
     setDeposit(selectedCurrencyBalance.toNumber());
@@ -105,10 +123,9 @@ export const Generate: FC = () => {
           </p>
           <BalanceInput
             className={classes.input}
-            error={''}
+            error={depositError}
             onChange={handleDepositChange}
             onMax={handleDepositMax}
-            showMaxBtn
             size='middle'
             value={depositValue}
           />
@@ -118,10 +135,8 @@ export const Generate: FC = () => {
           </div>
           <p className={classes.title}>How much {getTokenName(stableCurrency.asToken.toString())} would you like to borrow?</p>
           <BalanceInput
-            checkBalance={false}
             className={classes.input}
-            error={isLessThanMinDebit ? 'Generate must larger than minimum debit (1aUSD)' : ''}
-            max={maxGenerate.toNumber()}
+            error={generateError}
             onChange={handleGenerateChange}
             size='middle'
             value={generateValue}

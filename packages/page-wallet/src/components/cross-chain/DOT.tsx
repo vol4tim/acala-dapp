@@ -150,7 +150,7 @@ export const TransferIn: FC = () => {
               api={getApi()}
               className={classes.txBtn}
               method='transferToParachain'
-              onExtrinsicSuccess={handleSuccess}
+              onInblock={handleSuccess}
               params={getParams}
               preCheck={preCheck}
               section='parachains'
@@ -234,7 +234,7 @@ export const TransferOut: FC = () => {
       <TxButton
         className={classes.txBtn}
         method='transferToRelayChain'
-        onExtrinsicSuccess={handleSuccess}
+        onInblock={handleSuccess}
         params={getParams}
         preCheck={preCheck}
         section='xTokens'

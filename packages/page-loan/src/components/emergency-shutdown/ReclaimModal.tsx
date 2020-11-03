@@ -90,7 +90,7 @@ export const ReclaimModal: FC<ReclaimModalProps> = ({
           <TxButton
             beforeSend={beforeSend}
             method='refundCollaterals'
-            onExtrinsicSuccess={reclaimSuccess}
+            onInblock={reclaimSuccess}
             params={params}
             section='emergencyShutdown'
             size='small'

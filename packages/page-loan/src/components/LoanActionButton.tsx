@@ -1,10 +1,11 @@
 import React, { FC, useMemo, useCallback, ReactNode } from 'react';
 
 import { stableCoinToDebit, Fixed18, calcLiquidationPrice, calcCollateralRatio } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Dialog, ButtonProps, Button, List, InlineBlockBox } from '@acala-dapp/ui-components';
-import { useModal, useConstants, useBalance, useLoanHelper } from '@acala-dapp/react-hooks';
+import { useModal, useConstants, useBalance, useLoanHelper, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { BalanceInput, TxButton, FormatBalance, FormatRatio, FormatPrice, focusToFixed18, BalanceInputValue, TokenName } from '@acala-dapp/react-components';
 
 import classes from './LoanActionButton.module.scss';
@@ -34,27 +35,38 @@ export const LonaActionButton: FC<Props> = ({
     if (!balance || !loanHelper || !stableCurrencyBalance) return 0;
 
     if (type === 'payback') {
-      return focusToFixed18(stableCurrencyBalance).min(loanHelper.canPayBack).toNumber(18, 3);
+      return focusToFixed18(stableCurrencyBalance).min(loanHelper.canPayBack).toNumber(6, 3);
     }
 
     if (type === 'generate') {
-      return loanHelper.canGenerate.toNumber(18, 3);
+      return loanHelper.canGenerate.toNumber(6, 3);
     }
 
     if (type === 'deposit') {
-      return focusToFixed18(balance).toNumber(18, 3);
+      return focusToFixed18(balance).toNumber(6, 3);
     }
 
     if (type === 'withdraw') {
-      return loanHelper.collaterals.sub(loanHelper.requiredCollateral).toNumber(18, 3);
+      return loanHelper.collaterals.sub(loanHelper.requiredCollateral).toNumber(6, 3);
     }
 
     return 0;
   }, [balance, loanHelper, stableCurrencyBalance, type]);
 
-  const [inputValue, setInputValue, { ref: inputValueRef, reset }] = useInputValue<BalanceInputValue>({
+  const isStableCurrency = useMemo((): boolean => type === 'payback' || type === 'generate', [type]);
+
+  const isCheckBalance = useMemo(() => type === 'payback' || type === 'deposit', [type]);
+
+  const [inputValue, setInputValue, { error, ref: inputValueRef, reset, setValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: (type === 'payback' || type === 'generate') ? stableCurrency : token
+  });
+
+  useBalanceValidator({
+    checkBalance: isCheckBalance,
+    currency: isStableCurrency ? stableCurrency : token,
+    max: [new FixedPointNumber(maxInput), ''],
+    updateValidator: setValidator
   });
 
   const collateral = useMemo<number>((): number => {
@@ -111,10 +123,6 @@ export const LonaActionButton: FC<Props> = ({
       loanHelper.debitAmount.add(Fixed18.fromNatural(debit))
     );
   }, [collateral, debit, loanHelper]);
-
-  const isStableCurrency = useMemo((): boolean => {
-    return type === 'payback' || type === 'generate';
-  }, [type]);
 
   const dialogTitle = useMemo((): ReactNode => {
     const _token = isStableCurrency ? stableCurrency : token;
@@ -191,8 +199,10 @@ export const LonaActionButton: FC<Props> = ({
   }, [inputValue, loanHelper, minmumDebitValue, token, type]);
 
   const isDisabled = useMemo((): boolean => {
+    if (error) return true;
+
     return !inputValue.amount;
-  }, [inputValue]);
+  }, [inputValue, error]);
 
   const _close = (): void => {
     close();
@@ -202,10 +212,6 @@ export const LonaActionButton: FC<Props> = ({
   const formatListData = useCallback((value: Fixed18): Fixed18 => {
     return value || Fixed18.fromNatural(NaN);
   }, []);
-
-  const showMaxBtn = useMemo<boolean>((): boolean => {
-    return type !== 'generate';
-  }, [type]);
 
   const handleMax = (): void => {
     setInputValue({
@@ -236,7 +242,7 @@ export const LonaActionButton: FC<Props> = ({
             <TxButton
               disabled={isDisabled}
               method='adjustLoan'
-              onExtrinsicSuccess={_close}
+              onInblock={_close}
               params={getParams()}
               section='honzon'
               size='small'
@@ -250,13 +256,9 @@ export const LonaActionButton: FC<Props> = ({
         visiable={status}
       >
         <BalanceInput
-          checkBalance={false}
-          error={''}
-          max={maxInput}
-          min={0}
+          error={error}
           onChange={setInputValue}
-          onMax={handleMax}
-          showMaxBtn={showMaxBtn}
+          onMax={type === 'generate' ? undefined : handleMax}
           value={inputValue}
         />
         <List

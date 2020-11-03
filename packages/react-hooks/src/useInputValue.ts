@@ -24,6 +24,8 @@ type UseInputValueReturnType<T> = [
 ];
 
 export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInputValueReturnType<T> => {
+  const _value = useMemorized(defaultValue);
+
   const [value, _setValue] = useState<T>(defaultValue);
 
   const _options = useMemorized(options);
@@ -77,6 +79,10 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
         .catch((e) => setError(e.message))
       : setError('');
   }, [value, validator]);
+
+  useEffect(() => {
+    _setValue(_value);
+  }, [_value]);
 
   return [value, setValue, instance];
 };

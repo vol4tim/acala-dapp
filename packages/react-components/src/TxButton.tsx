@@ -25,9 +25,9 @@ interface Props extends ButtonProps {
   preCheck?: () => Promise<boolean>;
   beforeSend?: () => void; // the callback will be executed before send
   afterSend?: () => void; // the callback will be executed after send
-  onInblock?: () => void; // the callback will be executed when extrinsic in block
+  onExtrinsicSuccsss?: () => void; // the callback will be executed when extrinsic in block
   onFinalize?: () => void; // the callback will be executed when extrinsic in finalize
-  onExtrinsicSuccess?: () => void; // the callback will be executed when extrinsic success
+  onInblock?: () => void; // the callback will be executed when extrinsic success
   onFailed?: () => void; // the callback will be executed when extrinsic failed
 }
 
@@ -41,7 +41,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   className,
   disabled,
   method,
-  onExtrinsicSuccess,
+  onExtrinsicSuccsss,
   onFailed,
   onFinalize,
   onInblock,
@@ -269,8 +269,8 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       },
       next: (isDone) => {
         if (isDone) {
-          if (onExtrinsicSuccess) {
-            onExtrinsicSuccess();
+          if (onExtrinsicSuccsss) {
+            onExtrinsicSuccsss();
           }
 
           notification.success({
@@ -283,7 +283,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         }
       }
     });
-  }, [preCheck, _api, _signAddress, afterSend, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccess, onInblock, onFinalize, onFailed, refresh]);
+  }, [preCheck, _api, _signAddress, afterSend, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccsss, onInblock, onFinalize, onFailed, refresh]);
 
   return (
     <Button

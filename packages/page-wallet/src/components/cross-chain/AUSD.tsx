@@ -113,7 +113,7 @@ export const AUSD: FC = () => {
             <TxButton
               className={classes.txBtn}
               method='transferToParachain'
-              onExtrinsicSuccess={handleSuccess}
+              onInblock={handleSuccess}
               params={getParams}
               preCheck={preCheck}
               section='xTokens'

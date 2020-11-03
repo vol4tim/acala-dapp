@@ -95,7 +95,7 @@ export const StakingConsole: FC = () => {
             className={classes.txBtn}
             disabled={isDisable}
             method='mint'
-            onExtrinsicSuccess={resetForm}
+            onInblock={resetForm}
             params={params}
             section='homa'
             size='middle'

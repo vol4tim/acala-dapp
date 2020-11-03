@@ -1,7 +1,7 @@
 import React, { FC, useState, useMemo, FocusEventHandler, useCallback, useEffect } from 'react';
 import clsx from 'clsx';
 
-import { usePrice, useBalance, useConstants } from '@acala-dapp/react-hooks';
+import { usePrice, useBalance, useConstants, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { SwitchIcon, Condition } from '@acala-dapp/ui-components';
 
 import classes from './BalanceAmountInput.module.scss';
@@ -18,19 +18,20 @@ type InputType = 'balance' | 'amount';
 export interface BalanceAmountValue {
   balance: number;
   amount: number;
+  error?: string;
 }
 export interface BalanceAmountInputProps {
   currency: CurrencyId;
+  error?: string;
   mode?: 'token' | 'lp-token';
   onChange: (value: BalanceAmountValue) => void;
-  onError?: (error: boolean) => void;
 }
 
 export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   currency,
+  error,
   mode = 'token',
-  onChange,
-  onError
+  onChange
 }) => {
   const price = usePrice(currency);
   const balance = useBalance(currency);
@@ -45,19 +46,31 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   }, [mode, _setInputType]);
 
   const maxAmount = useMemo(() => {
-    if (!balance || !price) return 0;
+    if (!balance || !price) return FixedPointNumber.ZERO;
 
-    return balance.times(price).toNumber();
+    return balance.times(price);
   }, [balance, price]);
 
-  const [balanceValue, setBalanceValue] = useInputValue<BalanceInputValue>({
+  const [balanceValue, setBalanceValue, { error: balanceError, setValidator: setBalanceValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: currency
   });
 
-  const [amountValue, setAmountValue] = useInputValue<BalanceInputValue>({
+  const [amountValue, setAmountValue, { error: amountError, setValidator: setAmountValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: currency
+  });
+
+  useBalanceValidator({
+    currency: currency,
+    updateValidator: setBalanceValidator
+  });
+
+  useBalanceValidator({
+    checkBalance: false,
+    currency: currency,
+    max: [maxAmount, ''],
+    updateValidator: setAmountValidator
   });
 
   const amountForBalance = useMemo(() => {
@@ -109,18 +122,14 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
 
   const handleAmountMax = useCallback(() => {
     setAmountValue({
-      amount: maxAmount || 0,
+      amount: maxAmount.toNumber() || 0,
       token: stableCurrency
     });
     onChange({
-      amount: maxAmount,
-      balance: new FixedPointNumber(maxAmount).div(price).toNumber()
+      amount: maxAmount.toNumber(),
+      balance: maxAmount.div(price).toNumber()
     });
   }, [maxAmount, setAmountValue, price, onChange, stableCurrency]);
-
-  const error = useMemo(() => {
-    return false;
-  }, []);
 
   const rootClasses = useMemo(() => {
     return clsx(classes.root, {
@@ -131,24 +140,13 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
   }, [focused, error, mode]);
 
   useEffect(() => {
-    onError && onError(!!error);
-  }, [onError, error]);
-
-  const handleBalanceChange = useCallback((value: BalanceInputValue): void => {
-    setBalanceValue(value);
     onChange({
-      amount: new FixedPointNumber(value.amount).times(price).toNumber(),
-      balance: value.amount
+      amount: amountValue.amount,
+      balance: balanceValue.amount,
+      error: balanceError || amountError
     });
-  }, [setBalanceValue, onChange, price]);
-
-  const handleAmountChange = useCallback((value: BalanceInputValue): void => {
-    setAmountValue(value);
-    onChange({
-      amount: value.amount,
-      balance: new FixedPointNumber(value.amount).div(price).toNumber()
-    });
-  }, [setAmountValue, onChange, price]);
+  /* eslint-disable-next-line */
+  }, [balanceError, amountError, amountValue, balanceValue]);
 
   return (
     <div className={rootClasses}>
@@ -166,13 +164,12 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            error={''}
+            error={balanceError}
             onBlur={hanleBlur}
-            onChange={handleBalanceChange}
+            onChange={setBalanceValue}
             onFocus={handleFocus}
             onMax={handleBalanceMax}
             showIcon={false}
-            showMaxBtn
             size='small'
             value={balanceValue}
           />
@@ -195,11 +192,10 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            error={''}
-            onChange={handleAmountChange}
+            error={amountError}
+            onChange={setAmountValue}
             onMax={handleAmountMax}
             showIcon={false}
-            showMaxBtn
             size='small'
             value={amountValue}
           />

@@ -169,7 +169,7 @@ export const DepositConsole: FC = () => {
                   className={classes.txBtn}
                   disabled={isDisable}
                   method='addLiquidity'
-                  onExtrinsicSuccess={handleSuccess}
+                  onInblock={handleSuccess}
                   params={params}
                   section='dex'
                   size='large'

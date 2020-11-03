@@ -10,6 +10,7 @@ interface UseBalanceValidatorConfig {
   currency: CurrencyId;
   max?: [FixedPointNumber, string];
   min?: [FixedPointNumber, string];
+  checkBalance?: boolean;
   updateValidator?: (value: (value: BalanceInputValue) => Promise<any>) => void;
 }
 
@@ -30,7 +31,13 @@ export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: 
       return Promise.reject(new Error(_config.min[1] ? _config.min[1] : `Less than The min amount ${_config.min[0].toNumber()}`));
     }
 
-    if (_amount.isGreaterThan(balance)) {
+    let checkBalance = true;
+
+    if (Reflect.has(_config, 'checkBalance')) {
+      checkBalance = _config.checkBalance as boolean;
+    }
+
+    if (checkBalance && _amount.isGreaterThan(balance)) {
       return Promise.reject(new Error(`Insufficient ${getTokenName(_config.currency)} balance`));
     }
 

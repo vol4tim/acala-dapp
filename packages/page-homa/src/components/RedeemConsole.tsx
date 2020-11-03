@@ -238,7 +238,7 @@ export const RedeemConsole: FC = () => {
           className={classes.txBtn}
           disabled={isDisabled}
           method='redeem'
-          onExtrinsicSuccess={handleSuccess}
+          onInblock={handleSuccess}
           params={params}
           section='homa'
         >

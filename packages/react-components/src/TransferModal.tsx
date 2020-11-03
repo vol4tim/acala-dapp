@@ -3,9 +3,9 @@ import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
-import { useModal, useAccounts, useConstants, useLPCurrencies, useBalanceValidator, useAddressValidator } from '@acala-dapp/react-hooks';
+import { useModal, useAccounts, useConstants, useLPCurrencies, useBalanceValidator, useAddressValidator, useBalance } from '@acala-dapp/react-hooks';
 
-import { tokenEq } from './utils';
+import { tokenEq, eliminateGap } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
 import { UserAssetBalance, UserAssetValue } from './Assets';
 import classes from './TransferModal.module.scss';
@@ -104,6 +104,7 @@ const SelectCurrency: FC<SelectCurrencyProps> = ({
 interface AccountBalanceValue {
   account: string;
   balance: number;
+  error?: string;
 }
 
 interface TransferFormProps {
@@ -116,24 +117,20 @@ interface TransferFormProps {
 const TransferForm: FC<TransferFormProps> = ({
   currency,
   mode,
-  onChange,
-  value
+  onChange
 }) => {
   const { active } = useAccounts();
+  const [accountValue, setAccountValue] = useState<{ address: string; error?: string}>();
+  const [balanceValue, setBalanceValue] = useState<BalanceAmountValue>();
 
-  const handleAccountChange = useCallback((account: string) => {
+  useEffect(() => {
     onChange({
-      account,
-      balance: value.balance
+      account: accountValue?.address || '',
+      balance: balanceValue?.balance || 0,
+      error: accountValue?.error || balanceValue?.error
     });
-  }, [value, onChange]);
-
-  const handleBalanceAmountInput = useCallback((result: BalanceAmountValue) => {
-    onChange({
-      account: value.account,
-      balance: result.balance
-    });
-  }, [value, onChange]);
+    /* eslint-disable-next-line */
+  }, [accountValue, balanceValue]);
 
   return (
     <>
@@ -143,7 +140,7 @@ const TransferForm: FC<TransferFormProps> = ({
       >
         <AddressInput
           blockAddressList={[active ? active.address : '']}
-          onChange={handleAccountChange}
+          onChange={setAccountValue}
         />
       </FormItem>
       <FormItem
@@ -152,7 +149,7 @@ const TransferForm: FC<TransferFormProps> = ({
         <BalanceAmountInput
           currency={currency}
           mode={mode}
-          onChange={handleBalanceAmountInput}
+          onChange={setBalanceValue}
         />
       </FormItem>
     </>
@@ -180,12 +177,8 @@ export const TransferModal: FC<TransferModalProps> = ({
   const lpCurrencies = useLPCurrencies();
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyId>(defaultCurrency);
   const { close, open, status: isOpenSelect } = useModal();
-  const [value, setValue, { error, reset, setValidator }] = useInputValue<AccountBalanceValue>({
-    account: '',
-    balance: 0
-  });
-
-  const balanceValidator = useBalanceValidator({ currency: selectedCurrency });
+  const [value, setValue, { reset }] = useInputValue<AccountBalanceValue>({ account: '', balance: 0 });
+  const balance = useBalance(selectedCurrency);
 
   const renderHeader = useCallback((): JSX.Element => {
     return (
@@ -224,18 +217,24 @@ export const TransferModal: FC<TransferModalProps> = ({
     );
   }, [mode, handleTokenSelect, selectedCurrency, allCurrencies, lpCurrencies]);
 
-  const params = useMemo(() => {
-    return [value.account, selectedCurrency, new FixedPointNumber(value.balance).toChainData()];
-  }, [value, selectedCurrency]);
+  const params = useCallback(() => {
+    return [
+      value.account,
+      selectedCurrency,
+      eliminateGap(
+        new FixedPointNumber(value.balance),
+        balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
+  }, [value, selectedCurrency, balance]);
 
   const isDisabled = useMemo((): boolean => {
-    if (!value.account) {
-      return true;
-    }
+    if (!value.account) return true;
 
-    if (!value.account) {
-      return true;
-    }
+    if (!value.account) return true;
+
+    if (value.error) return true;
 
     return false;
   }, [value]);
@@ -260,7 +259,7 @@ export const TransferModal: FC<TransferModalProps> = ({
           <TxButton
             disabled={isDisabled}
             method='transfer'
-            onExtrinsicSuccess={onClose}
+            onInblock={onClose}
             params={params}
             section='currencies'
             size='small'

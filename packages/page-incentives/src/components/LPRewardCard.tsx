@@ -127,7 +127,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
             className={classes.fullBtn}
             disabled={!depositValue.amount}
             method='depositDexShare'
-            onExtrinsicSuccess={resetDepositValue}
+            onInblock={resetDepositValue}
             params={depositParams}
             section='incentives'
           >
@@ -154,7 +154,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
                 className={classes.fullBtn}
                 disabled={!withdrawValue.amount}
                 method='withdrawDexShare'
-                onExtrinsicSuccess={resetWithdrawValue}
+                onInblock={resetWithdrawValue}
                 params={withdrawParams}
                 section='incentives'
               >
