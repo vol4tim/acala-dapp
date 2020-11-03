@@ -184,7 +184,7 @@ export const LonaActionButton: FC<Props> = ({
         if (
           loanHelper.collaterals
             .sub(Fixed18.fromNatural(inputValue.amount))
-            .isLessThan(Fixed18.fromNatural(0.0000001))
+            .isLessThan(Fixed18.fromNatural(0.000001))
         ) {
           params[1] = loanHelper.collaterals.negated().innerToString();
         } else {

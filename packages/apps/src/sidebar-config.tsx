@@ -43,19 +43,19 @@ export const sideBarConfig: SideBarConfig = {
       icon: <LiquidSVG />,
       path: 'homa',
       rel: 'homa'
-    },
+    }
     // {
     //   content: 'NFT',
     //   icon: <DepositSVG />,
     //   path: 'nft',
     //   rel: 'nft'
     // },
-    {
-      content: 'Governance',
-      icon: <GovernanceSVG />,
-      path: 'governance',
-      rel: 'governance'
-    }
+    // {
+    //   content: 'Governance',
+    //   icon: <GovernanceSVG />,
+    //   path: 'governance',
+    //   rel: 'governance'
+    // }
   ],
   socialMedia: [
     {

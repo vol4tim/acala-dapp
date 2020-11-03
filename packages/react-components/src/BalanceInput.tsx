@@ -18,6 +18,7 @@ export type BalanceInputValue = {
 }
 
 export interface BalanceInputProps extends BareProps {
+  checkSelectBalance?: boolean;
   selectableTokens?: CurrencyId[];
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
@@ -41,6 +42,7 @@ export interface BalanceInputProps extends BareProps {
 
 export const BalanceInput: FC<BalanceInputProps> = ({
   border = true,
+  checkSelectBalance = true,
   className,
   disabled = false,
   disableTokens = [],
@@ -89,6 +91,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         condition={enableTokenSelect}
         match={(
           <TokenSelector
+            checkBalance={checkSelectBalance}
             className={
               clsx(
                 classes.tokenSelector,

@@ -59,12 +59,12 @@ export const DepositConsole: FC = () => {
       eliminateGap(
         new FixedPointNumber(token1Info.amount),
         token1Balance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData(),
       eliminateGap(
         new FixedPointNumber(token2Info.amount),
         token2Balance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [token1Info, token2Info, token1Balance, token2Balance]);
@@ -72,16 +72,16 @@ export const DepositConsole: FC = () => {
   const handleMax = useCallback(() => {
     if (!availableLP) return;
 
-    const suggestToken2ByToken1 = getAddLPSuggestAmount(token1Info.token, token1Balance.toNumber()).toNumber();
-    const suggestToken1ByToken2 = getAddLPSuggestAmount(token2Info.token, token2Balance.toNumber()).toNumber();
+    const suggestToken2ByToken1 = getAddLPSuggestAmount(token1Info.token, token1Balance.toNumber());
+    const suggestToken1ByToken2 = getAddLPSuggestAmount(token2Info.token, token2Balance.toNumber());
 
-    if (suggestToken2ByToken1 === 0 || suggestToken1ByToken2 === 0) {
+    if (suggestToken2ByToken1.isZero() || suggestToken1ByToken2.isZero()) {
       return;
     }
 
-    if (suggestToken2ByToken1 > token2Balance.toNumber()) {
+    if (suggestToken2ByToken1.isGreaterThan(token2Balance)) {
       setToken1Info({
-        amount: suggestToken1ByToken2,
+        amount: suggestToken1ByToken2.toNumber(),
         token: token1Info.token
       });
       setToken2Info({
@@ -94,7 +94,7 @@ export const DepositConsole: FC = () => {
         token: token1Info.token
       });
       setToken2Info({
-        amount: suggestToken2ByToken1,
+        amount: suggestToken2ByToken1.toNumber(),
         token: token2Info.token
       });
     }

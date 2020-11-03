@@ -56,8 +56,6 @@ export const EventsWatcher: FC = () => {
 
               if (data[2] !== active?.address) return;
 
-              console.log(data[0]);
-
               notification.success({
                 message: (
                   <div>

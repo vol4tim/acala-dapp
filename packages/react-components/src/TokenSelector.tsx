@@ -18,6 +18,7 @@ import { useBalance } from '@acala-dapp/react-hooks';
 interface MenuItemProps {
   value?: CurrencyId;
   currency: CurrencyId;
+  checkBalance: boolean;
   disabledCurrencies: CurrencyId[];
   onClick: (currency: CurrencyId) => void;
   [k: string]: any;
@@ -25,6 +26,7 @@ interface MenuItemProps {
 
 const MenuItem: FC<MenuItemProps> = ({
   currency,
+  checkBalance,
   disabledCurrencies,
   onClick,
   value,
@@ -37,10 +39,10 @@ const MenuItem: FC<MenuItemProps> = ({
   const isDisabled = useMemo(() => {
     if (disabledCurrencies.find((item) => tokenEq(item, currency))) return true;
 
-    if (balance && balance.isZero()) return true;
+    if (checkBalance && balance && balance.isZero()) return true;
 
     return false;
-  }, [currency, disabledCurrencies, balance]);
+  }, [currency, disabledCurrencies, balance, checkBalance]);
 
   const isActive = useMemo(() => value && tokenEq(currency, value), [currency, value]);
 
@@ -76,6 +78,7 @@ const MenuItem: FC<MenuItemProps> = ({
 
 interface Props extends BareProps {
   currencies: CurrencyId[];
+  checkBalance?: boolean;
   disabledCurrencies?: CurrencyId[];
   value?: CurrencyId;
   onChange?: CurrencyChangeFN;
@@ -85,6 +88,7 @@ interface Props extends BareProps {
 
 export const TokenSelector: FC<Props> = ({
   currencies,
+  checkBalance = true,
   disabledCurrencies = [],
   onChange = noop,
   value,
@@ -110,6 +114,7 @@ export const TokenSelector: FC<Props> = ({
             currencies.map((currency) => {
               return (
                 <MenuItem
+                  checkBalance={checkBalance}
                   currency={currency}
                   disabledCurrencies={disabledCurrencies}
                   key={`token-selector-${currency.toString()}`}

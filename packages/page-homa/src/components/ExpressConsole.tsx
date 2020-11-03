@@ -62,7 +62,7 @@ const StakePanel: FC = () => {
       eliminateGap(
         new FixedPointNumber(inputValue.amount),
         stakingCurrencyBalance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [inputValue, stakingCurrencyBalance]);
@@ -199,7 +199,7 @@ const UnstakePanel: FC = () => {
       eliminateGap(
         new FixedPointNumber(inputValue.amount),
         maxToUnstake,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData(),
       'Immediately'
     ];

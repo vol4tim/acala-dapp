@@ -50,7 +50,7 @@ export const WithdrawConsole: FC = () => {
       eliminateGap(
         new FixedPointNumber(selectedLP.amount),
         balance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [selectedLP, api, balance]);

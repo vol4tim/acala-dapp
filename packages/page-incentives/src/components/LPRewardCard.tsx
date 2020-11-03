@@ -66,7 +66,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
       eliminateGap(
         new FixedPointNumber(depositValue.amount),
         balance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [currency, depositValue, balance]);
@@ -77,7 +77,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
       eliminateGap(
         new FixedPointNumber(withdrawValue.amount),
         share.share,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [currency, withdrawValue, share]);

@@ -224,7 +224,7 @@ export const TransferModal: FC<TransferModalProps> = ({
       eliminateGap(
         new FixedPointNumber(value.balance),
         balance,
-        new FixedPointNumber('0.0000001')
+        new FixedPointNumber('0.000001')
       ).toChainData()
     ];
   }, [value, selectedCurrency, balance]);

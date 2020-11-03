@@ -235,6 +235,7 @@ export const SwapConsole: FC = () => {
           rightRender={(): JSX.Element => {
             return (
               <BalanceInput
+                checkSelectBalance={false}
                 className={classes.inputRight}
                 disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
                 enableTokenSelect
