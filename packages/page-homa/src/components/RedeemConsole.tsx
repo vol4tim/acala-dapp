@@ -3,7 +3,7 @@ import React, { FC, useState, useMemo, useCallback } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, Radio, List, Condition } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, formatDuration, FormatBalance, BalanceInputValue, getTokenName } from '@acala-dapp/react-components';
-import { useStakingPool, useStakingPoolFreeList, useBalance, useConstants, useInputValue } from '@acala-dapp/react-hooks';
+import { useStakingPool, useStakingPoolFreeList, useBalance, useConstants, useInputValue, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './RedeemConsole.module.scss';
 import { TargetRedeemList } from './TargetRedeemList';
@@ -30,9 +30,7 @@ export const RedeemConsole: FC = () => {
   }, [stakingPool]);
 
   const freeLiquidityCurrencyAmount = useMemo((): FixedPointNumber => {
-    if (!stakingPool) {
-      return FixedPointNumber.ZERO;
-    }
+    if (!stakingPool) return FixedPointNumber.ZERO;
 
     return stakingPool.stakingPool.getFreeUnbondedRatio().times(stakingPool.stakingPool.getTotalCommunalBalance());
   }, [stakingPool]);
@@ -42,32 +40,30 @@ export const RedeemConsole: FC = () => {
 
     const _result = freeList.find((item): boolean => item.era === era);
 
-    if (!_result) {
-      return FixedPointNumber.ZERO;
-    }
+    if (!_result) return FixedPointNumber.ZERO;
 
     return _result.amount.div(stakingPool.stakingPool.liquidExchangeRate());
   }, [freeList, stakingPool, era]);
 
   const maxLiquidCurrencyAmount = useMemo((): FixedPointNumber => {
-    if (redeemType === 'Immediately') {
-      return freeLiquidityCurrencyAmount;
-    }
+    if (redeemType === 'Immediately') return freeLiquidityCurrencyAmount;
 
-    if (redeemType === 'Target') {
-      return freeLiquidityCurrencyAmountInTarget;
-    }
+    if (redeemType === 'Target') return freeLiquidityCurrencyAmountInTarget;
 
-    if (redeemType === 'WaitForUnbonding') {
-      return liquidBalnace;
-    }
+    if (redeemType === 'WaitForUnbonding') return liquidBalnace;
 
     return FixedPointNumber.ZERO;
   }, [freeLiquidityCurrencyAmount, freeLiquidityCurrencyAmountInTarget, liquidBalnace, redeemType]);
 
-  const [liquidValue, setLiquidValue, { reset }] = useInputValue<BalanceInputValue>({
+  const [liquidValue, setLiquidValue, { error, reset, setValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: liquidCurrency
+  });
+
+  useBalanceValidator({
+    currency: liquidCurrency,
+    max: [maxLiquidCurrencyAmount, ''],
+    updateValidator: setValidator
   });
 
   const targetEra = useMemo<number>((): number => {
@@ -89,12 +85,12 @@ export const RedeemConsole: FC = () => {
   }, [stakingPool, era, redeemType]);
 
   const isDisabled = useMemo((): boolean => {
-    if (liquidValue.amount) {
-      return false;
-    }
+    if (error) return true;
 
-    return true;
-  }, [liquidValue]);
+    if (!liquidValue.amount) return true;
+
+    return false;
+  }, [liquidValue, error]);
 
   const handleInput = useCallback((value: BalanceInputValue) => {
     setLiquidValue(value);
@@ -138,6 +134,20 @@ export const RedeemConsole: FC = () => {
     }
   }, [stakingPool, setLiquidValue, redeemType, setReceived, setFee, targetEra, freeList]);
 
+  const handleMax = useCallback(() => {
+    handleInput({
+      amount: maxLiquidCurrencyAmount.toNumber(),
+      token: liquidValue.token
+    });
+  }, [handleInput, liquidValue, maxLiquidCurrencyAmount]);
+
+  const handleTypeChange = useCallback((value: RedeemType) => {
+    setRedeemType(value);
+    reset();
+    setFee(FixedPointNumber.ZERO);
+    setReceived(FixedPointNumber.ZERO);
+  }, [setRedeemType, reset]);
+
   const params = useMemo((): string[] => {
     const _params = [
       new FixedPointNumber(liquidValue.amount).toChainData(),
@@ -173,7 +183,7 @@ export const RedeemConsole: FC = () => {
             checked={redeemType === 'Immediately'}
             className={classes.item}
             label={`Redeem Now, Total Free is ${freeLiquidityCurrencyAmount.toNumber()} ${getTokenName(liquidCurrency.asToken.toString())}`}
-            onClick={(): void => setRedeemType('Immediately')}
+            onClick={(): void => handleTypeChange('Immediately')}
           />
           <Radio
             checked={redeemType === 'Target'}
@@ -196,20 +206,21 @@ export const RedeemConsole: FC = () => {
                 }
               </div>
             )}
-            onClick={(): void => setRedeemType('Target')}
+            onClick={(): void => handleTypeChange('Target')}
           />
           <Radio
             checked={redeemType === 'WaitForUnbonding'}
             className={classes.item}
             label='Redeem & Wait for Unbounding Period'
-            onClick={(): void => setRedeemType('WaitForUnbonding')}
+            onClick={(): void => handleTypeChange('WaitForUnbonding')}
           />
         </div>
       </Grid>
       <Grid item>
         <BalanceInput
-          max={maxLiquidCurrencyAmount.toNumber()}
+          error={error}
           onChange={handleInput}
+          onMax={handleMax}
           value={liquidValue}
         />
       </Grid>

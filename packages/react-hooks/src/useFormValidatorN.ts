@@ -48,15 +48,13 @@ export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: 
 
 interface UseAddressValidatorConfig {
   required?: boolean;
-  fieldName: string;
-  getFieldVaule: any;
 }
 
-export const useAddressValidator = (config: UseAddressValidatorConfig): () => Promise<any> => {
-  return (): Promise<any> => {
-    const value = config.getFieldVaule(config.fieldName);
+export const useAddressValidator = (config: UseAddressValidatorConfig): (value: string) => Promise<any> => {
+  const _config = useMemorized(config);
 
-    if (config.required && !value) {
+  const fn = useCallback((value: string) => {
+    if (_config.required && !value) {
       return Promise.reject(new Error('Address is Required'));
     }
 
@@ -67,5 +65,7 @@ export const useAddressValidator = (config: UseAddressValidatorConfig): () => Pr
     }
 
     return Promise.resolve();
-  };
+  }, [_config]);
+
+  return fn;
 };

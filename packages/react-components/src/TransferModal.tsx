@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
-import { useModal, useAccounts, useConstants, useLPCurrencies } from '@acala-dapp/react-hooks';
+import { useModal, useAccounts, useConstants, useLPCurrencies, useBalanceValidator, useAddressValidator } from '@acala-dapp/react-hooks';
 
 import { tokenEq } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
@@ -180,10 +180,12 @@ export const TransferModal: FC<TransferModalProps> = ({
   const lpCurrencies = useLPCurrencies();
   const [selectedCurrency, setSelectedCurrency] = useState<CurrencyId>(defaultCurrency);
   const { close, open, status: isOpenSelect } = useModal();
-  const [value, setValue, { reset }] = useInputValue<AccountBalanceValue>({
+  const [value, setValue, { error, reset, setValidator }] = useInputValue<AccountBalanceValue>({
     account: '',
     balance: 0
   });
+
+  const balanceValidator = useBalanceValidator({ currency: selectedCurrency });
 
   const renderHeader = useCallback((): JSX.Element => {
     return (

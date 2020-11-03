@@ -66,7 +66,7 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
     const [isValidNumber, validNumber] = getValidNumber(originInput, min, max);
 
     // trigger value change event when is a valid number and is changed, otherwise do nothing
-    if (isValidNumber && valueRef.current !== validNumber) {
+    if (isValidNumber) {
       _setValue(validNumber);
       valueRef.current = validNumber;
       _onChange(Number(validNumber));

@@ -2,10 +2,11 @@ import React, { FC, useCallback, useMemo } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Grid, List } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInput, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
-import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool } from '@acala-dapp/react-hooks';
+import { TxButton, BalanceInput, FormatBalance, BalanceInputValue, eliminateGap } from '@acala-dapp/react-components';
+import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './StakingConsole.module.scss';
+import { StakingTokeBalances } from './StakingTokenBalances';
 
 export const StakingConsole: FC = () => {
   const { liquidCurrency, stakingCurrency } = useConstants();
@@ -13,9 +14,14 @@ export const StakingConsole: FC = () => {
   const rewardRate = useStakingRewardAPR();
   const balance = useBalance(stakingCurrency);
 
-  const [stakingValue, setStakingValue, { ref, reset }] = useInputValue<BalanceInputValue>({
+  const [stakingValue, setStakingValue, { error, ref, reset, setValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: stakingCurrency
+  });
+
+  useBalanceValidator({
+    currency: stakingCurrency,
+    updateValidator: setValidator
   });
 
   const resetForm = useCallback(() => {
@@ -23,8 +29,14 @@ export const StakingConsole: FC = () => {
   }, [reset]);
 
   const params = useMemo(() => {
-    return [new FixedPointNumber(stakingValue.amount).toChainData()];
-  }, [stakingValue]);
+    return [
+      eliminateGap(
+        new FixedPointNumber(stakingValue.amount),
+        balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
+  }, [stakingValue, balance]);
 
   const receivedAmount = useMemo<FixedPointNumber>((): FixedPointNumber => {
     if (!stakingPool || !stakingValue.amount) return FixedPointNumber.ZERO;
@@ -39,8 +51,12 @@ export const StakingConsole: FC = () => {
   }, [rewardRate, stakingValue]);
 
   const isDisable = useMemo(() => {
-    return stakingValue.amount === 0;
-  }, [stakingValue]);
+    if (error) return true;
+
+    if (stakingValue.amount === 0) return true;
+
+    return false;
+  }, [stakingValue, error]);
 
   const handleMax = useCallback((): void => {
     setStakingValue({
@@ -49,9 +65,7 @@ export const StakingConsole: FC = () => {
     });
   }, [setStakingValue, ref, balance]);
 
-  if (!stakingPool) {
-    return null;
-  }
+  if (!stakingPool) return null;
 
   return (
     <Grid
@@ -65,6 +79,7 @@ export const StakingConsole: FC = () => {
       </Grid>
       <Grid item>
         <BalanceInput
+          error={error}
           onChange={setStakingValue}
           onMax={handleMax}
           value={stakingValue}

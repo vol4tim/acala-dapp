@@ -1,12 +1,12 @@
-import React, { FC, useMemo, useCallback } from 'react';
+import React, { FC, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { Token, TokenName, TxButton, BalanceInput, BalanceInputValue, UserBalance, FormatNumber } from '@acala-dapp/react-components';
+import { Token, TokenName, TxButton, BalanceInput, BalanceInputValue, UserBalance, FormatNumber, eliminateGap } from '@acala-dapp/react-components';
 import { List, Button, Dialog, SpaceBetweenBox, Grid } from '@acala-dapp/ui-components';
-import { useIncentiveShare, getPoolId, useModal, useBalance } from '@acala-dapp/react-hooks';
+import { useIncentiveShare, getPoolId, useModal, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './RewardCard.module.scss';
 import { TotalReward, UserReward, PoolRate, UserPoolRate } from './reward-components';
@@ -23,6 +23,8 @@ const ManagerModel: FC<ManagerModelProps> = ({
   onClose,
   visiable
 }) => {
+  const share = useIncentiveShare('DexIncentive', currency);
+
   const Header = useMemo(() => {
     return (
       <>
@@ -31,31 +33,54 @@ const ManagerModel: FC<ManagerModelProps> = ({
     );
   }, [currency]);
 
-  const [depositValue, setDepositValue, { reset: resetDepositValue }] = useInputValue<BalanceInputValue>({
+  const [depositValue, setDepositValue, { error: depositError, reset: resetDepositValue, setValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: currency
   });
 
-  const [withdrawValue, setWithdrawValue, { reset: resetWithdrawValue }] = useInputValue<BalanceInputValue>({
+  useBalanceValidator({
+    currency,
+    updateValidator: setValidator
+  });
+
+  const [withdrawValue, setWithdrawValue, { error: withdrawError, reset: resetWithdrawValue, setValidator: setWithdrawValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: currency
   });
 
-  const share = useIncentiveShare('DexIncentive', currency);
+  useBalanceValidator({
+    currency: currency,
+    max: [share ? share.share : FixedPointNumber.ZERO, ''],
+    updateValidator: setWithdrawValidator
+  });
+
+  const balance = useBalance(currency);
 
   const showWithdraw = useMemo(() => {
     return !share.share.isZero();
   }, [share]);
 
-  const depositParams = useMemo(() => {
-    return [currency, new FixedPointNumber(depositValue.amount).toChainData()];
-  }, [currency, depositValue]);
+  const depositParams = useCallback(() => {
+    return [
+      currency,
+      eliminateGap(
+        new FixedPointNumber(depositValue.amount),
+        balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
+  }, [currency, depositValue, balance]);
 
-  const withdrawParams = useMemo(() => {
-    return [currency, new FixedPointNumber(withdrawValue.amount).toChainData()];
-  }, [currency, withdrawValue]);
-
-  const balance = useBalance(currency);
+  const withdrawParams = useCallback(() => {
+    return [
+      currency,
+      eliminateGap(
+        new FixedPointNumber(withdrawValue.amount),
+        share.share,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
+  }, [currency, withdrawValue, share]);
 
   const handleDepositMax = useCallback(() => {
     setDepositValue({
@@ -65,11 +90,16 @@ const ManagerModel: FC<ManagerModelProps> = ({
   }, [setDepositValue, balance, currency]);
 
   const handleWithdrawMax = useCallback(() => {
-    setWithdrawValue({
-      amount: share.share.toNumber(),
-      token: currency
-    });
+    setWithdrawValue({ amount: share.share.toNumber(), token: currency });
   }, [setWithdrawValue, share, currency]);
+
+  useEffect(() => {
+    if (!visiable) {
+      resetDepositValue();
+      resetWithdrawValue();
+    }
+  /* eslint-disable-next-line */
+  }, [visiable]);
 
   return (
     <Dialog
@@ -88,9 +118,9 @@ const ManagerModel: FC<ManagerModelProps> = ({
             </div>
           </SpaceBetweenBox>
           <BalanceInput
+            error={depositError}
             onChange={setDepositValue}
             onMax={handleDepositMax}
-            showMaxBtn
             value={depositValue}
           />
           <TxButton
@@ -115,11 +145,9 @@ const ManagerModel: FC<ManagerModelProps> = ({
                 </div>
               </SpaceBetweenBox>
               <BalanceInput
-                checkBalance={false}
-                max={share.share.toNumber()}
+                error={withdrawError}
                 onChange={setWithdrawValue}
                 onMax={handleWithdrawMax}
-                showMaxBtn
                 value={withdrawValue}
               />
               <TxButton

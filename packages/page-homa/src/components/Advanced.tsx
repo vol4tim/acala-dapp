@@ -3,7 +3,6 @@ import React, { FC } from 'react';
 import { Grid } from '@acala-dapp/ui-components';
 
 import { StakingTokeBalances } from './StakingTokenBalances';
-import { SelectToken } from './SelectToken';
 import { SystemInfo } from './SystemInfo';
 import { Console } from './Console';
 import { StakingPool } from './StakingPool';
@@ -12,9 +11,6 @@ import { RedeemList } from './RedeemList';
 export const Advanced: FC = () => {
   return (
     <Grid container>
-      <Grid item>
-        <SelectToken />
-      </Grid>
       <Grid
         container
         item

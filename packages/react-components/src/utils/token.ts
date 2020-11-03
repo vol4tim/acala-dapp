@@ -70,7 +70,11 @@ export function getTokenFullName (token: string): string {
   return TOKEN_FULLNAMES.get(token) || '';
 }
 
-export function getTokenName (token: string | CurrencyId): string {
+export function getTokenName (token: string | string[] | CurrencyId): string {
+  if (Array.isArray(token)) {
+    return `${getTokenName(token[0])}-${getTokenName(token[1])}`;
+  }
+
   if (typeof token === 'string') {
     return TOKEN_NAME.get(token) || '';
   }
