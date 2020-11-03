@@ -1,27 +1,28 @@
-import { Fixed18 } from '@acala-network/app-util';
-import { getTokenName, isValidateAddress } from '@acala-dapp/react-components';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { getTokenName, isValidateAddress, BalanceInputValue } from '@acala-dapp/react-components';
+import { CurrencyId, Balance } from '@acala-network/types/interfaces';
 
-import { CurrencyLike } from './types';
 import { useBalance } from './balanceHooks';
+import { useCallback } from 'react';
+import { useMemorized } from './useMemorized';
 
 interface UseBalanceValidatorConfig {
-  currency: CurrencyLike;
-  fieldName: string;
-  getFieldValue: any;
+  currency: CurrencyId;
 }
 
-export const useBalanceValidator = (config: UseBalanceValidatorConfig): () => Promise<any> => {
-  const balance = useBalance(config.currency);
+export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: BalanceInputValue) => Promise<any> => {
+  const _config = useMemorized(config);
+  const balance = useBalance(_config.currency);
 
-  return (): Promise<any> => {
-    const value = config.getFieldValue(config.fieldName);
-
-    if (Fixed18.fromNatural(value).isGreaterThan(balance)) {
-      return Promise.reject(new Error(`Insufficient ${getTokenName(config.currency)} Balance`));
+  const fn = useCallback((value: BalanceInputValue): Promise<any> => {
+    if (new FixedPointNumber(value.amount).isGreaterThan(balance)) {
+      return Promise.reject(new Error(`Insufficient ${getTokenName(_config.currency)} Balance`));
     }
 
     return Promise.resolve();
-  };
+  }, [balance, _config]);
+
+  return fn;
 };
 
 interface UseAddressValidatorConfig {

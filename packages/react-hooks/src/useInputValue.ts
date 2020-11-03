@@ -1,21 +1,26 @@
-import { useState, useRef, useEffect, Dispatch, SetStateAction, MutableRefObject, useCallback, useMemo } from 'react';
-import { useMemorized } from './useMemorized';
-import { get, set } from 'lodash';
+import { useState, useRef, MutableRefObject, useCallback, useMemo, useEffect } from 'react';
+import { ApiRx } from '@polkadot/api';
+import { CurrencyId } from '@acala-network/types/interfaces';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
-interface Helper<T> {
+import { useMemorized } from './useMemorized';
+import { useApi } from './useApi';
+
+interface Instance<T> {
   reset: () => void;
   ref: MutableRefObject<T>;
+  error?: string;
+  setValidator: (validator: Options<T>['validator']) => void;
 }
 
 interface Options<T> {
-  max?: (value: T) => Promise<T>;
-  min?: (value: T) => Promise<T>;
+  validator: (value: T) => Promise<void> | void;
 }
 
 type UseInputValueReturnType<T> = [
   T,
   (value: T) => void,
-  Helper<T>
+  Instance<T>
 ];
 
 export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInputValueReturnType<T> => {
@@ -23,33 +28,55 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
 
   const _options = useMemorized(options);
 
+  const validator = useRef<Options<T>['validator'] | undefined>(_options?.validator);
+
   const ref = useRef<T>(value);
+
+  const [error, setError] = useState<string>();
 
   const reset = useCallback(() => {
     _setValue(defaultValue);
   }, [_setValue, defaultValue]);
 
-  const setValue = useCallback(async (value: T) => {
-    if (_options && _options.max) {
-      value = await _options.max(value);
-    }
+  const setValidator = useCallback((newValidator: Options<T>['validator']) => {
+    validator.current = newValidator;
 
-    if (_options && _options.min) {
-      value = await _options.min(value);
-    }
+    const promise = newValidator(value);
 
+    promise
+      ? promise
+        .then(() => setError(''))
+        .catch((e) => setError(e.message))
+      : setError('');
+  }, [validator, value]);
+
+  const setValue = useCallback((value: T) => {
     // update ref
     ref.current = value;
     // update value
     _setValue(value);
-  }, [_options, _setValue]);
+  }, [_setValue]);
 
-  const helper = useMemo(() => {
+  const instance = useMemo(() => {
     return {
+      error,
       ref,
-      reset
+      reset,
+      setValidator
     };
-  }, [ref, reset]);
+  }, [ref, reset, error, setValidator]);
 
-  return [value, setValue, helper];
+  useEffect(() => {
+    if (!validator.current) return;
+
+    const promise = validator.current(value);
+
+    promise
+      ? promise
+        .then(() => setError(''))
+        .catch((e) => setError(e.message))
+      : setError('');
+  }, [value, validator]);
+
+  return [value, setValue, instance];
 };

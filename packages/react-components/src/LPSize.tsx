@@ -2,7 +2,7 @@ import React, { FC, useMemo } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { FormatBalance } from '@acala-dapp/react-components';
-import { useLPSize, useApi, useLPShares, useAccounts, useIssuance, usePrice } from '@acala-dapp/react-hooks';
+import { useLPSize, useApi, useIssuance, usePrice } from '@acala-dapp/react-hooks';
 
 import { getCurrenciesFromDexShare, getCurrencyIdFromName } from './utils';
 import { BareProps } from '@acala-dapp/ui-components/types';

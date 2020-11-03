@@ -4,7 +4,6 @@ import { ReactComponent as RightArrowIcon } from './assets/right-arrow.svg';
 import { ReactComponent as AddIcon } from './assets/add.svg';
 import classes from './InputField.module.scss';
 import clsx from 'clsx';
-import { Condition } from './Condition';
 
 export interface InputFieldProps {
   leftAddition?: () => ReactNode;
@@ -15,14 +14,18 @@ export interface InputFieldProps {
   rightRender: () => ReactNode;
   actionRender: () => ReactNode;
   separation: 'right-arrow' | 'plus' | (() => ReactNode);
+  leftContentClassName?: string;
+  rightContentClassName?: string;
 }
 
 export const InputField: FC<InputFieldProps> = ({
   actionRender,
   leftAddition,
+  leftContentClassName,
   leftRender,
   leftTitle,
   rightAddition,
+  rightContentClassName,
   rightRender,
   rightTitle,
   separation
@@ -52,7 +55,7 @@ export const InputField: FC<InputFieldProps> = ({
       <div className={clsx(classes.leftTitle, classes.title)}>
         {leftTitle()}
       </div>
-      <div className={clsx(classes.leftContent)}>
+      <div className={clsx(classes.leftContent, leftContentClassName)}>
         {leftRender()}
       </div>
       <div className={clsx(classes.separation)}>
@@ -61,7 +64,7 @@ export const InputField: FC<InputFieldProps> = ({
       <div className={clsx(classes.rightTitle, classes.title)}>
         {rightTitle()}
       </div>
-      <div className={clsx(classes.rightContent)}>
+      <div className={clsx(classes.rightContent, rightContentClassName)}>
         {rightRender()}
       </div>
       <div className={clsx(classes.actionBtn)}>

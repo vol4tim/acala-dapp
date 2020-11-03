@@ -40,20 +40,6 @@ export const LiquidityInformation: FC = () => {
       title: 'Pool Share',
       width: 1
     }
-    // {
-    //   align: 'right',
-    //   /* eslint-disable-next-line react/display-name */
-    //   render: (token: CurrencyId): ReactNode => <DexRewardRatio token={token} />,
-    //   title: 'Reward Ratio',
-    //   width: 1
-    // },
-    // {
-    //   align: 'right',
-    //   /* eslint-disable-next-line react/display-name */
-    //   render: (token: CurrencyId): ReactNode => <DexReward token={token} />,
-    //   title: 'Reward',
-    //   width: 1
-    // }
   ];
 
   return (

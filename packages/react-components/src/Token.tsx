@@ -10,7 +10,7 @@ import classes from './Token.module.scss';
 import { getTokenImage, getTokenName, getTokenFullName } from './utils';
 
 interface TokenComponentProps extends BareProps {
-  currency: CurrencyId;
+  currency?: CurrencyId;
 }
 
 function getTokensNameFromDexShare (currency: CurrencyId): [string, string] {
@@ -33,6 +33,8 @@ function getTokensNameFromDexShare (currency: CurrencyId): [string, string] {
  * @param currency
  */
 export const TokenImage: FC<TokenComponentProps> = ({ className, currency }) => {
+  if (!currency) return null;
+
   // handle token
   if (currency.isToken) {
     return (
@@ -71,6 +73,8 @@ export const TokenImage: FC<TokenComponentProps> = ({ className, currency }) => 
  * @param currency
  */
 export const TokenName: FC<TokenComponentProps> = ({ className, currency }) => {
+  if (!currency) return null;
+
   if (currency.isToken) {
     return (
       <span className={className}>
@@ -98,6 +102,8 @@ export const TokenName: FC<TokenComponentProps> = ({ className, currency }) => {
  * @param currency
  */
 export const TokenFullName: FC<TokenComponentProps> = ({ className, currency }) => {
+  if (!currency) return null;
+
   if (currency.isToken) {
     return (
       <span className={className}>

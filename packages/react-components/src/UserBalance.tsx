@@ -3,7 +3,6 @@ import React, { FC } from 'react';
 import AccountId from '@polkadot/types/generic/AccountId';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Balance, CurrencyId } from '@acala-network/types/interfaces';
-import { convertToFixed18 } from '@acala-network/app-util';
 
 import { useCall, useAccounts, usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
@@ -11,7 +10,7 @@ import { FormatValue, FormatBalance } from './format';
 
 interface Props extends BareProps {
   account?: AccountId | string;
-  token: CurrencyId;
+  token?: CurrencyId;
   showValue?: boolean;
   showCurrencyName?: boolean;
 }
@@ -32,7 +31,7 @@ export const UserBalance: FC<Props> = ({
   if (!result) return null;
 
   if (showValue && price) {
-    const _value = price.mul(convertToFixed18(result));
+    const _value = price.times(new FixedPointNumber(result.toString()));
 
     return (
       <FormatValue

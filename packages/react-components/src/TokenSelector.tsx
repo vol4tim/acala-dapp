@@ -13,6 +13,66 @@ import { tokenEq } from './utils';
 import { CurrencyChangeFN } from './types';
 import classes from './TokenSelector.module.scss';
 import { UserAssetBalance } from './Assets';
+import { useBalance } from '@acala-dapp/react-hooks';
+
+interface MenuItemProps {
+  value?: CurrencyId;
+  currency: CurrencyId;
+  disabledCurrencies: CurrencyId[];
+  onClick: (currency: CurrencyId) => void;
+  [k: string]: any;
+}
+
+const MenuItem: FC<MenuItemProps> = ({
+  currency,
+  disabledCurrencies,
+  onClick,
+  value,
+  ...others
+}) => {
+  // query currency balance
+  const balance = useBalance(currency);
+
+  // if currency in disabledCurrencies or balance is zero, disable this item
+  const isDisabled = useMemo(() => {
+    if (disabledCurrencies.find((item) => tokenEq(item, currency))) return true;
+
+    if (balance && balance.isZero()) return true;
+
+    return false;
+  }, [currency, disabledCurrencies, balance]);
+
+  const isActive = useMemo(() => value && tokenEq(currency, value), [currency, value]);
+
+  return (
+    <Menu.Item
+      className={
+        clsx(
+          classes.item,
+          { [classes.active]: isActive }
+        )
+      }
+      disabled={isDisabled}
+      key={currency.toString()}
+      onClick={(): void => onClick(currency)}
+      {...others}
+    >
+      <TokenImage
+        className={classes.tokenImage}
+        currency={currency}
+      />
+      <div className={classes.tokenDetail}>
+        <TokenName
+          className={classes.tokenName}
+          currency={currency}
+        />
+        <UserAssetBalance
+          className={classes.assetBalance}
+          currency={currency} />
+      </div>
+    </Menu.Item>
+  );
+};
 
 interface Props extends BareProps {
   currencies: CurrencyId[];
@@ -25,7 +85,7 @@ interface Props extends BareProps {
 
 export const TokenSelector: FC<Props> = ({
   currencies,
-  disabledCurrencies,
+  disabledCurrencies = [],
   onChange = noop,
   value,
   showIcon
@@ -40,49 +100,27 @@ export const TokenSelector: FC<Props> = ({
     setVisible(false);
   }, [onChange]);
 
-  const menu = useMemo(() => (
-    <Menu>
-      {
-        currencies.map((currency) => {
-          return (
-            <Menu.Item
-              className={
-                clsx(
-                  classes.item,
-                  {
-                    [classes.active]: tokenEq(currency, value || '')
-                  }
-                )
-              }
-              disabled={disabledCurrencies ? !!disabledCurrencies.find((item): boolean => tokenEq(item, currency)) : false}
-              key={currency.toString()}
-              onClick={(): void => _onChange(currency)}
-            >
-              <TokenImage
-                className={classes.tokenImage}
-                currency={currency}
-              />
-              <div className={classes.tokenDetail}>
-                <TokenName
-                  className={classes.tokenName}
-                  currency={currency}
-                />
-                <UserAssetBalance
-                  className={classes.assetBalance}
-                  currency={currency} />
-              </div>
-            </Menu.Item>
-          );
-        })
-      }
-    </Menu>
-  ), [currencies, disabledCurrencies, _onChange, value]);
-
   return (
     <Dropdown
       getPopupContainer={(triggerNode): any => triggerNode.parentNode}
       onVisibleChange={setVisible}
-      overlay={menu}
+      overlay={(
+        <Menu>
+          {
+            currencies.map((currency) => {
+              return (
+                <MenuItem
+                  currency={currency}
+                  disabledCurrencies={disabledCurrencies}
+                  key={`token-selector-${currency.toString()}`}
+                  onClick={_onChange}
+                  value={value}
+                />
+              );
+            })
+          }
+        </Menu>
+      )}
       trigger={['click']}
       visible={visible}
     >

@@ -1,9 +1,9 @@
-import React, { FC, useContext, useCallback, useMemo, useEffect } from 'react';
+import React, { FC, useContext, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { Card, Alert, Grid, InputField, List, SpaceBetweenBox } from '@acala-dapp/ui-components';
-import { useApi, useLP, useBalance } from '@acala-dapp/react-hooks';
-import { BalanceInput, TxButton, UserBalance, BalanceInputValue, getCurrencyIdFromName, TokenImage, TokenName, getDexShareFromCurrencyId, LPExchangeRate, LPSize, LPShare } from '@acala-dapp/react-components';
+import { Card, Alert, Grid, InputField, List, SpaceBetweenBox, Fadein } from '@acala-dapp/ui-components';
+import { useApi, useLP, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
+import { BalanceInput, TxButton, UserBalance, BalanceInputValue, getCurrencyIdFromName, TokenImage, TokenName, getDexShareFromCurrencyId, LPExchangeRate, LPSize, LPShare, tokenEq, eliminateGap } from '@acala-dapp/react-components';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 
 import classes from './DepositConsole.module.scss';
@@ -13,48 +13,62 @@ export const DepositConsole: FC = () => {
   const { api } = useApi();
   const { lpEnableCurrencies } = useContext(LiquidityContext);
 
-  const [token1Info, setToken1Info, { ref: token1Ref, reset: token1InfoReset }] = useInputValue<BalanceInputValue>({
+  const [token1Info, setToken1Info, {
+    error: token1Error,
+    ref: token1Ref,
+    setValidator: setToken1Validator
+  }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: lpEnableCurrencies.filter((item) => item.asToken.toString() !== 'AUSD')[0]
   });
-  const [token2Info, setToken2Info, { ref: token2Ref, reset: token2InfoReset }] = useInputValue<BalanceInputValue>({
+  const [token2Info, setToken2Info, {
+    error: token2Error,
+    ref: token2Ref,
+    setValidator: setToken2Validator
+  }] = useInputValue<BalanceInputValue>({
     amount: 0,
-    token: getCurrencyIdFromName(api, 'AUSD') // default set token2
+    token: getCurrencyIdFromName(api, 'AUSD')
   });
-
-  const lpToken = useMemo(() => {
-    return getDexShareFromCurrencyId(api, token1Info.token, token2Info.token);
-  }, [api, token1Info, token2Info]);
-
+  const lpToken = useMemo(() => getDexShareFromCurrencyId(api, token1Info.token, token2Info.token), [api, token1Info, token2Info]);
   const token1Balance = useBalance(token1Info.token);
   const token2Balance = useBalance(token2Info.token);
+  const token1Validator = useBalanceValidator({ currency: token1Info.token });
+  const token2Validator = useBalanceValidator({ currency: token2Info.token });
+
+  useEffect(() => {
+    setToken1Validator(token1Validator);
+    setToken2Validator(token2Validator);
+  }, [token1Validator, token2Validator, setToken2Validator, setToken1Validator]);
 
   const {
     availableLP,
     getAddLPSuggestAmount
   } = useLP(token1Info.token, token2Info.token);
 
-  const params = useMemo(() => {
-    if (!token1Info || !token2Info) return [];
+  const params = useCallback(() => {
+    if (!token1Info || !token2Info) return;
 
     return [
       token1Info.token,
       token2Info.token,
-      new FixedPointNumber(token1Info.amount).toChainData(),
-      new FixedPointNumber(token2Info.amount).toChainData()
+      eliminateGap(
+        new FixedPointNumber(token1Info.amount),
+        token1Balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData(),
+      eliminateGap(
+        new FixedPointNumber(token2Info.amount),
+        token2Balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
     ];
-  }, [token1Info, token2Info]);
-
-  const handleSuccess = useCallback(() => {
-    token1InfoReset();
-    token2InfoReset();
-  }, [token1InfoReset, token2InfoReset]);
+  }, [token1Info, token2Info, token1Balance, token2Balance]);
 
   const handleMax = useCallback(() => {
+    if (!availableLP) return;
+
     const suggestToken2ByToken1 = getAddLPSuggestAmount(token1Info.token, token1Balance.toNumber()).toNumber();
     const suggestToken1ByToken2 = getAddLPSuggestAmount(token2Info.token, token2Balance.toNumber()).toNumber();
-
-    console.log(token1Info.token.toString(), token2Info.token.toString());
 
     if (suggestToken2ByToken1 > token2Balance.toNumber()) {
       setToken1Info({
@@ -75,42 +89,65 @@ export const DepositConsole: FC = () => {
         token: token2Info.token
       });
     }
-  }, [setToken2Info, setToken1Info, token1Info, token2Info, token1Balance, token2Balance, getAddLPSuggestAmount]);
+  }, [setToken2Info, setToken1Info, token1Info, token2Info, token1Balance, token2Balance, getAddLPSuggestAmount, availableLP]);
 
   const isDisable = useMemo(() => {
     if (!availableLP) return true;
 
-    return !(token1Info.amount && token2Info.amount);
-  }, [availableLP, token1Info, token2Info]);
+    return !(token1Info.amount && token2Info.amount && !token1Error && !token2Error);
+  }, [availableLP, token1Info, token2Info, token1Error, token2Error]);
+
+  const clearAmount = useCallback((value?: { token1?: Partial<BalanceInputValue>; token2?: Partial<BalanceInputValue> }) => {
+    setToken1Info({
+      amount: 0,
+      token: token1Ref.current.token,
+      ...value?.token1
+    });
+    setToken2Info({
+      amount: 0,
+      token: token2Ref.current.token,
+      ...value?.token2
+    });
+  }, [setToken2Info, setToken1Info, token1Ref, token2Ref]);
+
+  const handleSuccess = useCallback(() => {
+    clearAmount();
+  }, [clearAmount]);
 
   const handleToken1Change = useCallback((value: BalanceInputValue) => {
+    if (!tokenEq(value.token, token1Ref.current.token)) {
+      clearAmount({ token1: { token: value.token } });
+
+      return;
+    }
+
     setToken1Info(value);
     setToken2Info({
       amount: getAddLPSuggestAmount(value.token, value.amount).toNumber(),
       token: token2Info.token
     });
-  }, [setToken1Info, setToken2Info, token2Info, getAddLPSuggestAmount]);
+  }, [setToken1Info, setToken2Info, token2Info, getAddLPSuggestAmount, clearAmount, token1Ref]);
 
   const handleToken2Change = useCallback((value: BalanceInputValue) => {
+    if (!tokenEq(value.token, token2Ref.current.token)) {
+      clearAmount({ token2: { token: value.token } });
+
+      return;
+    }
+
     setToken2Info(value);
     setToken1Info({
       amount: getAddLPSuggestAmount(value.token, value.amount).toNumber(),
       token: token1Info.token
     });
-  }, [setToken1Info, setToken2Info, token1Info, getAddLPSuggestAmount]);
+  }, [setToken1Info, setToken2Info, token1Info, getAddLPSuggestAmount, clearAmount, token2Ref]);
 
+  // clear amount when lp is not available
   useEffect(() => {
     if (!availableLP) {
-      setToken1Info({
-        amount: 0,
-        token: token1Ref.current.token
-      });
-      setToken2Info({
-        amount: 0,
-        token: token2Ref.current.token
-      });
+      clearAmount();
     }
-  }, [availableLP, setToken1Info, setToken2Info, token1Ref, token2Ref]);
+  }, [availableLP, clearAmount, token1Ref, token2Ref]);
 
   return (
     <Card>
@@ -128,11 +165,13 @@ export const DepositConsole: FC = () => {
                   section='dex'
                   size='large'
                 >
-                  { availableLP ? 'Deposit' : 'Error' }
+                  Deposit
                 </TxButton>
               );
             }}
-            leftAddition={(): JSX.Element => {
+            leftAddition={(): ReactNode => {
+              if (!availableLP) return null;
+
               return (
                 <List>
                   <List.Item
@@ -140,7 +179,7 @@ export const DepositConsole: FC = () => {
                     value={<LPExchangeRate lp={lpToken} />}
                   />
                   <List.Item
-                    label='Current Pool Size'
+                    label='Pool Size'
                     value={<LPSize lp={lpToken} />}
                   />
                   <List.Item
@@ -158,12 +197,13 @@ export const DepositConsole: FC = () => {
             leftRender={(): JSX.Element => {
               return (
                 <BalanceInput
+                  disabled={!availableLP}
                   disableTokens={[token2Info.token]}
                   enableTokenSelect
+                  error={token1Error}
                   onChange={handleToken1Change}
                   onMax={handleMax}
                   selectableTokens={lpEnableCurrencies}
-                  showMaxBtn
                   value={token1Info}
                 />
               );
@@ -179,12 +219,13 @@ export const DepositConsole: FC = () => {
             rightRender={(): JSX.Element => {
               return (
                 <BalanceInput
+                  disabled={!availableLP}
                   disableTokens={[token1Info.token]}
                   enableTokenSelect
+                  error={token2Error}
                   onChange={handleToken2Change}
                   onMax={handleMax}
                   selectableTokens={lpEnableCurrencies}
-                  showMaxBtn
                   value={token2Info}
                 />
               );
@@ -203,20 +244,22 @@ export const DepositConsole: FC = () => {
         {
           !availableLP ? (
             <Grid item>
-              <Alert
-                message={
-                  <>
-                    <TokenImage currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)} />
-                    <TokenName
-                      className={classes.tokenName}
-                      currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)}
-                    />
-                    <span>is not an available liquidity pool.</span>
-                  </>
-                }
-                messageClassName={classes.alertContent}
-                type='error'
-              />
+              <Fadein>
+                <Alert
+                  message={
+                    <>
+                      <TokenImage currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)} />
+                      <TokenName
+                        className={classes.tokenName}
+                        currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)}
+                      />
+                      <span>is not an available liquidity pool.</span>
+                    </>
+                  }
+                  messageClassName={classes.alertContent}
+                  type='error'
+                />
+              </Fadein>
             </Grid>
           ) : null
         }

@@ -39,16 +39,16 @@ export const tokenEq = (base: CurrencyId | string, target: CurrencyId | string):
   return false;
 };
 
-export const eliminateGap = (target: Fixed18, max: Fixed18, gap: Fixed18): Fixed18 => {
-  const _gap = target.sub(max);
+export const eliminateGap = (target: FixedPointNumber, max: FixedPointNumber, gap: FixedPointNumber): FixedPointNumber => {
+  const _gap = target.minus(max);
 
-  // target is larger than max, but not lerge enough
-  if (_gap.isGreaterThan(Fixed18.ZERO) && _gap.isLessThan(gap)) {
+  // target is larger than max, but not large enough
+  if (_gap.isGreaterThan(FixedPointNumber.ZERO) && _gap.isLessThan(gap)) {
     return max;
   }
 
   // target is smaller than max, but not small enough.
-  if (_gap.isLessThan(Fixed18.ZERO) && _gap.negated().isLessThan(gap)) {
+  if (_gap.isLessThan(FixedPointNumber.ZERO) && _gap.abs().isLessThan(gap)) {
     return max;
   }
 

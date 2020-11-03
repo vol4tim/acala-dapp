@@ -20,7 +20,7 @@ interface Props extends ButtonProps {
   affectAssets?: CurrencyLike[]; // assets which be affected in this extrinsc
   section: string; // extrinsic section
   method: string; // extrinsic method
-  params: any[] | (() => any[]); // extrinsic params
+  params: any[] | (() => any[] | null | undefined); // extrinsic params
 
   preCheck?: () => Promise<boolean>;
   beforeSend?: () => void; // the callback will be executed before send
@@ -79,6 +79,12 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
       }
     }
 
+    const _params = isFunction(params) ? params() : params;
+
+    if (!_params) {
+      return;
+    }
+
     // ensure that the section and method are exist
     if (!_api.tx[section] || !_api.tx[section][method]) {
       console.error(`can not find api.tx.${section}.${method}`);
@@ -100,12 +106,9 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     const createTx = (): Observable<SubmittableExtrinsic<'rxjs'>> => _api.query.system.account<AccountInfo>(_signAddress).pipe(
       take(1),
       map((account) => {
-        const _params = isFunction(params) ? params() : params;
-
         return [account, _params] as [AccountInfo, any[]];
       }),
       switchMap(([account, params]) => {
-        console.log(account.toHuman());
         const signedExtrinsic = _api.tx[section][method].apply(_api, params);
 
         return signedExtrinsic.paymentInfo(_signAddress).pipe(

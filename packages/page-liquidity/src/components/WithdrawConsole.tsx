@@ -1,8 +1,8 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useEffect, useMemo } from 'react';
 
 import { Card, InputField, SpaceBetweenBox, List } from '@acala-dapp/ui-components';
-import { BalanceInput, TxButton, UserBalance, LPExchangeRate, LPSize, LPShare, BalanceInputValue, getCurrenciesFromDexShare, LPSizeWithShare } from '@acala-dapp/react-components';
-import { useLPCurrencies, useApi, useAccounts, useBalance } from '@acala-dapp/react-hooks';
+import { BalanceInput, TxButton, UserBalance, LPExchangeRate, LPSize, LPShare, BalanceInputValue, getCurrenciesFromDexShare, LPSizeWithShare, eliminateGap } from '@acala-dapp/react-components';
+import { useLPCurrencies, useApi, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import classes from './Withdraw.module.scss';
@@ -12,11 +12,23 @@ export const WithdrawConsole: FC = () => {
   const { api } = useApi();
   const enabledCurrencies = useLPCurrencies();
   const lpCurrencies = useLPCurrencies();
-  const [selectedLP, setSelectedLP, { reset: resetSelectLP }] = useInputValue<BalanceInputValue>({
+  const [selectedLP, setSelectedLP, { error, setValidator }] = useInputValue<BalanceInputValue>({
     amount: 0,
     token: lpCurrencies[0]
   });
   const balance = useBalance(selectedLP.token);
+  const validator = useBalanceValidator({ currency: selectedLP.token });
+
+  useEffect(() => {
+    setValidator(validator);
+  }, [setValidator, validator]);
+
+  const clearAmount = useCallback(() => {
+    setSelectedLP({
+      amount: 0,
+      token: selectedLP.token
+    });
+  }, [setSelectedLP, selectedLP]);
 
   const handleMax = useCallback(() => {
     setSelectedLP({
@@ -25,17 +37,31 @@ export const WithdrawConsole: FC = () => {
     });
   }, [balance, setSelectedLP, selectedLP]);
 
-  const handleSuccess = useCallback((): void => {
-    resetSelectLP();
-  }, [resetSelectLP]);
+  const handleSuccess = useCallback((): void => clearAmount(), [clearAmount]);
 
-  const params = useMemo(() => {
+  const params = useCallback(() => {
     if (!selectedLP.amount || !selectedLP.token) return [];
 
     const [token1, token2] = getCurrenciesFromDexShare(api, selectedLP.token);
 
-    return [token1, token2, new FixedPointNumber(selectedLP.amount).toChainData()];
-  }, [selectedLP, api]);
+    return [
+      token1,
+      token2,
+      eliminateGap(
+        new FixedPointNumber(selectedLP.amount),
+        balance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
+  }, [selectedLP, api, balance]);
+
+  const isDisabled = useMemo(() => {
+    if (!selectedLP.amount) return true;
+
+    if (error) return true;
+
+    return false;
+  }, [selectedLP, error]);
 
   return (
     <Card>
@@ -44,7 +70,7 @@ export const WithdrawConsole: FC = () => {
           actionRender={(): JSX.Element => {
             return (
               <TxButton
-                disabled={false}
+                disabled={isDisabled}
                 method='removeLiquidity'
                 onExtrinsicSuccess={handleSuccess}
                 params={params}
@@ -82,12 +108,12 @@ export const WithdrawConsole: FC = () => {
             return (
               <div>
                 <BalanceInput
+                  disabled={balance.isZero()}
                   enableTokenSelect={true}
-                  error={''}
+                  error={error}
                   onChange={setSelectedLP}
                   onMax={handleMax}
                   selectableTokens={enabledCurrencies}
-                  showMaxBtn
                   value={selectedLP}
                 />
               </div>
@@ -101,6 +127,7 @@ export const WithdrawConsole: FC = () => {
               </SpaceBetweenBox>
             );
           }}
+          rightContentClassName={classes.outputRoot}
           rightRender={(): JSX.Element => {
             return (
               <LPSizeWithShare

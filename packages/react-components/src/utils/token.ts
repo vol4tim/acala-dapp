@@ -47,6 +47,17 @@ export const TOKEN_NAME: Map<string, string> = new Map([
   ['DOT', 'DOT']
 ]);
 
+export const TOKEN_WEIGHT: Map<string, number> = new Map([
+  ['AUSD', 0],
+  ['ACA', 1],
+  ['BTC', 2],
+  ['XBTC', 2],
+  ['RENBTC', 2],
+  ['RENBTC', 2],
+  ['DOT', 2],
+  ['LDOT', 2]
+]);
+
 export function getTokenColor (token: string): string {
   return TOKEN_COLOR.get(token) || '#000000';
 }
@@ -59,8 +70,22 @@ export function getTokenFullName (token: string): string {
   return TOKEN_FULLNAMES.get(token) || '';
 }
 
-export function getTokenName (token: string): string {
-  return TOKEN_NAME.get(token) || '';
+export function getTokenName (token: string | CurrencyId): string {
+  if (typeof token === 'string') {
+    return TOKEN_NAME.get(token) || '';
+  }
+
+  token = token as any as CurrencyId;
+
+  if (token.isToken) {
+    return getTokenName(token.asToken.toString());
+  }
+
+  if (token.isDexShare) {
+    return `${getTokenName(token.asDexShare[0].toString())}-${getTokenName(token.asDexShare[1].toString())}`;
+  }
+
+  return '';
 }
 
 export function getCurrenciesFromDexShare (api: ApiRx, dexShare: CurrencyId): [CurrencyId, CurrencyId] {
@@ -97,4 +122,11 @@ export function getDexShareFromCurrencyId (api: ApiRx, token1: CurrencyId, token
   ).getPair();
 
   return api.createType('CurrencyId' as any, { DEXShare: [pair[0].name, pair[1].name] });
+}
+
+export function sortCurrency (currency1?: CurrencyId, currency2?: CurrencyId): number {
+  const currency1Weight = (currency1 ? TOKEN_WEIGHT.get(currency1.asToken.toString()) : 0) || 0;
+  const currency2Weight = (currency2 ? TOKEN_WEIGHT.get(currency2.asToken.toString()) : 0) || 0;
+
+  return currency1Weight - currency2Weight;
 }

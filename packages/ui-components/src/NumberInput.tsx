@@ -7,10 +7,14 @@ const NUMBER_PATTERN = '^[0-9]*(\\.)?[0-9]*$';
 const numberReg = new RegExp(NUMBER_PATTERN);
 
 const getValidNumber = (input: string, min?: number, max?: number): [boolean, string] => {
+  if (!input) {
+    return [true, ''];
+  }
+
   if (numberReg.test(input)) {
     const _num = Number(input);
 
-    if (min !== undefined && _num <= min) {
+    if (min !== undefined && _num < min) {
       input = String(min);
     }
 
@@ -23,17 +27,6 @@ const getValidNumber = (input: string, min?: number, max?: number): [boolean, st
 
   return [false, ''];
 };
-
-// const checkInputComplated = (num: string): boolean => {
-//   // '', x., x.000 are not complated
-//   if (!num) return false;
-
-//   if (num.endsWith('.')) return false;
-
-//   if (/\.0*$/.test(num)) return false;
-
-//   return true;
-// };
 
 export interface NumberInputProps {
   className?: string;
@@ -62,9 +55,8 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
   placeholder = '0.0',
   value
 }, ref) => {
-  const [_value, setValue] = useState<string>('');
+  const [_value, _setValue] = useState<string>('');
   const valueRef = useRef<string>('');
-  const isControlled = useMemo<boolean>((): boolean => value !== undefined, [value]);
   const isInEditMode = useRef<boolean>(false);
 
   const _onChange = useMemo(() => onChange || noop, [onChange]);
@@ -73,48 +65,32 @@ export const NumberInput: FC<NumberInputProps> = forwardRef<HTMLInputElement, Nu
     const originInput = originEvent.currentTarget.value;
     const [isValidNumber, validNumber] = getValidNumber(originInput, min, max);
 
-    // no matter if input completed, trigger value change
     // trigger value change event when is a valid number and is changed, otherwise do nothing
     if (isValidNumber && valueRef.current !== validNumber) {
-      setValue(validNumber);
+      _setValue(validNumber);
       valueRef.current = validNumber;
       _onChange(Number(validNumber));
     }
-  }, [setValue, _onChange, min, max]);
-
-  const handleValueChange = useCallback(() => {
-    if ((value === 0 || value === '0') && isControlled) {
-      setValue('');
-      valueRef.current = '';
-
-      return;
-    }
-
-    const [isValidNumber, validNumber] = getValidNumber(String(value), min, max);
-
-    if (isValidNumber && isControlled) {
-      setValue(validNumber);
-      valueRef.current = validNumber;
-    }
-  }, [value, isControlled, max, min]);
+  }, [_setValue, _onChange, min, max]);
 
   const _onBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
     if (onBlur) onBlur(e);
 
     isInEditMode.current = false;
-
-    handleValueChange();
-  }, [onBlur, handleValueChange]);
+  }, [onBlur, isInEditMode]);
 
   const _onFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
     if (onFocus) onFocus(e);
 
     isInEditMode.current = true;
-  }, [onFocus]);
+  }, [onFocus, isInEditMode]);
 
   useEffect(() => {
-    handleValueChange();
-  }, [handleValueChange]);
+    // dont update value if user is input
+    if (isInEditMode.current) return;
+
+    _setValue(value ? value.toString() : '');
+  }, [value, _setValue, isInEditMode, _value]);
 
   return (
     <input

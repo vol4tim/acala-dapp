@@ -35,9 +35,11 @@ export const useAllPrices = (): PriceData[] => {
  * @description get price of `currency`
  * @param currency
  */
-export const usePrice = (currency: CurrencyId): FixedPointNumber => {
+export const usePrice = (currency?: CurrencyId): FixedPointNumber => {
   const prices = useAllPrices();
   const result = useMemo(() => {
+    if (!currency) return FixedPointNumber.ZERO;
+
     // dex share should not have price
     if (currency.isDexShare) return FixedPointNumber.ZERO;
 

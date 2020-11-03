@@ -7,7 +7,7 @@ import { FixedPointNumber } from '@acala-network/sdk-core';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
-import { formatBalance } from '../utils';
+import { formatBalance, sortCurrency } from '../utils';
 import { FormatNumber, FormatNumberProps, FormatterColor } from './FormatNumber';
 import classes from './format.module.scss';
 import { TokenName } from '../Token';
@@ -24,6 +24,7 @@ export interface FormatBalanceProps extends BareProps {
   pairSymbol?: string;
   decimalLength?: number;
   color?: FormatterColor;
+  isSort?: boolean;
 }
 
 const formatBalanceConfig: FormatNumberProps['formatNumberConfig'] = {
@@ -38,6 +39,7 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
   color,
   currency,
   decimalLength = 6,
+  isSort = true,
   pair,
   pairSymbol
 }) => {
@@ -61,7 +63,11 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
 
   return (
     <span className={clsx(classes.balance, className, color)}>
-      {pair ? pair.map((data, index) => renderBalance(data, index)) : renderBalance({ balance, currency }, -1)}
+      {
+        pair
+          ? (isSort ? pair.sort((p1, p2) => sortCurrency(p1.currency, p2.currency)) : pair).map((data, index) => renderBalance(data, index))
+          : renderBalance({ balance, currency }, -1)
+      }
     </span>
   );
 };

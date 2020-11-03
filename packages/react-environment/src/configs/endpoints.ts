@@ -22,6 +22,10 @@ export const DEFAULT_ENDPOINTS: EndpointConfig = {
     {
       name: 'Mandala TC5-2',
       url: 'wss://node-6714447553211260928.rz.onfinality.io/ws'
+    },
+    {
+      name: 'Mandala TC5-3',
+      url: 'wss://acala-testnet-1.polkawallet.io:9904'
     }
   ],
   development: [
