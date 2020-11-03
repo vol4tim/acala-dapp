@@ -57,7 +57,7 @@ export const AirDrop: FC = () => {
               <Button
                 onClick={open}
               >
-                Candy Claim
+                Claim Rewards
               </Button>
             ) : null
           }

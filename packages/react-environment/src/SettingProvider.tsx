@@ -1,4 +1,4 @@
-import React, { createContext, FC, PropsWithChildren, useState, useEffect, useCallback } from 'react';
+import React, { createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { noop } from 'lodash';
 import { useModal } from '@acala-dapp/react-hooks';
@@ -35,6 +35,7 @@ export interface SettingDate {
   selectableEndpoints: EndpointConfig;
   browser: Browser;
   endpoint: string;
+  allEndpoints: string[];
   language: 'zh' | 'en' | string;
   theme: 'normal' | 'dark';
   changeEndpoint: (endpoints: string) => void;
@@ -47,6 +48,7 @@ export interface SettingDate {
 }
 
 export const SettingContext = createContext<SettingDate>({
+  allEndpoints: [],
   browser: 'unknown',
   changeEndpoint: noop as any,
   closeSetting: noop,
@@ -68,6 +70,9 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   const [endpoint, setEndpoint] = useState<string>('');
   const { i18n } = useTranslation();
 
+  const allEndpoints = useMemo(() => {
+    return DEFAULT_ENDPOINTS.testnet.map((item) => item.url);
+  }, []);
   const changeEndpoint = useCallback((endpoint: string, reload?: boolean) => {
     setEndpoint(endpoint);
     window.localStorage.setItem('endpoint', endpoint);
@@ -140,6 +145,7 @@ export const SettingProvider: FC<PropsWithChildren<any>> = ({ children }) => {
   return (
     <SettingContext.Provider
       value={{
+        allEndpoints,
         browser,
         changeEndpoint,
         closeSetting,

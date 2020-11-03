@@ -261,7 +261,7 @@ export const SwapConsole: FC = () => {
         />
       </div>
       {
-        parameters ? (
+        (parameters && !isDisable) ? (
           <SwapInfo parameters={parameters} />
         ) : null
       }

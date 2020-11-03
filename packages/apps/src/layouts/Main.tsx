@@ -13,15 +13,15 @@ interface Props {
 export const MainLayout: React.FC<PropsWithChildren<Props>> = ({ children, sideBarProps }) => {
   const { appReadyStatus } = useIsAppReady();
   const { connected, init } = useApi();
-  const { endpoint } = useSetting();
+  const { allEndpoints, endpoint } = useSetting();
 
   useEffect(() => {
     if (connected) return;
 
     if (!endpoint) return;
 
-    init(endpoint);
-  }, [connected, init, endpoint]);
+    init(endpoint, allEndpoints);
+  }, [connected, init, endpoint, allEndpoints]);
 
   return (
     <div className={classes.root}>

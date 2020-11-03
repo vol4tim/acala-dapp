@@ -59,16 +59,18 @@
 
 
 .swapRoute {
-  display: flex;
-  align-items: center;
-
-  img {
-    max-width: 24px;
-    height: 24px;
-    margin: 0 8px;
+  .content {
+    display: flex;
+    align-items: center;
+    margin-left: 8px;
   }
 
-  svg {
-    margin: 0 8px;
+  .token {
+    width: 16px;
+    height: 16px;
+  }
+
+  .arrow {
+    margin: 4px;
   }
 }

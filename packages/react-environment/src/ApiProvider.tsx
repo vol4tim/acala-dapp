@@ -15,7 +15,7 @@ export interface ApiContextData {
   chainInfo: {
     chainName: string;
   };
-  init: (endpoint: string) => void; // connect to network
+  init: (endpoint: string, allEndpoint: string[]) => void; // connect to network
 }
 
 // ensure that api always exist
@@ -44,12 +44,12 @@ export const ApiProvider: FC<Props> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const apiSubscriber = useRef<Subscription>();
 
-  const init = useCallback((endpoint: string) => {
+  const init = useCallback((endpoint: string, allEndpoints: string[]) => {
     if (apiSubscriber.current) {
       apiSubscriber.current.unsubscribe();
     }
 
-    const provider = new WsProvider(endpoint);
+    const provider = new WsProvider([endpoint, ...allEndpoints]);
 
     apiSubscriber.current = ApiRx.create(options({ provider })).pipe(
       timeout(MAX_CONNECT_TIME)

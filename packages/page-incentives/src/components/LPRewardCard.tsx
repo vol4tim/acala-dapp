@@ -27,9 +27,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
 
   const Header = useMemo(() => {
     return (
-      <>
-        Manager <TokenName currency={currency}/>
-      </>
+      <TokenName currency={currency}/>
     );
   }, [currency]);
 

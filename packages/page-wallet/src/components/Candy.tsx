@@ -83,7 +83,7 @@ export const Candy: FC<Props> = ({
         ) : null
       }
       onCancel={onClose}
-      title='Candy Claimed'
+      title='Thank You'
       visiable={status}
       withClose
     >
@@ -93,9 +93,9 @@ export const Candy: FC<Props> = ({
             {
               candy.candy.length > 0 ? (
                 <>
-                  <p className={classes.title}>You have received a gift for participated in previous acala testnet.</p>
+                  <p className={classes.title}>This is our way of saying THANK YOU for participating in previous testnet campaigns.</p>
                   <div className={classes.candyList}>
-                    <span>ACA(MainNet)</span>
+                    <span>ACA(Mainnet)</span>
                     <span>{candy.candy.length}</span>
                   </div>
                   <div className={classes.candyList}>
@@ -104,7 +104,13 @@ export const Candy: FC<Props> = ({
                   </div>
                 </>
               ) : (
-                <p className={classes.title}>The account has no airdrop, please waiting for the next acala testnet.</p>
+                <p className={classes.title}>
+                  You are new to the community, please head to <a
+                    href='https://discord.gg/vdbFVCH'
+                    rel='noopener noreferrer'
+                    target='_blank'
+                  >Discord</a> to participate
+                </p>
               )
             }
           </div>

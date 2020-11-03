@@ -1,10 +1,10 @@
-import React, { FC, memo, useMemo, useContext, useEffect } from 'react';
+import React, { FC, memo, useMemo, useContext, useEffect, ReactNode } from 'react';
 import clsx from 'clsx';
 
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Tag } from '@acala-dapp/ui-components';
+import { Tag, ArrowRightOutlined } from '@acala-dapp/ui-components';
 import { FormatBalance, FormatRatio, tokenEq, getCurrencyIdFromName, Token, TokenImage, FormatPrice, FormatNumber } from '@acala-dapp/react-components';
 import { usePrice, useDexExchangeRate, useConstants, useApi } from '@acala-dapp/react-hooks';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
@@ -25,16 +25,23 @@ const SwapRoute: FC<SwapRouteProps> = ({ parameters }) => {
   return (
     <div className={clsx(classes.info, classes.swapRoute)}>
       Swap Route is
-      {
-        parameters.path.map((item): JSX.Element => {
-          return (
-            <TokenImage
-              currency={getCurrencyIdFromName(api, item.name)}
-              key={`${item.toString()}`}
-            />
-          );
-        })
-      }
+      <div className={classes.content}>
+        {
+          parameters.path.map((item, index): ReactNode[] => {
+            return [
+              <TokenImage
+                className={classes.token}
+                currency={getCurrencyIdFromName(api, item.name)}
+                key={`${item.toString()}`}
+              />,
+              index < parameters.path.length - 1 ? <ArrowRightOutlined
+                className={classes.arrow}
+                key={`${item.toString()}-arrow`}
+              /> : null
+            ];
+          })
+        }
+      </div>
     </div>
   );
 };
@@ -57,10 +64,7 @@ export const SwapInfo: FC<Props> = ({ parameters }) => {
   const { api } = useApi();
   const {
     userInput: {
-      acceptSlippage,
-      inputAmount,
       inputToken,
-      outputAmount,
       outputToken
     }
   } = useContext(SwapContext);
@@ -83,6 +87,11 @@ export const SwapInfo: FC<Props> = ({ parameters }) => {
           />
         </Tag>
       </p>
+      {
+        parameters.path.length > 2 ? (
+          <SwapRoute parameters={parameters} />
+        ) : null
+      }
     </div>
   );
 };
