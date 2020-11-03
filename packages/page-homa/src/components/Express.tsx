@@ -4,7 +4,6 @@ import { Grid } from '@acala-dapp/ui-components';
 
 import { StakingOverview } from './StakingOverview';
 import { ExpressConsole } from './ExpressConsole';
-import { Transaction } from './Transaction';
 
 export const Express: FC = () => {
   return (
@@ -14,9 +13,6 @@ export const Express: FC = () => {
       </Grid>
       <Grid item>
         <ExpressConsole />
-      </Grid>
-      <Grid item>
-        <Transaction />
       </Grid>
     </Grid>
   );

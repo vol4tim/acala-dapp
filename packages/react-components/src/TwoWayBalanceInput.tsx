@@ -11,6 +11,7 @@ import { Condition, SwitchIcon } from '@acala-dapp/ui-components';
 
 interface TwoWayBalanceInputProps {
   className?: string;
+  error?: string;
   value: [BalanceInputValue, BalanceInputValue];
   onChange: (value: BalanceInputValue) => void;
   onSwap?: () => void;
@@ -22,6 +23,7 @@ type Direction = 'forward' | 'reverse';
 
 export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
   className,
+  error,
   value,
   onChange,
   onMax = noop,
@@ -32,9 +34,10 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
 
   const rootClassName = useMemo(() => {
     return clsx(classes.root, className, {
-      [classes.focused]: focused
+      [classes.focused]: focused,
+      [classes.error]: error
     });
-  }, [focused, className]);
+  }, [focused, className, error]);
 
   const handleFocus = useCallback(() => {
     setFocused(true);
@@ -59,12 +62,11 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
           <BalanceInput
             border={false}
             className={classes.balanceInput}
-            error={''}
+            error={error}
             onBlur={handleBlur}
             onChange={onChange}
             onFocus={handleFocus}
             onMax={onMax}
-            showMaxBtn
             value={value[0]}
           />
         </div>

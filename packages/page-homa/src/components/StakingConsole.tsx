@@ -67,7 +67,6 @@ export const StakingConsole: FC = () => {
         <BalanceInput
           onChange={setStakingValue}
           onMax={handleMax}
-          showMaxBtn
           value={stakingValue}
         />
       </Grid>

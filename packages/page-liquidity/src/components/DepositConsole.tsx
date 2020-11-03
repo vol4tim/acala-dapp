@@ -32,13 +32,18 @@ export const DepositConsole: FC = () => {
   const lpToken = useMemo(() => getDexShareFromCurrencyId(api, token1Info.token, token2Info.token), [api, token1Info, token2Info]);
   const token1Balance = useBalance(token1Info.token);
   const token2Balance = useBalance(token2Info.token);
-  const token1Validator = useBalanceValidator({ currency: token1Info.token });
-  const token2Validator = useBalanceValidator({ currency: token2Info.token });
 
-  useEffect(() => {
-    setToken1Validator(token1Validator);
-    setToken2Validator(token2Validator);
-  }, [token1Validator, token2Validator, setToken2Validator, setToken1Validator]);
+  // init token1 validator
+  useBalanceValidator({
+    currency: token1Info.token,
+    updateValidator: setToken1Validator
+  });
+
+  // init token2 validator
+  useBalanceValidator({
+    currency: token2Info.token,
+    updateValidator: setToken2Validator
+  });
 
   const {
     availableLP,
@@ -69,6 +74,10 @@ export const DepositConsole: FC = () => {
 
     const suggestToken2ByToken1 = getAddLPSuggestAmount(token1Info.token, token1Balance.toNumber()).toNumber();
     const suggestToken1ByToken2 = getAddLPSuggestAmount(token2Info.token, token2Balance.toNumber()).toNumber();
+
+    if (suggestToken2ByToken1 === 0 || suggestToken1ByToken2 === 0) {
+      return;
+    }
 
     if (suggestToken2ByToken1 > token2Balance.toNumber()) {
       setToken1Info({

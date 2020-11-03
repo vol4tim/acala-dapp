@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 
 import { Card, InputField, SpaceBetweenBox, List } from '@acala-dapp/ui-components';
 import { BalanceInput, TxButton, UserBalance, LPExchangeRate, LPSize, LPShare, BalanceInputValue, getCurrenciesFromDexShare, LPSizeWithShare, eliminateGap } from '@acala-dapp/react-components';
@@ -17,11 +17,11 @@ export const WithdrawConsole: FC = () => {
     token: lpCurrencies[0]
   });
   const balance = useBalance(selectedLP.token);
-  const validator = useBalanceValidator({ currency: selectedLP.token });
 
-  useEffect(() => {
-    setValidator(validator);
-  }, [setValidator, validator]);
+  useBalanceValidator({
+    currency: selectedLP.token,
+    updateValidator: setValidator
+  });
 
   const clearAmount = useCallback(() => {
     setSelectedLP({

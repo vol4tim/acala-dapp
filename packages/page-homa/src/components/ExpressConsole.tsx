@@ -1,10 +1,10 @@
-import React, { FC, useMemo, useCallback, useState } from 'react';
+import React, { FC, useMemo, useCallback, useState, useEffect } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { StakingPool } from '@acala-network/sdk-homa';
 import { Card, Tabs, List } from '@acala-dapp/ui-components';
-import { TxButton, TwoWayBalanceInput, FormatBalance, BalanceInputValue } from '@acala-dapp/react-components';
-import { useConstants, useStakingPool, useBalance, useInputValue } from '@acala-dapp/react-hooks';
+import { TxButton, TwoWayBalanceInput, FormatBalance, BalanceInputValue, UserBalance, eliminateGap } from '@acala-dapp/react-components';
+import { useConstants, useStakingPool, useBalance, useInputValue, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './ExpressConsole.module.scss';
 
@@ -40,7 +40,7 @@ const StakePanel: FC = () => {
   const stakingPool = useStakingPool();
   const stakingCurrencyBalance = useBalance(stakingCurrency);
 
-  const [inputValue, setInputValue, { reset }] = useInputValue({
+  const [inputValue, setInputValue, { error, reset, setValidator }] = useInputValue({
     amount: 0,
     token: stakingCurrency
   });
@@ -55,17 +55,28 @@ const StakePanel: FC = () => {
     ] as [BalanceInputValue, BalanceInputValue];
   }, [stakingPool, inputValue, liquidCurrency]);
 
-  const params = useMemo(() => {
-    if (!stakingCurrencyBalance) return [];
+  const params = useCallback(() => {
+    if (!stakingCurrencyBalance) return;
 
-    return [new FixedPointNumber(inputValue.amount).toChainData()];
+    return [
+      eliminateGap(
+        new FixedPointNumber(inputValue.amount),
+        stakingCurrencyBalance,
+        new FixedPointNumber('0.0000001')
+      ).toChainData()
+    ];
   }, [inputValue, stakingCurrencyBalance]);
+
+  useBalanceValidator({
+    currency: stakingCurrency,
+    updateValidator: setValidator
+  });
 
   const onSuccess = useCallback(() => {
     reset();
   }, [reset]);
 
-  const onMax = useCallback(() => {
+  const handleMax = useCallback(() => {
     setInputValue({
       amount: stakingCurrencyBalance.toNumber(),
       token: stakingCurrency
@@ -73,19 +84,28 @@ const StakePanel: FC = () => {
   }, [setInputValue, stakingCurrency, stakingCurrencyBalance]);
 
   const isDisabled = useMemo(() => {
-    return twoWayValues[0].amount === 0 || twoWayValues[1].amount === 0;
-  }, [twoWayValues]);
+    if (error) return true;
+
+    if (twoWayValues[0].amount === 0 || twoWayValues[1].amount === 0) return true;
+
+    return false;
+  }, [twoWayValues, error]);
 
   return (
     <div className={classes.panelContent}>
       <div className={classes.main}>
         <TwoWayBalanceInput
           className={classes.balanceInput}
+          error={error}
           onChange={setInputValue}
-          onMax={onMax}
+          onMax={handleMax}
           value={twoWayValues}
         />
         <List>
+          <List.Item
+            label='Max To Stake'
+            value={<UserBalance token={stakingCurrency} />}
+          />
           <List.Item
             label='Price'
             value={<Price />}
@@ -111,11 +131,23 @@ const UnstakePanel: FC = () => {
   const { liquidCurrency, stakingCurrency } = useConstants();
   const stakingPool = useStakingPool();
   const liquidCurrencyBalance = useBalance(liquidCurrency);
-  const [unstakeResult, seteUnStakeResult] = useState<ReturnType<StakingPool['getStakingAmountInRedeemByFreeUnbonded']>>();
+  const [unstakeResult, setUnStakeResult] = useState<ReturnType<StakingPool['getStakingAmountInRedeemByFreeUnbonded']>>();
 
-  const [inputValue, setInputValue, { reset }] = useInputValue({
+  const [inputValue, setInputValue, { error, reset, setValidator }] = useInputValue({
     amount: 0,
     token: liquidCurrency
+  });
+
+  const maxToUnstake = useMemo<FixedPointNumber>((): FixedPointNumber => {
+    if (!stakingPool) return FixedPointNumber.ZERO;
+
+    return FixedPointNumber.fromInner(stakingPool?.derive.freeUnbonded.toString()).min(liquidCurrencyBalance);
+  }, [stakingPool, liquidCurrencyBalance]);
+
+  useBalanceValidator({
+    currency: inputValue.token,
+    max: [maxToUnstake, ''],
+    updateValidator: setValidator
   });
 
   const [twoWayValue, setTwoWayValue] = useState<[BalanceInputValue, BalanceInputValue]>([
@@ -123,60 +155,81 @@ const UnstakePanel: FC = () => {
     { amount: 0, token: stakingCurrency }
   ]);
 
-  const onChange = useCallback((value: BalanceInputValue) => {
+  const handleMax = useCallback(() => {
+    if (!stakingPool) return;
+
+    const unstakeResult = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(maxToUnstake);
+
+    setUnStakeResult(unstakeResult);
+    setInputValue({
+      amount: maxToUnstake.toNumber(),
+      token: inputValue.token
+    });
+    setTwoWayValue([
+      { amount: maxToUnstake.toNumber(), token: inputValue.token },
+      { amount: unstakeResult.received.toNumber(), token: liquidCurrency }
+    ]);
+  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, liquidCurrency, maxToUnstake, inputValue]);
+
+  const handleChange = useCallback((value: BalanceInputValue) => {
     if (!stakingPool) return;
 
     const unstakeResult = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(
       new FixedPointNumber(value.amount)
     );
 
-    seteUnStakeResult(unstakeResult);
+    if (unstakeResult.received.isZero()) {
+      setUnStakeResult(undefined);
+
+      return;
+    }
+
+    setUnStakeResult(unstakeResult);
     setInputValue(value);
     setTwoWayValue([
       value,
-      {
-        amount: unstakeResult.received.toNumber(),
-        token: liquidCurrency
-      }
+      { amount: unstakeResult.received.toNumber(), token: liquidCurrency }
     ]);
-  }, [stakingPool, setInputValue, seteUnStakeResult, setTwoWayValue, liquidCurrency]);
+  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, liquidCurrency]);
 
-  const maxToUnstake = useMemo<FixedPointNumber>((): FixedPointNumber => {
-    if (!stakingPool) return FixedPointNumber.ZERO;
+  const params = useCallback(() => {
+    if (!liquidCurrencyBalance) return;
 
-    return FixedPointNumber.ONE;
-  }, [stakingPool]);
-
-  const params = useMemo(() => {
-    if (!liquidCurrencyBalance) return [];
-
-    return [new FixedPointNumber(inputValue.amount).toChainData(), 'Immediately'];
-  }, [inputValue, liquidCurrencyBalance]);
+    return [
+      eliminateGap(
+        new FixedPointNumber(inputValue.amount),
+        maxToUnstake,
+        new FixedPointNumber('0.0000001')
+      ).toChainData(),
+      'Immediately'
+    ];
+  }, [inputValue, liquidCurrencyBalance, maxToUnstake]);
 
   const isDisabled = useMemo<boolean>((): boolean => {
-    return inputValue.amount === 0;
-  }, [inputValue]);
+    if (error) return true;
+
+    if (inputValue.amount === 0) return true;
+
+    return false;
+  }, [inputValue, error]);
 
   const onSuccess = useCallback(() => {
     reset();
     setTwoWayValue([
-      {
-        amount: 0,
-        token: stakingCurrency
-      },
-      {
-        amount: 0,
-        token: liquidCurrency
-      }
+      { amount: 0, token: stakingCurrency },
+      { amount: 0, token: liquidCurrency }
     ]);
-  }, [reset, setTwoWayValue, stakingCurrency, liquidCurrency]);
+    setUnStakeResult(undefined);
+  }, [reset, setTwoWayValue, stakingCurrency, liquidCurrency, setUnStakeResult]);
 
   return (
     <div className={classes.panelContent}>
       <div className={classes.main}>
         <TwoWayBalanceInput
           className={classes.balanceInput}
-          onChange={onChange}
+          error={error}
+          onChange={handleChange}
+          onMax={handleMax}
           value={twoWayValue}
         />
         <List>
@@ -193,15 +246,32 @@ const UnstakePanel: FC = () => {
             label='Price'
             value={<Price />}
           />
-          <List.Item
-            label='Fee'
-            value={
-              <FormatBalance
-                balance={unstakeResult?.fee}
-                currency={stakingCurrency}
+          {
+            unstakeResult ? (
+              <List.Item
+                label='Fee'
+                value={
+                  <FormatBalance
+                    balance={unstakeResult?.fee}
+                    currency={stakingCurrency}
+                  />
+                }
               />
-            }
-          />
+            ) : null
+          }
+          {
+            unstakeResult ? (
+              <List.Item
+                label='Received'
+                value={
+                  <FormatBalance
+                    balance={unstakeResult?.received}
+                    currency={stakingCurrency}
+                  />
+                }
+              />
+            ) : null
+          }
         </List>
       </div>
       <TxButton
