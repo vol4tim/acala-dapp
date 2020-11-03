@@ -1,17 +1,17 @@
-import React, { FC, useContext, ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { FC, useContext, ReactElement, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 
 import { ITuple } from '@polkadot/types/types';
 import { Balance } from '@acala-network/types/interfaces';
 
 import { Card, IconButton, InputField, SpaceBetweenBox } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInputValue, UserBalance, BalanceInput } from '@acala-dapp/react-components';
-import { useApi, useSubscription, useBalance } from '@acala-dapp/react-hooks';
+import { useApi, useSubscription, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInput } from './SlippageInput';
 import { SwapContext } from './SwapProvider';
-import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
+import { token2CurrencyId, currencyId2Token, FixedPointNumber, TokenPair } from '@acala-network/sdk-core';
 import { SwapTrade } from '@acala-network/sdk-swap';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
 import { SwapTradeMode } from '@acala-network/sdk-swap/help';
@@ -38,6 +38,9 @@ export const SwapConsole: FC = () => {
   const { api } = useApi();
 
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
+
+  const [inputError, setInputError] = useState<string>();
+  const [outputError, setOutputError] = useState<string>();
 
   const {
     availableTokens,
@@ -73,10 +76,11 @@ export const SwapConsole: FC = () => {
       inputAmount: 0,
       outputAmount: 0
     });
-  }, [updateUserInput]);
+    setParameters(null);
+  }, [updateUserInput, setParameters]);
 
-  const params = useMemo(() => {
-    if (!parameters || !swapTrade) return [];
+  const params = useCallback(() => {
+    if (!parameters || !swapTrade) return;
 
     const result = parameters.toChainData(swapTrade.mode);
 
@@ -86,6 +90,21 @@ export const SwapConsole: FC = () => {
   const setTradeMode = useCallback((mode: SwapTradeMode) => {
     updateUserInput({ mode });
   }, [updateUserInput]);
+
+  const balanceValidator = useBalanceValidator({ currency: token2CurrencyId(api, userInput.inputToken) });
+  const promiseRef = useRef<any>();
+
+  useEffect(() => {
+    // check balance
+    promiseRef.current = balanceValidator({
+      amount: userInput.inputAmount,
+      token: token2CurrencyId(api, userInput.inputToken)
+    });
+
+    promiseRef.current.then(() => setInputError(''))
+      .catch((e: any) => setInputError(e.message));
+  /* eslint-disable-next-line */
+  }, [balanceValidator]);
 
   const setInput = useCallback((value: BalanceInputValue) => {
     updateUserInput({
@@ -103,6 +122,22 @@ export const SwapConsole: FC = () => {
     });
   }, [updateUserInput]);
 
+  const isDisable = useMemo(() => {
+    if (!parameters) return true;
+
+    if (parameters.midPrice.isLessOrEqualTo(FixedPointNumber.ZERO)) return true;
+
+    if (outputError) return true;
+
+    if (inputError) return true;
+
+    if (userInput.outputAmount <= 0) return true;
+
+    if (userInput.inputAmount <= 0) return true;
+
+    return false;
+  }, [inputError, outputError, parameters, userInput]);
+
   useSubscription(() => {
     if (!api) return;
     if (!swapTrade) return;
@@ -116,6 +151,29 @@ export const SwapConsole: FC = () => {
       const parameters = swapTrade.getTradeParameters(pools);
 
       setParameters(parameters);
+
+      const { path } = parameters;
+
+      if (path.length >= 2) {
+        const tailPair = new TokenPair(path[path.length - 1], path[path.length - 2]);
+        const tailPairPool = pools.find((item): boolean => item.isEqual(tailPair));
+
+        if (tailPairPool) {
+          // check output is sufficient in pool
+          if (parameters.midPrice.isLessOrEqualTo(FixedPointNumber.ZERO)) {
+            setOutputError('Insufficient token in the pool');
+          } else {
+            setOutputError('');
+          }
+        }
+      }
+
+      // check input
+      if (parameters.input.amount.isGreaterThan(balance)) {
+        setInputError('Insufficient balance');
+      } else {
+        setInputError('');
+      }
 
       updateUserInput({
         inputAmount: parameters.input.amount.toNumber(),
@@ -134,9 +192,9 @@ export const SwapConsole: FC = () => {
           actionRender={(): JSX.Element => {
             return (
               <TxButton
-                disabled={false}
+                disabled={isDisable}
                 method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
-                onExtrinsicSuccess={handleSuccess}
+                onInblock={handleSuccess}
                 params={params}
                 section='dex'
                 size='large'
@@ -151,12 +209,11 @@ export const SwapConsole: FC = () => {
                 className={classes.inputLeft}
                 disableTokens={[token2CurrencyId(api, userInput.outputToken)]}
                 enableTokenSelect
-                error={''}
+                error={inputError}
                 onChange={setInput}
                 onFocus={(): void => setTradeMode('EXACT_INPUT')}
                 onMax={handleMax}
                 selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
-                showMaxBtn={true}
                 value={{
                   amount: userInput.inputAmount,
                   token: token2CurrencyId(api, userInput.inputToken)
@@ -181,7 +238,7 @@ export const SwapConsole: FC = () => {
                 className={classes.inputRight}
                 disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
                 enableTokenSelect
-                error={''}
+                error={outputError}
                 onChange={setOutput}
                 onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
                 selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}

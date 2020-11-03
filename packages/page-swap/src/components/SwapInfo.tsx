@@ -83,13 +83,6 @@ export const SwapInfo: FC<Props> = ({ parameters }) => {
           />
         </Tag>
       </p>
-      {
-        parameters?.midPrice.isFinaite() ? (
-          <p>
-            The prices is <FormatPrice data={parameters.output.amount.div(parameters.input.amount)} />
-          </p>
-        ) : null
-      }
     </div>
   );
 };
