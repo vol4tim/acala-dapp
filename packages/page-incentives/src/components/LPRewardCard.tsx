@@ -47,6 +47,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
   });
 
   useBalanceValidator({
+    checkBalance: false,
     currency: currency,
     max: [share ? share.share : FixedPointNumber.ZERO, ''],
     updateValidator: setWithdrawValidator
@@ -204,6 +205,12 @@ const Action: FC<ActionProps> = ({ currency }) => {
     navigate({ pathname: '/amm' });
   }, [navigate]);
 
+  const showManager = useMemo(() => {
+    const minimum = new FixedPointNumber('0.0000001');
+
+    return balance.isGreaterThan(minimum) || share.share.isGreaterThan(minimum);
+  }, [balance, share]);
+
   return (
     <div className={classes.action}>
       {
@@ -220,16 +227,16 @@ const Action: FC<ActionProps> = ({ currency }) => {
         ) : null
       }
       {
-        balance.isLessOrEqualTo(FixedPointNumber.ZERO) ? (
-          <Button
-            className={classes.btn}
-            onClick={goToLiquidity}
-          >Get Reward By Add Liquidity!</Button>
-        ) : (
+        showManager ? (
           <Button
             className={classes.btn}
             onClick={(): void => open()}
           >Manager</Button>
+        ) : (
+          <Button
+            className={classes.btn}
+            onClick={goToLiquidity}
+          >Get Reward By Add Liquidity!</Button>
         )
       }
       <ManagerModel

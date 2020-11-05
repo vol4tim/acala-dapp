@@ -1,4 +1,4 @@
-import React, { memo, createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo, useRef, Dispatch } from 'react';
+import React, { memo, createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo } from 'react';
 import { u32 } from '@polkadot/types';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Token, TokenPair, FixedPointNumber, getPresetToken } from '@acala-network/sdk-core';

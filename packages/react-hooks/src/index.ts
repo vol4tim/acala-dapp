@@ -63,6 +63,5 @@ export * from './utils';
 export * from './useRequestChart';
 export * from './dashboardHomeHooks';
 
-// nfg
+// nft
 export * from './nftHooks';
-

@@ -25,8 +25,8 @@ interface MenuItemProps {
 }
 
 const MenuItem: FC<MenuItemProps> = ({
-  currency,
   checkBalance,
+  currency,
   disabledCurrencies,
   onClick,
   value,

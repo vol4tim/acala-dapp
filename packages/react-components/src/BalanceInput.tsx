@@ -118,7 +118,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         )}
       />
     );
-  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition]);
+  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition, checkSelectBalance]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);

@@ -206,8 +206,8 @@ export const DepositConsole: FC = () => {
             leftRender={(): JSX.Element => {
               return (
                 <BalanceInput
-                  disabled={!availableLP}
                   disableTokens={[token2Info.token]}
+                  disabled={!availableLP}
                   enableTokenSelect
                   error={token1Error}
                   onChange={handleToken1Change}
@@ -228,8 +228,8 @@ export const DepositConsole: FC = () => {
             rightRender={(): JSX.Element => {
               return (
                 <BalanceInput
-                  disabled={!availableLP}
                   disableTokens={[token1Info.token]}
+                  disabled={!availableLP}
                   enableTokenSelect
                   error={token2Error}
                   onChange={handleToken2Change}

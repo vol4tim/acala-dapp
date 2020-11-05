@@ -71,7 +71,7 @@ export const drawBulletBar = ($container: HTMLElement, config: BulletBarConfigIt
       return 0;
     }
 
-    return scale(data);
+    return scale(data) || 0;
   };
 
   mapAttr(canvas.append('rect'), {

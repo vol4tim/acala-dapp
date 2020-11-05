@@ -1,11 +1,10 @@
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 
 import { formatDuration, getTokenName } from '@acala-dapp/react-components';
 import { Dropdown, DropdownConfig } from '@acala-dapp/ui-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
 import classes from './TargetRedeemList.module.scss';
-import { StakingPoolContext } from './StakingPoolProvider';
 import { useStakingPool, useStakingPoolFreeList, useApi, useConstants } from '@acala-dapp/react-hooks';
 
 interface Props extends BareProps {

@@ -28,6 +28,7 @@ type Props<T> = {
   rawProps?: RawProps<T>;
   showHeader?: boolean;
   cellClassName?: string;
+  disabledRows?: number[];
   headerCellClassName?: string;
   empty?: ReactNode;
   size?: 'small' | 'normal';
@@ -40,6 +41,7 @@ export function Table<T> ({
   className,
   config,
   data,
+  disabledRows,
   empty,
   headerCellClassName,
   loading = false,
@@ -85,9 +87,14 @@ export function Table<T> ({
           onClick = (event): void => rawProps.onClick(event, item);
         }
 
+        const className = clsx(
+          classes.row,
+          { [classes.disabled]: disabledRows && disabledRows.findIndex((i) => i === index) !== -1 }
+        );
+
         return (
           <tr
-            className={classes.row}
+            className={className}
             key={`table-body-${index}`}
             {...rawProps}
             onClick={onClick}
@@ -125,7 +132,7 @@ export function Table<T> ({
         </tr>
       );
     }
-  }, [loading, data, empty, config, rawProps, cellClassName, renderItem]);
+  }, [loading, data, empty, config, rawProps, cellClassName, renderItem, disabledRows]);
 
   return (
     <table className={clsx(classes.root, classes[size], className, { [classes.border]: border })}>
@@ -162,9 +169,7 @@ export function Table<T> ({
         ) : null
       }
       <tbody>
-        {
-          renderContent()
-        }
+        {renderContent()}
       </tbody>
     </table>
   );

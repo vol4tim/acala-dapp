@@ -1,8 +1,7 @@
-import React, { FC, useContext } from 'react';
+import React, { FC } from 'react';
 
 import { Card, List } from '@acala-dapp/ui-components';
 import { FormatRatio, FormatBalance } from '@acala-dapp/react-components';
-import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { useStakingPool, useConstants } from '@acala-dapp/react-hooks';

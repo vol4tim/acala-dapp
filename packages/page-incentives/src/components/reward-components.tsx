@@ -59,7 +59,7 @@ export const UserPoolRate: FC<UserPoolRateProps> = ({
   );
 };
 
-export const TotalReward: FC<{ currency: CurrencyId; rewardCurrency: CurrencyId; poolId: PoolId }> = ({ currency, poolId, rewardCurrency}) => {
+export const TotalReward: FC<{ currency: CurrencyId; rewardCurrency: CurrencyId; poolId: PoolId }> = ({ currency, poolId, rewardCurrency }) => {
   const share = useIncentiveShare(poolId, currency);
 
   return (

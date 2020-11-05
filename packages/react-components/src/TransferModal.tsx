@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
-import { useModal, useAccounts, useConstants, useLPCurrencies, useBalanceValidator, useAddressValidator, useBalance } from '@acala-dapp/react-hooks';
+import { useModal, useAccounts, useConstants, useLPCurrencies, useBalance } from '@acala-dapp/react-hooks';
 
 import { tokenEq, eliminateGap } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';

@@ -5,7 +5,6 @@ import { ReactComponent as TwitterSVG } from '@acala-dapp/apps/assets/twitter.sv
 import { ReactComponent as EmailSVG } from '@acala-dapp/apps/assets/email.svg';
 import { ReactComponent as LoanSVG } from '@acala-dapp/apps/assets/loan.svg';
 import { ReactComponent as ExchangeSVG } from '@acala-dapp/apps/assets/exchange.svg';
-import { ReactComponent as GovernanceSVG } from '@acala-dapp/apps/assets/governance.svg';
 import { ReactComponent as LiquidSVG } from '@acala-dapp/apps/assets/liquid.svg';
 import { ReactComponent as GuideSVG } from '@acala-dapp/apps/assets/guide.svg';
 import { ReactComponent as FaucetSVG } from '@acala-dapp/apps/assets/faucet.svg';

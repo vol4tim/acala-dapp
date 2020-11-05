@@ -1,35 +1,33 @@
 import React, { FC, useContext, useState, useCallback, useMemo, useRef, useEffect, ReactNode } from 'react';
 
-import { useUserLoan, useConstants, useAllUserLoans } from '@acala-dapp/react-hooks';
+import { CurrencyId } from '@acala-network/types/interfaces';
+import { useConstants, useAllUserLoans, useBalance } from '@acala-dapp/react-hooks';
 import { Table, TableConfig, Radio, Button } from '@acala-dapp/ui-components';
 import { Token, tokenEq, UserAssetBalance, UserAssetValue, Price, StableFeeAPR, RequiredCollateralRatio, LiquidationRatio, LiquidationPenalty } from '@acala-dapp/react-components';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import classes from './SelectCollateral.module.scss';
 import { createProviderContext } from './CreateProvider';
 import { LoanContext } from './LoanProvider';
 
 interface SelectProps {
-  currency: CurrencyLike;
-  onClick: (currency: CurrencyLike) => void;
-  selected: CurrencyLike;
+  currency: CurrencyId;
+  disabled: boolean;
+  onClick: (currency: CurrencyId) => void;
+  selected: boolean;
 }
 
 const Select: FC<SelectProps> = ({
   currency,
+  disabled,
   onClick,
   selected
 }) => {
-  const loan = useUserLoan(currency);
-
-  if (!loan) {
-    return null;
-  }
+  const balance = useBalance(currency);
 
   return (
     <Radio
-      checked={tokenEq(currency, selected)}
-      disabled={!loan.collateral.isEmpty}
+      checked={selected}
+      disabled={disabled || balance.isZero()}
       label={
         <Token
           currency={currency}
@@ -42,7 +40,7 @@ const Select: FC<SelectProps> = ({
   );
 };
 
-const Balance: FC<{ currency: CurrencyLike}> = ({ currency }) => {
+const Balance: FC<{ currency: CurrencyId }> = ({ currency }) => {
   return (
     <div className={classes.balanceArea}>
       <UserAssetBalance className={classes.balance}
@@ -55,93 +53,103 @@ const Balance: FC<{ currency: CurrencyLike}> = ({ currency }) => {
 
 export const SelectCollateral: FC = () => {
   const { loanCurrencies } = useConstants();
-  const [selected, setSelected] = useState<CurrencyLike>('');
   const loans = useAllUserLoans(true);
+  const [selected, setSelected] = useState<CurrencyId>();
   const { setSelectedToken, setStep } = useContext(createProviderContext);
   const { cancelCurrentTab } = useContext(LoanContext);
-  const collateralDisabled = useRef<{[k in string]: boolean}>({});
+  const collateralDisabled = useRef<Map<string, boolean>>(new Map());
 
   useEffect(() => {
     if (!loans) return;
 
     loans.forEach(({ currency }) => {
-      if (loans.findIndex((item): boolean => tokenEq(item.currency, currency)) !== -1) {
-        collateralDisabled.current[currency.toString()] = false;
-      }
+      collateralDisabled.current.set(currency.toString(), false);
     });
   }, [loans]);
 
-  const handleRowClick = useCallback((_event: any, data: CurrencyLike) => {
-    if (collateralDisabled.current[data.toString()] !== false) {
+  const handleRowClick = useCallback((_event: any, data: CurrencyId) => {
+    if (collateralDisabled.current.get(data.toString()) !== false) {
       setSelected(data);
     }
   }, [setSelected]);
 
-  const handleSelect = useCallback((token: CurrencyLike): void => {
+  const handleSelect = useCallback((token: CurrencyId): void => {
     setSelected(token);
   }, [setSelected]);
 
   const handleNext = useCallback((): void => {
+    if (!selected) return;
+
     setStep('generate');
     setSelectedToken(selected);
   }, [setStep, setSelectedToken, selected]);
 
-  const isNextDisabled = useMemo((): boolean => !selected, [selected]);
+  const isNextDisabled = useMemo(() => !selected, [selected]);
 
   const tableConfig: TableConfig[] = useMemo(() => [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => (
-        <Select
-          currency={currency}
-          onClick={handleSelect}
-          selected={selected}
-        />
-      ),
+      render: (currency: CurrencyId): ReactNode => {
+        if (!loans) return null;
+
+        const loan = loans.find((item) => tokenEq(item.currency, currency));
+        // disabled selector when loan exisit
+        const isDisabled = !!loan;
+        const isSelected = !!selected && tokenEq(selected, currency);
+
+        return (
+          <Select
+            currency={currency}
+            disabled={isDisabled}
+            onClick={handleSelect}
+            selected={isSelected}
+          />
+        );
+      },
       title: 'Collateral Type'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyLike): ReactNode => <Balance currency={token} />,
+      render: (token: CurrencyId): ReactNode => <Balance currency={token} />,
       title: 'Avail.Balance'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => <Price currency={currency} />,
+      render: (currency: CurrencyId): ReactNode => <Price currency={currency} />,
       title: 'Price'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => <StableFeeAPR currency={currency} />,
+      render: (currency: CurrencyId): ReactNode => <StableFeeAPR currency={currency} />,
       title: 'Interest Rate'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => <RequiredCollateralRatio currency={currency} />,
+      render: (currency: CurrencyId): ReactNode => <RequiredCollateralRatio currency={currency} />,
       title: 'Min.Collateral'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => <LiquidationRatio currency={currency} />,
+      render: (currency: CurrencyId): ReactNode => <LiquidationRatio currency={currency} />,
       title: 'LIQ Ratio'
     },
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyLike): ReactNode => <LiquidationPenalty currency={currency} />,
+      render: (currency: CurrencyId): ReactNode => <LiquidationPenalty currency={currency} />,
       title: 'LIQ Fee'
     }
-  ], [selected, handleSelect]);
+  ], [selected, handleSelect, loans]);
 
   return (
     <div className={classes.root}>
-      <Table<CurrencyLike>
+      <Table<CurrencyId>
         config={tableConfig}
         data={loanCurrencies}
         rawProps={{

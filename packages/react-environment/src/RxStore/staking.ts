@@ -14,7 +14,7 @@ export class StakingPoolStore extends BaseRxStore {
   public data$!: Observable<StakingPoolData>;
   private api!: ApiRx;
 
-  init (api: ApiRx): void{
+  init (api: ApiRx): void {
     this.api = api;
     this.run();
   }

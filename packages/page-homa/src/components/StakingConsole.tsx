@@ -6,7 +6,6 @@ import { TxButton, BalanceInput, FormatBalance, BalanceInputValue, eliminateGap 
 import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './StakingConsole.module.scss';
-import { StakingTokeBalances } from './StakingTokenBalances';
 
 export const StakingConsole: FC = () => {
   const { liquidCurrency, stakingCurrency } = useConstants();

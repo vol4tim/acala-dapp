@@ -81,7 +81,7 @@ export const useShareAndWithdrawnReward = (poolId: PoolId, currency: CurrencyId,
   }, [info]);
 
   return result;
-}
+};
 
 interface RewardPool {
   currency: CurrencyId;

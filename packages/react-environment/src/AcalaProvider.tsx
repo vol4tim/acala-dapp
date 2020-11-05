@@ -21,9 +21,9 @@ export const AcalaProvider: FC<AcalaProviderProps> = ({
     <SettingProvider>
       <ApiProvider>
         <AccountProvider
-          applicationName={applicationName}
           NoAccounts={<NoAccounts />}
           NoExtensions={<NoExtensions />}
+          applicationName={applicationName}
         >
           <StoreProvier>
             <RxStoreProvider>

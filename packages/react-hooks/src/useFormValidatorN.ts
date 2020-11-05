@@ -1,6 +1,6 @@
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { getTokenName, isValidateAddress, BalanceInputValue } from '@acala-dapp/react-components';
-import { CurrencyId, Balance } from '@acala-network/types/interfaces';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useBalance } from './balanceHooks';
 import { useCallback, useEffect } from 'react';

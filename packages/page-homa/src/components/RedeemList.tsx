@@ -1,7 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 
 import { Card, TableConfig, Table, Condition } from '@acala-dapp/ui-components';
-import { useCurrentRedeem, useStakingPoolFreeList, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
+import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 

@@ -1,19 +1,14 @@
-import React, { FC, memo, useMemo, useContext, useEffect, ReactNode } from 'react';
+import React, { FC, useContext, ReactNode } from 'react';
 import clsx from 'clsx';
 
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
-import { CurrencyId } from '@acala-network/types/interfaces';
-
 import { Tag, ArrowRightOutlined } from '@acala-dapp/ui-components';
-import { FormatBalance, FormatRatio, tokenEq, getCurrencyIdFromName, Token, TokenImage, FormatPrice, FormatNumber } from '@acala-dapp/react-components';
-import { usePrice, useDexExchangeRate, useConstants, useApi } from '@acala-dapp/react-hooks';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { FormatBalance, getCurrencyIdFromName, TokenImage } from '@acala-dapp/react-components';
+import { useApi } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
-import { SwapContext, PoolData } from './SwapProvider';
-import { FixedPointNumber, token2CurrencyId } from '@acala-network/sdk-core';
+import { SwapContext } from './SwapProvider';
+import { token2CurrencyId } from '@acala-network/sdk-core';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
-import { FormItemPrefixContext } from 'antd/lib/form/context';
 
 interface SwapRouteProps {
   parameters: TradeParameters;
@@ -46,15 +41,15 @@ const SwapRoute: FC<SwapRouteProps> = ({ parameters }) => {
   );
 };
 
-const SwapFee: FC = () => {
-  const { api } = useApi();
+// const SwapFee: FC = () => {
+//   const { api } = useApi();
 
-  return (
-    <div className={classes.info}>
-      Transaction Fee is <FormatRatio data={FixedPointNumber.fromInner(api.consts.dex.getExchangeFee.toString())} />
-    </div>
-  );
-};
+//   return (
+//     <div className={classes.info}>
+//       Transaction Fee is <FormatRatio data={FixedPointNumber.fromInner(api.consts.dex.getExchangeFee.toString())} />
+//     </div>
+//   );
+// };
 
 interface Props {
   parameters: TradeParameters;

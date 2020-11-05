@@ -8,7 +8,6 @@ import { useConstants, useBalance } from '@acala-dapp/react-hooks';
 import { TokenImage, TokenName, UserAssetBalance, UserAssetValue, tokenEq, StakingPoolExchangeRate } from '@acala-dapp/react-components';
 
 import classes from './WalletBalance.module.scss';
-import { focusToFixed18 } from './utils';
 
 interface BalanceProps extends BareProps {
   currency: CurrencyId;

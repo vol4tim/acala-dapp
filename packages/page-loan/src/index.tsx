@@ -7,7 +7,6 @@ import { CreateConsole } from './components/CreateConsole';
 import { LoanProvider, LoanContext } from './components/LoanProvider';
 import { LoanConsole } from './components/LoanConsole';
 import { Overview } from './components/Overview';
-import { Transaction } from './components/Transaction';
 import { EmergencyShutdown } from './components/emergency-shutdown';
 import { WalletBalance } from '@acala-dapp/react-components';
 import { LoanAlert } from './components/LoanAlert';

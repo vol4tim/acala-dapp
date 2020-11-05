@@ -39,8 +39,6 @@ export * from './Loan';
 // dex
 export * from './LPExchangeRate';
 export * from './LPSize';
-export * from './DexReward';
-export * from './DexRewardRatio';
 export * from './LPShare';
 
 // homa

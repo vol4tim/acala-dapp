@@ -1,10 +1,5 @@
 import { useState, useRef, MutableRefObject, useCallback, useMemo, useEffect } from 'react';
-import { ApiRx } from '@polkadot/api';
-import { CurrencyId } from '@acala-network/types/interfaces';
-import { FixedPointNumber } from '@acala-network/sdk-core';
-
 import { useMemorized } from './useMemorized';
-import { useApi } from './useApi';
 
 interface Instance<T> {
   reset: () => void;

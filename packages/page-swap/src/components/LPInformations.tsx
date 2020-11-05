@@ -3,8 +3,8 @@ import React, { FC, ReactNode } from 'react';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Section, Card, Table, TableConfig } from '@acala-dapp/ui-components';
-import { Token, LPExchangeRate, LPSize, LPSizeWithShare } from '@acala-dapp/react-components';
-import { useLPCurrencies, useApi } from '@acala-dapp/react-hooks';
+import { Token, LPExchangeRate, LPSize } from '@acala-dapp/react-components';
+import { useLPCurrencies } from '@acala-dapp/react-hooks';
 
 import classes from './LPInformations.module.scss';
 
