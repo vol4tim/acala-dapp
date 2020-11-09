@@ -104,7 +104,7 @@ export const SwapConsole: FC = () => {
     promiseRef.current.then(() => setInputError(''))
       .catch((e: any) => setInputError(e.message));
   /* eslint-disable-next-line */
-  }, [balanceValidator]);
+  }, [balanceValidator, userInput.inputAmount]);
 
   const setInput = useCallback((value: BalanceInputValue) => {
     updateUserInput({
@@ -139,8 +139,7 @@ export const SwapConsole: FC = () => {
   }, [inputError, outputError, parameters, userInput]);
 
   useSubscription(() => {
-    if (!api) return;
-    if (!swapTrade) return;
+    if (!api || !swapTrade) return;
 
     const usedTokenPairs = swapTrade.getTradeTokenPairsByPaths();
 

@@ -167,9 +167,9 @@ const UnstakePanel: FC = () => {
     });
     setTwoWayValue([
       { amount: maxToUnstake.toNumber(), token: inputValue.token },
-      { amount: unstakeResult.received.toNumber(), token: liquidCurrency }
+      { amount: unstakeResult.received.toNumber(), token: stakingCurrency }
     ]);
-  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, liquidCurrency, maxToUnstake, inputValue]);
+  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, stakingCurrency, maxToUnstake, inputValue]);
 
   const handleChange = useCallback((value: BalanceInputValue) => {
     if (!stakingPool) return;
@@ -188,9 +188,9 @@ const UnstakePanel: FC = () => {
     setInputValue(value);
     setTwoWayValue([
       value,
-      { amount: unstakeResult.received.toNumber(), token: liquidCurrency }
+      { amount: unstakeResult.received.toNumber(), token: stakingCurrency }
     ]);
-  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, liquidCurrency]);
+  }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, stakingCurrency]);
 
   const params = useCallback(() => {
     if (!liquidCurrencyBalance) return;
@@ -216,8 +216,8 @@ const UnstakePanel: FC = () => {
   const onSuccess = useCallback(() => {
     reset();
     setTwoWayValue([
-      { amount: 0, token: stakingCurrency },
-      { amount: 0, token: liquidCurrency }
+      { amount: 0, token: liquidCurrency },
+      { amount: 0, token: stakingCurrency }
     ]);
     setUnStakeResult(undefined);
   }, [reset, setTwoWayValue, stakingCurrency, liquidCurrency, setUnStakeResult]);

@@ -56,7 +56,7 @@ export class PriceStore extends BaseRxStore {
         // calculate native currency price
         if (acaLP) {
           /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
-          const price = FixedPointNumber.fromInner(acaLP[0].toString()).div(FixedPointNumber.fromInner(acaLP[1].toString()));
+          const price = FixedPointNumber.fromInner(acaLP[1].toString()).div(FixedPointNumber.fromInner(acaLP[0].toString()));
 
           insertPrice(result, nativeCurrency.asToken.toString(), price);
         }

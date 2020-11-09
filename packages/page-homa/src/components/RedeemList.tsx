@@ -1,44 +1,47 @@
-import React, { FC, ReactNode } from 'react';
+import React, { FC, ReactNode, useEffect } from 'react';
 
-import { Card, TableConfig, Table, Condition } from '@acala-dapp/ui-components';
+import { Card, TableConfig, Table, Condition, SpaceBetweenBox, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
 import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
-import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
+import { Fixed18 } from '@acala-network/app-util';
 
 import classes from './RedeemList.module.scss';
 
 export const RedeemList: FC = () => {
   const { stakingCurrency } = useConstants();
-  const currentRedeem = useCurrentRedeem();
+  const { currentRedeem, query } = useCurrentRedeem();
   const redeemList = useRedeemList();
   const stakingPool = useStakingPool();
 
   const renderHeader = (): ReactNode => {
     return (
-      <div className={classes.header}>
+      <SpaceBetweenBox>
         <div>Redeem Tracker</div>
-        <div className={classes.currentRedeem}>
-          {
-            currentRedeem && stakingPool ? (
-              <FormatBalance
-                balance={convertToFixed18(currentRedeem.amount)}
-                currency={stakingCurrency}
-              />
-            ) : null
-          }
-          {
-            currentRedeem ? (
+        {
+          !currentRedeem.isZero() ? (
+            <FlexBox
+              alignItems={'center'}
+              justifyContent={'space-between'}
+            >
+              <PaddingBox padding={'0 8px 0 0'}>
+                <FormatBalance
+                  balance={currentRedeem}
+                  currency={stakingCurrency}
+                />
+              </PaddingBox>
               <TxButton
                 method='withdrawRedemption'
+                onExtrinsicSuccsss={query}
                 params={[]}
                 section='homa'
               >
                 Withdraw
               </TxButton>
-            ) : null
-          }
-        </div>
-      </div>
+            </FlexBox>
+
+          ) : null
+        }
+      </SpaceBetweenBox>
     );
   };
 
@@ -88,7 +91,7 @@ export const RedeemList: FC = () => {
     }
   ];
 
-  if (redeemList.length === 0 && !currentRedeem) {
+  if (redeemList.length === 0 && currentRedeem.isZero()) {
     return null;
   }
 

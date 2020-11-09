@@ -211,6 +211,8 @@ const Action: FC<ActionProps> = ({ currency }) => {
     return balance.isGreaterThan(minimum) || share.share.isGreaterThan(minimum);
   }, [balance, share]);
 
+  console.log(balance.toString(), currency.toString(), showManager);
+
   return (
     <div className={classes.action}>
       {

@@ -3,7 +3,7 @@ import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { BlockNumber, SubAccountStatus, Amount } from '@acala-network/types/interfaces';
+import { BlockNumber, SubAccountStatus, Amount, Balance } from '@acala-network/types/interfaces';
 
 import { useApi } from './useApi';
 import { useCall } from './useCall';
@@ -81,12 +81,12 @@ export const useRedeemList = (): RedeemItem[] => {
   const stakingPool = useStakingPool();
   const [redeemList, setRedeemList] = useState<RedeemItem[]>([]);
 
-  useSubscription((): Observable<{ era: number; balance: Fixed18}[]> => {
+  useSubscription(() => {
     if (!stakingPool || !active) return;
 
     const duration = stakingPool.derive.bondingDuration.toNumber();
     const start = stakingPool.derive.currentEra.toNumber();
-    const eraArray = new Array(duration).fill(undefined).map((_i, index) => start + index + 2);
+    const eraArray = new Array(duration + 1).fill(undefined).map((_i, index) => start + index + 1);
 
     return combineLatest(
       eraArray.map((era: number) => api.query.stakingPool.claimedUnbond<Balance>(active.address, era))
