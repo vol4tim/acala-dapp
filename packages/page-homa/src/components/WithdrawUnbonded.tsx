@@ -20,7 +20,7 @@ export const WithdrawUnbonded: FC = memo(() => {
   return (
     <Card>
       <p>
-        {`You have ${formatBalance(result.amount).toNumber()} can withdraw`}
+        {`You have ${formatBalance(result.amount)} can withdraw`}
       </p>
       {
         !result.amount.isEmpty && (

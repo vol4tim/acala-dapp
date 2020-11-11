@@ -1,8 +1,7 @@
-import { ReactElement, ReactNode } from 'react';
+import { ReactElement } from 'react';
 
 export interface SideBarItem {
   icon?: ReactElement;
-  name: ReactNode;
   path?: string;
   target?: string;
   href?: string;

@@ -1,11 +1,10 @@
 import React, { FC, useMemo, ReactElement, ReactNode, useCallback, isValidElement, cloneElement } from 'react';
 import CSS from 'csstype';
 import clsx from 'clsx';
+import styled from 'styled-components';
 
 import { BareProps } from './types';
 import classes from './Box.module.scss';
-import styled from 'styled-components';
-import { style } from 'd3';
 
 export const InlineBlockBox: FC<{ margin: number } & BareProps> = ({ children, className, margin }) => {
   return (
@@ -79,11 +78,11 @@ export const GridBox: FC<GridBoxProps> = ({
 
   const justifyChild = useCallback((child: ReactNode): ReactNode => {
     if (isValidElement(child)) {
-      child = child as ReactElement;
+      const _child = child as ReactElement<any>;
 
-      return cloneElement(child, {
+      return cloneElement(_child, {
         style: {
-          ...child?.props?.style,
+          ..._child?.props?.style,
           margin: `${padding}px ${padding}px 0 0`
         }
       });

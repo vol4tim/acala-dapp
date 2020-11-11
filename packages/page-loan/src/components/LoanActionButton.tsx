@@ -47,7 +47,7 @@ export const LonaActionButton: FC<Props> = ({
     }
 
     if (type === 'withdraw') {
-      return loanHelper.collaterals.sub(loanHelper.requiredCollateral).toNumber(6, 3);
+      return loanHelper.collaterals.sub(loanHelper.requiredCollateral).max(Fixed18.ZERO).toNumber(6, 3);
     }
 
     return 0;

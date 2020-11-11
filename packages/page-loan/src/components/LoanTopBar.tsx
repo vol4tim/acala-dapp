@@ -1,17 +1,17 @@
 import React, { FC, memo, useContext, useMemo } from 'react';
 import clsx from 'clsx';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { TokenImage, TokenName, CollateralRate } from '@acala-dapp/react-components';
+import { useAllUserLoans, filterEmptyLoan, useLoanHelper } from '@acala-dapp/react-hooks';
 
 import { ReactComponent as OverviewIcon } from '../assets/overview.svg';
 import { ReactComponent as AddIcon } from '../assets/add.svg';
-import classes from './LoanTopBar.module.scss';
-import { useAllUserLoans, filterEmptyLoan, useLoanHelper } from '@acala-dapp/react-hooks';
 import { LoanContext } from './LoanProvider';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { getLoanStatus } from '../utils';
+import classes from './LoanTopBar.module.scss';
 
 interface LoanItemProps {
-  token: CurrencyLike;
+  token: CurrencyId;
 }
 
 const LoanItem: FC<LoanItemProps> = memo(({ token }) => {
@@ -116,7 +116,7 @@ export const LoanTopBar: FC = () => {
         filterEmptyLoan(loans).map((item) => (
           <LoanItem
             key={`loan-top-bar-${item.currency}`}
-            token={item.currency}
+            token={item.currency as unknown as CurrencyId}
           />
         ))
       }

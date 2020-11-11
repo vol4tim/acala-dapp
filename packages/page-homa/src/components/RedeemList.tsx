@@ -1,11 +1,9 @@
-import React, { FC, ReactNode, useEffect } from 'react';
+import React, { FC, ReactNode } from 'react';
 
 import { Card, TableConfig, Table, Condition, SpaceBetweenBox, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
 import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
 import { Fixed18 } from '@acala-network/app-util';
-
-import classes from './RedeemList.module.scss';
 
 export const RedeemList: FC = () => {
   const { stakingCurrency } = useConstants();

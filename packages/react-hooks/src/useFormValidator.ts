@@ -3,7 +3,7 @@ import { useMemo } from 'react';
 
 import { ApiRx } from '@polkadot/api';
 import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
-import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { tokenEq, getTokenName } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
@@ -68,9 +68,9 @@ export function getFormValidator<T> (config: Config, api: ApiRx, active: Injecte
 
           const _balance = _balanceData.balance;
 
-          const _value = Fixed18.fromNatural(value);
-          const _max = Fixed18.fromNatural(_config.max !== undefined ? _config.max : Number.MAX_VALUE);
-          const _min = Fixed18.fromNatural(_config.min !== undefined ? _config.min : 0);
+          const _value = new FixedPointNumber(value);
+          const _max = new FixedPointNumber(_config.max !== undefined ? _config.max : Number.MAX_VALUE);
+          const _min = new FixedPointNumber(_config.min !== undefined ? _config.min : 0);
 
           // ensure balance is sufficient
           if (_value.isGreaterThan(_balance)) {

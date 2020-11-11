@@ -10,6 +10,8 @@ import { LiquidationRatioCard } from './LiquidationRatioCard';
 export const LoanConsole: FC = () => {
   const { currentTab } = useContext(LoanContext);
 
+  if (typeof currentTab === 'string') return null;
+
   return (
     <Grid container>
       <Grid item

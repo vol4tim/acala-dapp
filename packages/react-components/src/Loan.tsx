@@ -1,11 +1,11 @@
 import React, { FC, useMemo } from 'react';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { FormatNumberProps, FormatRatio, FormatBalanceProps, FormatBalance } from './format';
 import { useLoanHelper, useConstants, useLoanType, useLoanOverview, usePrice } from '@acala-dapp/react-hooks';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
 type LoanPropertyProps<T> = T & {
-  currency: CurrencyLike;
+  currency: CurrencyId;
 }
 
 export const CollateralRate: FC<LoanPropertyProps<Omit<FormatNumberProps, 'data'>>> = ({

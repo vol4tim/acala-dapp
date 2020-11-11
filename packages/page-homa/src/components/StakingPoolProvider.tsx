@@ -1,10 +1,10 @@
 import React, { createContext, FC, memo, useState, useEffect } from 'react';
-import { useStakingPool, UseStakingPoolReturnType, useInitialize } from '@acala-dapp/react-hooks';
+import { useStakingPool, useInitialize } from '@acala-dapp/react-hooks';
 import { PageLoading } from '@acala-dapp/ui-components';
 
 export type ACTION_TYPE = 'staking' | 'redeem';
 
-export interface ContextData extends UseStakingPoolReturnType {
+export interface ContextData {
   action: ACTION_TYPE;
   setAction: (type: ACTION_TYPE) => void;
 }
@@ -25,7 +25,7 @@ export const StakingPoolProvider: FC = memo(({ children }) => {
   }, [result, setEnd]);
 
   return (
-    <StakingPoolContext.Provider value={{ ...result, action, setAction }}>
+    <StakingPoolContext.Provider value={{ action, setAction }}>
       {isInitialized ? children : <PageLoading />}
     </StakingPoolContext.Provider>
   );

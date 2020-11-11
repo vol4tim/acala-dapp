@@ -94,13 +94,13 @@ export const formatBalance = (balance: FixedPointNumber | Fixed18 | Codec | numb
 
   if (typeof balance === 'string') return Number(balance);
 
-  if (balance instanceof FixedPointNumber) return balance.toNumber(6);
+  if (balance instanceof FixedPointNumber) return balance.toNumber();
 
   if (balance instanceof Fixed18) return balance.toNumber(6, 3);
 
   try {
     // for Codec
-    return FixedPointNumber.fromInner(balance.toString()).toNumber(6);
+    return FixedPointNumber.fromInner(balance?.toString() || 0).toNumber(6);
   } catch (e) {
     // swallow error
   }

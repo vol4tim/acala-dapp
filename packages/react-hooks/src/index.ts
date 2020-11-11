@@ -39,7 +39,6 @@ export * from './dexAccumulateDataHooks';
 
 // homa
 export * from './stakingPoolHooks';
-export * from './useStakingPool';
 export * from './useCurrentRedeem';
 
 // loan

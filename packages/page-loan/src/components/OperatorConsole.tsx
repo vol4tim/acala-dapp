@@ -1,5 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { useConstants, useLoanHelper, useBalance } from '@acala-dapp/react-hooks';
 import { getTokenName, TokenImage, FormatBalance, FormatValue } from '@acala-dapp/react-components';
 import { Card } from '@acala-dapp/ui-components';
@@ -8,7 +8,7 @@ import { debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
 import { LonaActionButton } from './LoanActionButton';
 
 interface OperatorConsoleProps {
-  currency: CurrencyLike;
+  currency: CurrencyId;
 }
 
 export const DebitConsole: FC<OperatorConsoleProps> = ({ currency }) => {
@@ -97,7 +97,7 @@ export const CollateralConsole: FC<OperatorConsoleProps> = ({ currency }) => {
     if (!helper) return true;
     if (!balance) return true;
 
-    return convertToFixed18(balance).isZero();
+    return balance.isZero();
   }, [helper, balance]);
 
   const isWithdrawDisabled = useMemo(() => {

@@ -25,6 +25,7 @@ export interface FormatBalanceProps extends BareProps {
   decimalLength?: number;
   color?: FormatterColor;
   isSort?: boolean;
+  negativeToZero?: boolean;
 }
 
 const formatBalanceConfig: FormatNumberProps['formatNumberConfig'] = {
@@ -40,18 +41,25 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
   currency,
   decimalLength = 6,
   isSort = true,
+  negativeToZero = true,
   pair,
   pairSymbol
 }) => {
   const pairLength = useMemo(() => pair ? pair.length : 0, [pair]);
 
   const renderBalance = useCallback((data: BalancePair, index: number): ReactNode => {
-    const _balance = formatBalance(data?.balance);
+    const balance = formatBalance(data?.balance);
+
+    let displayNumber = isFinite(balance) ? balance : 0;
+
+    if (negativeToZero) {
+      displayNumber = displayNumber < 0 ? 0 : displayNumber;
+    }
 
     return [
       <span key={'format-balance-' + index}>
         <FormatNumber
-          data={isFinite(_balance) ? _balance : 0}
+          data={displayNumber}
           formatNumberConfig={{ ...formatBalanceConfig, decimalLength }}
         />
         {data.currency ? <span>{' '}</span> : null}
@@ -59,7 +67,7 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
       </span>,
       (pairSymbol && index !== pairLength - 1) ? <span key={'format-balance-symbol-' + index}>{' '}{pairSymbol}{' '}</span> : null
     ];
-  }, [decimalLength, pairSymbol, pairLength]);
+  }, [decimalLength, pairSymbol, pairLength, negativeToZero]);
 
   return (
     <span className={clsx(classes.balance, className, color)}>
