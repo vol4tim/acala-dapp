@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Grid, Page, Tabs } from '@acala-dapp/ui-components';
+import { Row, Col, Page, Tabs } from '@acala-dapp/ui-components';
 
 import Oracles from './components/Oracles';
 import PriceChart from './components/PriceChart';
@@ -12,11 +12,11 @@ const PageDashboardHome: FC = () => {
     <Page fullscreen>
       <Page.Title title='Oracles' />
       <Page.Content>
-        <Grid container>
-          <Grid item>
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
             <Oracles />
-          </Grid>
-          <Grid item>
+          </Col>
+          <Col span={24}>
             <Page.Title title='Price Feeds' />
             <Tabs type='button'>
               {oracleCurrency.map((item: any) => {
@@ -29,8 +29,8 @@ const PageDashboardHome: FC = () => {
                 );
               })}
             </Tabs>
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

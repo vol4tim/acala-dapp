@@ -62,7 +62,7 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
   cacheKey: string;
 }): T | undefined {
   const { api } = useApi();
-  const { appReadyStatus } = useIsAppReady();
+  const isAppReady = useIsAppReady();
   const { get, set } = useStore('apiQueryStore');
   const key = useMemo(
     () =>
@@ -73,12 +73,12 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
   // on changes, re-subscribe
   useEffect(() => {
     // check if we have a function & that we are mounted
-    if (!appReadyStatus) return;
+    if (!isAppReady) return;
 
     tracker.subscribe(api, path, params, key, set);
 
     return (): void => tracker.unsubscribe(key);
-  }, [appReadyStatus, api, path, params, key, set]);
+  }, [isAppReady, api, path, params, key, set]);
 
   return get(key);
 }

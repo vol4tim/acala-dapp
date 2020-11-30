@@ -1,21 +1,20 @@
-import React, { FC, useMemo } from 'react';
-import ApolloClient from 'apollo-boost';
-import { ApolloProvider } from '@apollo/react-hooks';
+import React, { FC } from 'react';
 
 import { UIProvider } from '@acala-dapp/ui-components';
-import { AcalaProvider } from '@acala-dapp/react-environment';
+import { AcalaProvider, ChartDataProvider, RouterProvider } from '@acala-dapp/react-environment';
 import { EventsWatcher } from '@acala-dapp/react-components';
 
-import { RouterProvider } from './components/RouterProvider';
 import { config as routerConfig } from './router-config';
 
-const App: FC = () => {
-  const client = useMemo<ApolloClient<any>>(() => {
-    return new ApolloClient({ uri: 'http://118.25.24.80:4000' });
-  }, []);
+const CHARTDATA_URL = 'http://39.99.168.67:8086';
+const CHARTDATA_READONLY_TOKEN = 'piy6tjT8PkJmWZAR3TahGUP3uWWB5jcl-0rv0gwcEVlynllxrntp9UCBdnbMsqUtIIPgeUaVMnq1x2r9TvUDwg==';
 
+const App: FC = () => {
   return (
-    <ApolloProvider client={client}>
+    <ChartDataProvider
+      token={CHARTDATA_READONLY_TOKEN}
+      url={CHARTDATA_URL}
+    >
       <UIProvider>
         <AcalaProvider applicationName={'Acala Dapp'}>
           <>
@@ -24,7 +23,7 @@ const App: FC = () => {
           </>
         </AcalaProvider>
       </UIProvider>
-    </ApolloProvider>
+    </ChartDataProvider>
   );
 };
 

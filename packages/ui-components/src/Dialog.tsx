@@ -49,6 +49,7 @@ export const Dialog: FC<Props> = ({
           <Button
             onClick={onCancel}
             size='small'
+            type='border'
           >
             {cancelText}
           </Button>
@@ -74,6 +75,7 @@ export const Dialog: FC<Props> = ({
       destroyOnClose
       footer={null}
       keyboard={true}
+      maskClosable={false}
       onCancel={onCancel}
       title={title}
       visible={visiable}

@@ -1,38 +1,39 @@
-import React, { FC, useContext, useCallback } from 'react';
+import React, { FC } from 'react';
 
-import { Card, Tabs } from '@acala-dapp/ui-components';
+import { styled, Card, Tabs, useTabs } from '@acala-dapp/ui-components';
 
 import { StakingConsole } from './StakingConsole';
 import { RedeemConsole } from './RedeemConsole';
-import classes from './Console.module.scss';
-import { StakingPoolContext } from './StakingPoolProvider';
+
+const CCard = styled(Card)`
+  height: 100%;
+  padding-top: 0;
+`;
+
+type AdvanceConsoleTabType = 'staking' | 'redeem';
 
 export const Console: FC = () => {
-  const { setAction } = useContext(StakingPoolContext);
-
-  const handleChange = useCallback((value) => {
-    setAction(value);
-  }, [setAction]);
+  const { changeTabs, currentTab } = useTabs<AdvanceConsoleTabType>('staking');
 
   return (
-    <Card className={classes.root} >
+    <CCard>
       <Tabs
-        onChange={handleChange}
-        type='button'
+        active={currentTab}
+        onChange={changeTabs}
       >
         <Tabs.Panel
-          key='staking'
+          $key='staking'
           tab='Mint & Stake'
         >
           <StakingConsole />
         </Tabs.Panel>
         <Tabs.Panel
-          key='redeem'
+          $key='redeem'
           tab='Redeem'
         >
           <RedeemConsole />
         </Tabs.Panel>
       </Tabs>
-    </Card>
+    </CCard>
   );
 };

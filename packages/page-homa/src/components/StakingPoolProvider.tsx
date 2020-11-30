@@ -1,32 +1,20 @@
-import React, { createContext, FC, memo, useState, useEffect } from 'react';
-import { useStakingPool, useInitialize } from '@acala-dapp/react-hooks';
-import { PageLoading } from '@acala-dapp/ui-components';
+import React, { createContext, FC, memo, useMemo } from 'react';
+import { useStakingPool } from '@acala-dapp/react-hooks';
 
-export type ACTION_TYPE = 'staking' | 'redeem';
-
-export interface ContextData {
-  action: ACTION_TYPE;
-  setAction: (type: ACTION_TYPE) => void;
-}
+type ContextData = {};
 
 export const StakingPoolContext = createContext<ContextData>({} as ContextData);
 
 export const StakingPoolProvider: FC = memo(({ children }) => {
-  const [action, setAction] = useState<ACTION_TYPE>('staking');
   const result = useStakingPool();
-  const { isInitialized, setEnd } = useInitialize();
 
-  useEffect(() => {
-    if (!result) return;
+  const contextData = useMemo(() => ({}), []);
 
-    if (result.stakingPool) {
-      setEnd();
-    }
-  }, [result, setEnd]);
+  if (!result?.stakingPool) return null;
 
   return (
-    <StakingPoolContext.Provider value={{ action, setAction }}>
-      {isInitialized ? children : <PageLoading />}
+    <StakingPoolContext.Provider value={contextData}>
+      {children}
     </StakingPoolContext.Provider>
   );
 });

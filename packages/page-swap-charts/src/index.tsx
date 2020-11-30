@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Page, Row, Col } from '@acala-dapp/ui-components';
 import { SwapPool } from './components/SwapPool';
 import { SwapPoolDetail } from './components/SwapPoolDetail';
 
@@ -9,25 +9,14 @@ const PageWallet: FC = () => {
     <Page fullscreen>
       <Page.Title title='Swap Analysis' />
       <Page.Content>
-        <Grid container>
-          <Grid
-            item
-            span={12}
-          >
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
             <SwapPool />
-          </Grid>
-          <Grid
-            item
-            span={12}
-          >
+          </Col>
+          <Col span={24}>
             <SwapPoolDetail />
-          </Grid>
-          <Grid
-            item
-            span={12}
-          >
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

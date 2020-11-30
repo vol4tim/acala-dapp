@@ -2,7 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 
 import { DerivedUserLoan, DerivedLoanType, DerivedLoanOverView } from '@acala-network/api-derive';
 import { LoanHelper, Fixed18, debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
-import { Balance, Rate, CurrencyId } from '@acala-network/types/interfaces';
+import { Rate, CurrencyId, Position } from '@acala-network/types/interfaces';
 
 import { CurrencyLike, AccountLike } from './types';
 import { useAccounts } from './useAccounts';
@@ -13,7 +13,7 @@ import { filterEmptyLoan } from './utils';
 import { useApi } from './useApi';
 import { combineLatest, Observable } from 'rxjs';
 import { map, throttleTime } from 'rxjs/operators';
-import { tokenEq, focusToFixed18 } from '@acala-dapp/react-components';
+import { tokenEq, focusToFixed18, getTokenName } from '@acala-dapp/react-components';
 
 /**
  * @name useUserLoan
@@ -53,7 +53,7 @@ export const useAllLoansType = (): Record<string, DerivedLoanType> | undefined =
       setData(result.reduce((acc, cur, index) => {
         const currency = loanCurrencies[index];
 
-        acc[currency.toString()] = cur;
+        acc[getTokenName(currency)] = cur;
 
         return acc;
       }, {} as Record<string, DerivedLoanType>));
@@ -161,28 +161,30 @@ export const useTotalDebit = (): TotalDebitOrCollateralData | null => {
     if (!api || !loanCurrencies || !prices) return;
 
     const subscriber = combineLatest(
-      loanCurrencies.map((currency: CurrencyLike): Observable<[Fixed18, Fixed18, CurrencyLike]> => api.queryMulti<[Balance, Rate]>([
-        [api.query.loans.totalDebits, currency],
+      loanCurrencies.map((currency: CurrencyLike): Observable<[Fixed18, Fixed18, CurrencyLike]> => api.queryMulti<[Position, Rate]>([
+        [api.query.loans.totalPositions, currency],
         [api.query.cdpEngine.debitExchangeRate, currency]
-      ]).pipe(throttleTime(1000), map((result): [Fixed18, Fixed18, CurrencyLike] => [convertToFixed18(result[0]), convertToFixed18(result[1]), currency]))))
-      .subscribe((_result) => {
-        /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-        const balanceDetail = new Map(_result.map(([debit, rate, currency]): [CurrencyLike, Fixed18] => {
-          return [currency, debit];
-        }));
+      ]).pipe(
+        throttleTime(1000),
+        map((result): [Fixed18, Fixed18, CurrencyLike] => [convertToFixed18(result[0].debit), convertToFixed18(result[1]), currency])))
+    ).subscribe((_result) => {
+      /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+      const balanceDetail = new Map(_result.map(([debit, rate, currency]): [CurrencyLike, Fixed18] => {
+        return [currency, debit];
+      }));
 
-        const amountDetail = new Map(_result.map(([debit, rate, currency]) => {
-          return [currency, rate ? debit.mul(rate) : Fixed18.ZERO];
-        }));
+      const amountDetail = new Map(_result.map(([debit, rate, currency]) => {
+        return [currency, rate ? debit.mul(rate) : Fixed18.ZERO];
+      }));
 
-        const amount = _result.reduce((acc, cur) => {
-          const [_debit, _rate] = cur;
+      const amount = _result.reduce((acc, cur) => {
+        const [_debit, _rate] = cur;
 
-          return _rate ? acc.add(_debit.mul(_rate)) : acc;
-        }, Fixed18.ZERO);
+        return _rate ? acc.add(_debit.mul(_rate)) : acc;
+      }, Fixed18.ZERO);
 
-        setResult({ amount, amountDetail, balanceDetail });
-      });
+      setResult({ amount, amountDetail, balanceDetail });
+    });
 
     return (): void => subscriber.unsubscribe();
   }, [api, prices, loanCurrencies]);
@@ -201,8 +203,8 @@ export const useTotalCollateral = (): TotalDebitOrCollateralData | null => {
 
     const subscriber = combineLatest(
       loanCurrencies.map((currency: CurrencyLike): Observable<[CurrencyLike, Fixed18]> => {
-        return api.query.loans.totalCollaterals<Balance>(currency).pipe(
-          map((result): [CurrencyLike, Fixed18] => [currency, convertToFixed18(result)])
+        return api.query.loans.totalPositions<Position>(currency).pipe(
+          map((result): [CurrencyLike, Fixed18] => [currency, convertToFixed18(result.collateral)])
         );
       })
     ).pipe(throttleTime(1000)).subscribe((_result) => {

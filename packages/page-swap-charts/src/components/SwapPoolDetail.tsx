@@ -2,12 +2,11 @@ import React, { FC, useMemo } from 'react';
 
 import { Table } from 'antd';
 import { Card } from '@acala-dapp/ui-components';
-import { useConstants, useSwapOverview } from '@acala-dapp/react-hooks';
-import { Token, FormatBalance, DexExchangeRate, FormatValue } from '@acala-dapp/react-components';
+import { useSwapOverview } from '@acala-dapp/react-hooks';
+import { Token, FormatBalance, FormatValue } from '@acala-dapp/react-components';
 
 export const SwapPoolDetail: FC = () => {
   const overview = useSwapOverview();
-  const { stableCurrency } = useConstants();
 
   const columns = useMemo(() => {
     return [
@@ -18,18 +17,18 @@ export const SwapPoolDetail: FC = () => {
         title: 'Currency'
       },
       {
-        key: 'pool_other',
+        key: 'pool_detail',
         /* eslint-disable-next-line react/display-name */
         render: (item: any): JSX.Element => (
           <FormatBalance
             pair={[
               {
-                balance: item.other,
-                currency: item.currency
+                balance: item.token1Amount,
+                currency: item.token1
               },
               {
-                balance: item.base,
-                currency: stableCurrency
+                balance: item.token2Amount,
+                currency: item.token2
               }
             ]}
             pairSymbol='+'
@@ -41,20 +40,12 @@ export const SwapPoolDetail: FC = () => {
         key: 'value',
         /* eslint-disable-next-line react/display-name */
         render: (item: any): JSX.Element => (
-          <DexExchangeRate supply={item.currency} />
-        ),
-        title: 'Exchange Rate'
-      },
-      {
-        key: 'value',
-        /* eslint-disable-next-line react/display-name */
-        render: (item: any): JSX.Element => (
           <FormatValue data={item.value} />
         ),
         title: 'Value'
       }
     ];
-  }, [stableCurrency]);
+  }, []);
 
   if (!overview) return null;
 

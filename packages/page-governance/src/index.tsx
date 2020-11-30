@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Page, Row, Col } from '@acala-dapp/ui-components';
 
 import { GovernanceProvider } from './components/provider';
 import { PageTypeSelector } from './components/PageTypeSelector';
@@ -13,17 +13,17 @@ const PageWallet: FC = () => {
       <Page.Title title='Governance' />
       <Page.Content>
         <GovernanceProvider>
-          <Grid container>
-            <Grid item>
+          <Row>
+            <Col span={24}>
               <PageTypeSelector />
-            </Grid>
-            <Grid item>
+            </Col>
+            <Col span={24}>
               <CouncilSelector />
-            </Grid>
-            <Grid item>
+            </Col>
+            <Col span={24}>
               <Content />
-            </Grid>
-          </Grid>
+            </Col>
+          </Row>
         </GovernanceProvider>
       </Page.Content>
     </Page>

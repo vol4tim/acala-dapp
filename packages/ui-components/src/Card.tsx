@@ -3,8 +3,13 @@ import clsx from 'clsx';
 
 import { BareProps } from './types';
 import classes from './Card.module.scss';
+import styled from 'styled-components';
 
-export interface CardProps extends BareProps {
+export interface CardRootProps {
+  showShadow?: boolean;
+}
+
+export interface CardProps extends BareProps, CardRootProps {
   headerClassName?: string;
   contentClassName?: string;
   header?: ReactNode;
@@ -13,6 +18,15 @@ export interface CardProps extends BareProps {
   padding?: boolean;
   overflowHidden?: boolean;
 }
+
+export const CardRoot = styled.section<CardRootProps>`
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  box-shadow: ${({ showShadow }): string => showShadow ? '0 1px 20px 0 rgba(23, 65, 212, 0.02);' : 'none'};
+`;
 
 export const Card = forwardRef<HTMLDivElement, CardProps>(({
   children,
@@ -23,7 +37,8 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
   header,
   headerClassName,
   overflowHidden = false,
-  padding = true
+  padding = true,
+  showShadow = true
 }, ref) => {
   const rootClassName = clsx(
     classes.root,
@@ -43,9 +58,10 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
   );
 
   return (
-    <section
+    <CardRoot
       className={rootClassName}
       ref={ref}
+      showShadow={showShadow}
     >
       { header ? <div className={clsx(headerClassName, classes.title, { [classes.divider]: divider })}>
         {header}
@@ -54,7 +70,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
       <div className={_contentClassName}>
         {children}
       </div>
-    </section>
+    </CardRoot>
   );
 });
 

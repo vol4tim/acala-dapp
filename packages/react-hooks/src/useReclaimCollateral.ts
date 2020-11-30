@@ -1,4 +1,4 @@
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Balance } from '@open-web3/orml-types/interfaces';
 
 import { useConstants } from './useConstants';
@@ -7,11 +7,11 @@ import { useCall } from './useCall';
 import { WithNull } from './types';
 import { useTreasuryOverview } from './treasuryHooks';
 
-type ReclaimCollateralAmount = Record<string, Fixed18>;
+type ReclaimCollateralAmount = Record<string, FixedPointNumber>;
 
 export interface ReclaimCollateralData {
   collaterals: WithNull<ReclaimCollateralAmount>;
-  calcCanReceive: (amount: Fixed18) => ReclaimCollateralAmount;
+  calcCanReceive: (amount: FixedPointNumber) => ReclaimCollateralAmount;
 }
 
 export const useReclaimCollateral = (): ReclaimCollateralData => {
@@ -23,21 +23,21 @@ export const useReclaimCollateral = (): ReclaimCollateralData => {
     if (!treasury) return {};
 
     return treasury.totalCollaterals.reduce((acc, cur) => {
-      acc[cur.currency.toString()] = cur.balance;
+      acc[cur.currency.asToken.toString()] = cur.balance;
 
       return acc;
     }, {} as ReclaimCollateralAmount);
   }, [treasury]);
 
-  const calcCanReceive = useCallback((amount: Fixed18): ReclaimCollateralAmount => {
+  const calcCanReceive = useCallback((amount: FixedPointNumber): ReclaimCollateralAmount => {
     if (!totalIssuance || !collaterals) {
       return {};
     }
 
-    const ratio = amount.div(convertToFixed18(totalIssuance));
+    const ratio = amount.div(FixedPointNumber.fromInner(totalIssuance.toString()));
 
     return Object.keys(collaterals).reduce((acc, currency) => {
-      acc[currency] = (collaterals[currency] || Fixed18.ZERO).mul(ratio);
+      acc[currency] = (collaterals[currency] || FixedPointNumber.ZERO).times(ratio);
 
       return acc;
     }, {} as ReclaimCollateralAmount);

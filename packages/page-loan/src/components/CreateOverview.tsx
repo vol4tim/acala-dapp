@@ -1,6 +1,6 @@
 import React, { FC, useContext } from 'react';
 
-import { Grid, Card } from '@acala-dapp/ui-components';
+import { Row, Col, Card } from '@acala-dapp/ui-components';
 import { StableFeeAPR, LiquidationPenalty } from '@acala-dapp/react-components';
 
 import { createProviderContext } from './CreateProvider';
@@ -12,22 +12,22 @@ export const CreateOverview: FC = () => {
   const { deposit, generate, selectedToken } = useContext(createProviderContext);
 
   return (
-    <Grid container>
-      <Grid item>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
         <DynamicLiquidationPrice
           collateral={deposit}
           currency={selectedToken}
           generate={generate}
         />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <DynamicLiquidationRatio
           collateral={deposit}
           currency={selectedToken}
           generate={generate}
         />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <Card className={classes.otherInfo}
           contentClassName={classes.content}
         >
@@ -42,7 +42,7 @@ export const CreateOverview: FC = () => {
               currency={selectedToken} />
           </div>
         </Card>
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

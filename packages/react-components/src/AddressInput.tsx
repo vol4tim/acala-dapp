@@ -3,15 +3,13 @@ import clsx from 'clsx';
 
 import Identicon from '@polkadot/react-identicon';
 
-import { AutoComplete, Input, InputProps, ArrowDownIcon, Tooltip } from '@acala-dapp/ui-components';
-import { AddressInfo } from '@acala-dapp/react-environment';
+import { AutoComplete, Input, InputProps, ArrowDownIcon } from '@acala-dapp/ui-components';
 import { useAccounts, useAddressValidator } from '@acala-dapp/react-hooks';
 
 import classes from './AddressInput.module.scss';
 import { FormatAddress } from './format';
 
 interface AddressInputProps extends Omit<InputProps, 'onChange'>{
-  addressList?: AddressInfo[];
   width?: number;
   onChange: (value: { address: string; error?: string }) => void;
   showIdentIcon?: boolean;
@@ -24,7 +22,6 @@ interface AddressInputProps extends Omit<InputProps, 'onChange'>{
  * @description input and auto select account
  */
 export const AddressInput: FC<AddressInputProps> = ({
-  addressList,
   blockAddressList = [],
   inputClassName,
   onChange,
@@ -34,48 +31,35 @@ export const AddressInput: FC<AddressInputProps> = ({
 }) => {
   const [value, setValue] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const { addAddress, addressList: defaultAddressList } = useAccounts();
+  const { addToAddressBook, addressBook } = useAccounts();
   const addressValidator = useAddressValidator({ required: true });
 
-  const _addressList = useMemo((): AddressInfo[] => {
-    if (addressList) return addressList;
-
-    if (defaultAddressList) return defaultAddressList;
-
-    return [];
-  }, [addressList, defaultAddressList]);
-
   const options = useMemo(() => {
-    return _addressList
+    return addressBook
       .filter((item) => !blockAddressList.includes(item.address))
       .map((item) => {
         return {
           label: (
-            <Tooltip
-              mouseEnterDelay={0.5}
-              title={item.address}
-            >
-              <div className={classes.option}>
-                <Identicon
-                  className={classes.identicon}
-                  size={32}
-                  value={item.address}
-                />
-                <div>
-                  {item?.meta?.name ? <p>{item.meta.name}</p> : null}
-                  <FormatAddress address={item.address} />
-                </div>
+            <div className={classes.option}>
+              <Identicon
+                className={classes.identicon}
+                size={32}
+                value={item.address}
+              />
+              <div>
+                {item?.name ? <p>{item.name}</p> : null}
+                <FormatAddress address={item.address} />
               </div>
-            </Tooltip>
+            </div>
           ),
           value: item.address
         };
       });
-  }, [_addressList, blockAddressList]);
+  }, [addressBook, blockAddressList]);
 
   const insertOptions = useCallback((value: string) => {
-    addAddress(value);
-  }, [addAddress]);
+    addToAddressBook({ address: value });
+  }, [addToAddressBook]);
 
   const _setValue = useCallback((value: string): void => {
     setValue(value);

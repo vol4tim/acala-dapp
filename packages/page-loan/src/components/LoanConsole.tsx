@@ -1,6 +1,6 @@
 import React, { FC, useContext } from 'react';
 
-import { Grid } from '@acala-dapp/ui-components';
+import { Row, Col } from '@acala-dapp/ui-components';
 
 import { LoanContext } from './LoanProvider';
 import { DebitConsole, CollateralConsole } from './OperatorConsole';
@@ -13,23 +13,19 @@ export const LoanConsole: FC = () => {
   if (typeof currentTab === 'string') return null;
 
   return (
-    <Grid container>
-      <Grid item
-        span={12}>
+    <Row gutter={[24, 24]}>
+      <Col span={12}>
         <LiquidationPriceCard currency={currentTab} />
-      </Grid>
-      <Grid item
-        span={12}>
+      </Col>
+      <Col span={12}>
         <LiquidationRatioCard currency={currentTab} />
-      </Grid>
-      <Grid item
-        span={12}>
+      </Col>
+      <Col span={12}>
         <DebitConsole currency={currentTab} />
-      </Grid>
-      <Grid item
-        span={12}>
+      </Col>
+      <Col span={12}>
         <CollateralConsole currency={currentTab} />
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

@@ -14,6 +14,6 @@ if (process.env.NODE_ENV === 'development') {
 i18n.use(initReactI18next).init({
   defaultNS: 'translations',
   fallbackLng: 'en',
-  ns: ['apps', 'page-wallet', 'page-loan', 'page-swap', 'page-liquidity', 'page-homa', 'page-governance'],
+  ns: ['apps', 'page-wallet', 'page-loan', 'page-swap', 'page-homa', 'page-oracle-price', 'page-governance'],
   resources
 });

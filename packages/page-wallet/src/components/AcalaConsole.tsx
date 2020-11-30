@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 
 import { AirDrop } from './AirDrop';
-import { Grid, SubTitle } from '@acala-dapp/ui-components';
+import { Row, Col, SubTitle } from '@acala-dapp/ui-components';
 
 import { UserCard } from './UserCard';
 import { TokenBalances } from './TokenBalances';
@@ -9,23 +9,23 @@ import { LPBalances } from './LPBalances';
 
 export const AcalaConsole: FC = () => {
   return (
-    <Grid container>
-      <Grid item>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
         <UserCard />
-      </Grid>
+      </Col>
 
-      <Grid item>
+      <Col span={24}>
         <TokenBalances />
-      </Grid>
+      </Col>
 
-      <Grid item>
+      <Col span={24}>
         <SubTitle>LP Tokens</SubTitle>
         <LPBalances />
-      </Grid>
+      </Col>
 
-      <Grid item>
+      <Col span={24}>
         <AirDrop />
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

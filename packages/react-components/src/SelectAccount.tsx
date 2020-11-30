@@ -1,23 +1,24 @@
 import React, { useState, useCallback, useEffect } from 'react';
 
-import { AnyFunction } from '@polkadot/types/types';
 import Identicon from '@polkadot/react-identicon';
 import { Dialog } from '@acala-dapp/ui-components';
 
 import { ReactComponent as CheckedIcon } from './assets/checked.svg';
 import classes from './SelectAccount.module.scss';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
+import { InjectedAccount } from '@polkadot/extension-inject/types';
 
 interface Props {
   defaultAccount?: string;
-  accounts: InjectedAccountWithMeta[];
+  accounts: InjectedAccount[];
   visable: boolean;
-  onSelect?: (account: InjectedAccountWithMeta) => void;
+  onSelect?: (account: InjectedAccount) => void;
+  onCancel: () => void;
 }
 
 export const SelectAccount: React.FC<Props> = ({
   accounts,
   defaultAccount,
+  onCancel,
   onSelect,
   visable
 }) => {
@@ -26,8 +27,6 @@ export const SelectAccount: React.FC<Props> = ({
   const confirmHandler = useCallback(() => {
     onSelect && onSelect(accounts[selectedIndex]);
   }, [onSelect, accounts, selectedIndex]);
-
-  const genSelectHandler = useCallback((index: number): AnyFunction => (): void => setSelectedIndex(index), [setSelectedIndex]);
 
   useEffect(() => {
     if (!defaultAccount || !accounts.length) return;
@@ -40,9 +39,11 @@ export const SelectAccount: React.FC<Props> = ({
   return (
     <Dialog
       className={classes.root}
+      onCancel={onCancel}
       onConfirm={confirmHandler}
       title='Choose Account'
       visiable={visable}
+      withClose
     >
       <ul className={classes.list}>
         {
@@ -51,14 +52,14 @@ export const SelectAccount: React.FC<Props> = ({
               <li
                 className={classes.item}
                 key={`account-${item.address}`}
-                onClick={genSelectHandler(index)}
+                onClick={(): void => setSelectedIndex(index)}
               >
                 <Identicon
                   className={classes.icon}
                   size={16}
                   value={item.address}
                 />
-                <p className={classes.account}>{item.meta.name}</p>
+                <p className={classes.account}>{item.name}</p>
                 <div className={classes.checked}>
                   {
                     selectedIndex === index ? <CheckedIcon /> : null

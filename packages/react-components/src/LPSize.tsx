@@ -8,7 +8,7 @@ import { getCurrenciesFromDexShare, getCurrencyIdFromName } from './utils';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Token } from './Token';
-import { AlignCenterBox } from '@acala-dapp/ui-components';
+import { FlexBox } from '@acala-dapp/ui-components';
 import { FormatValue } from './format';
 
 interface Props { lp: CurrencyId }
@@ -65,7 +65,10 @@ export const LPSizeWithShare: FC<LPSizeWithShareProps> = ({
   if (result.length === 0) return null;
 
   return (
-    <AlignCenterBox className={className}>
+    <FlexBox
+      alignItems='center'
+      className={className}
+    >
       <FormatBalance balance={result[1]} />
       <Token
         currency={result[0]}
@@ -77,7 +80,7 @@ export const LPSizeWithShare: FC<LPSizeWithShareProps> = ({
         currency={result[2]}
         padding
       />
-    </AlignCenterBox>
+    </FlexBox>
   );
 };
 

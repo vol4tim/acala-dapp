@@ -4,13 +4,14 @@ import { useNavigate } from 'react-router';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { Token, TokenName, TxButton, BalanceInput, BalanceInputValue, UserBalance, FormatNumber, eliminateGap } from '@acala-dapp/react-components';
-import { List, Button, Dialog, SpaceBetweenBox, Grid } from '@acala-dapp/ui-components';
+import { TokenName, TxButton, BalanceInput, BalanceInputValue, UserBalance, FormatNumber, eliminateGap } from '@acala-dapp/react-components';
+import { Dialog, Row, Col, FlexBox } from '@acala-dapp/ui-components';
 import { useIncentiveShare, getPoolId, useModal, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './RewardCard.module.scss';
-import { TotalReward, UserReward, PoolRate, UserPoolRate } from './reward-components';
+import { UserReward } from './reward-components';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
+import { ActionContainer, CardRoot, ClimeBtn, DescriptionGray, EarnExtra, EarnNumber, ExtraBtn, TokenImage } from './components';
 
 interface ManagerModelProps {
   currency: CurrencyId;
@@ -107,15 +108,18 @@ const ManagerModel: FC<ManagerModelProps> = ({
       visiable={visiable}
       withClose
     >
-      <Grid container>
-        <Grid item>
-          <SpaceBetweenBox className={classes.label}>
+      <Row gutter={[24, 24]}>
+        <Col span={24}>
+          <FlexBox
+            className={classes.label}
+            justifyContent='space-between'
+          >
             <p>Deposit</p>
             <div>
               {'max: '}
               <UserBalance token={currency} />
             </div>
-          </SpaceBetweenBox>
+          </FlexBox>
           <BalanceInput
             error={depositError}
             onChange={setDepositValue}
@@ -132,17 +136,20 @@ const ManagerModel: FC<ManagerModelProps> = ({
           >
             Deposit
           </TxButton>
-        </Grid>
+        </Col>
         {
           showWithdraw ? (
-            <Grid item>
-              <SpaceBetweenBox className={classes.label}>
+            <Col span={24}>
+              <FlexBox
+                className={classes.label}
+                justifyContent='space-between'
+              >
                 <p>Withdraw</p>
                 <div>
                   {'max: '}
                   <FormatNumber data={share.share} />
                 </div>
-              </SpaceBetweenBox>
+              </FlexBox>
               <BalanceInput
                 error={withdrawError}
                 onChange={setWithdrawValue}
@@ -159,27 +166,11 @@ const ManagerModel: FC<ManagerModelProps> = ({
               >
                 Withdraw
               </TxButton>
-            </Grid>
+            </Col>
           ) : null
         }
-      </Grid>
+      </Row>
     </Dialog>
-  );
-};
-
-interface DescriptionProps {
-  rewardCurrency: CurrencyId;
-  lp: CurrencyId;
-}
-
-const Description: FC<DescriptionProps> = ({
-  lp,
-  rewardCurrency
-}) => {
-  return (
-    <div className={classes.decription}>
-      Earn <TokenName currency={rewardCurrency}/> by staking <TokenName currency={lp} />
-    </div>
   );
 };
 
@@ -202,7 +193,7 @@ const Action: FC<ActionProps> = ({ currency }) => {
   }, [currency]);
 
   const goToLiquidity = useCallback(() => {
-    navigate({ pathname: '/amm' });
+    navigate({ pathname: '/swap?tab=add-liquidity' });
   }, [navigate]);
 
   const showManager = useMemo(() => {
@@ -211,34 +202,32 @@ const Action: FC<ActionProps> = ({ currency }) => {
     return balance.isGreaterThan(minimum) || share.share.isGreaterThan(minimum);
   }, [balance, share]);
 
-  console.log(balance.toString(), currency.toString(), showManager);
-
   return (
-    <div className={classes.action}>
+    <ActionContainer>
       {
         isShowClaim ? (
-          <TxButton
-            className={classes.btn}
+          <ClimeBtn
             disabled={share.reward.isZero()}
             method='claimRewards'
             params={params}
             section='incentives'
           >
             Claim
-          </TxButton>
+          </ClimeBtn>
         ) : null
       }
       {
         showManager ? (
-          <Button
-            className={classes.btn}
-            onClick={(): void => open()}
-          >Manager</Button>
+          <ExtraBtn onClick={(): void => open()}>
+            Manager
+          </ExtraBtn>
         ) : (
-          <Button
+          <ExtraBtn
             className={classes.btn}
             onClick={goToLiquidity}
-          >Get Reward By Add Liquidity!</Button>
+          >
+            Get LP Tokens
+          </ExtraBtn>
         )
       }
       <ManagerModel
@@ -246,7 +235,7 @@ const Action: FC<ActionProps> = ({ currency }) => {
         onClose={close}
         visiable={status}
       />
-    </div>
+    </ActionContainer>
   );
 };
 
@@ -259,68 +248,27 @@ interface LPRewardCardProps {
 }
 
 export const LPRewardCard: FC<LPRewardCardProps> = ({
-  accumulatePeriod,
   lp,
-  rewardCurrency,
-  totalReward
+  rewardCurrency
 }) => {
   return (
-    <div className={classes.root}>
-      <Token
-        currency={lp}
-        icon
-      />
-      <Description
-        lp={lp}
-        rewardCurrency={rewardCurrency}
-      />
-      <List className={classes.information}>
-        <List.Item
-          label={'Pool Rate'}
-          value={
-            <PoolRate
-              accumulatePeriod={accumulatePeriod}
-              rewardCurrency={rewardCurrency}
-              totalReward={totalReward}
-            />
-          }
+    <CardRoot>
+      <TokenImage currency={lp} />
+      <DescriptionGray>
+        <p>Deposit <TokenName currency={lp}/></p>
+        <p>Earn <TokenName currency={rewardCurrency} /></p>
+      </DescriptionGray>
+      <EarnNumber>
+        <UserReward
+          currency={lp}
+          poolId='DexIncentive'
+          rewardCurrency={rewardCurrency}
         />
-        <List.Item
-          label={'Your Rate'}
-          value={
-            <UserPoolRate
-              accumulatePeriod={accumulatePeriod}
-              currency={lp}
-              poolId='DexIncentive'
-              rewardCurrency={rewardCurrency}
-              totalReward={totalReward}
-            />
-          }
-        />
-        <List.Item
-          label={'Total Reward'}
-          value={
-            <TotalReward
-              currency={lp}
-              poolId='DexIncentive'
-              rewardCurrency={rewardCurrency}
-            />
-          }
-        />
-        <List.Item
-          label={'Earned'}
-          value={
-            <UserReward
-              currency={lp}
-              poolId='DexIncentive'
-              rewardCurrency={rewardCurrency}
-            />
-          }
-        />
-      </List>
-      <Action
-        currency={lp}
-      />
-    </div>
+      </EarnNumber>
+      <EarnExtra>
+        <TokenName currency={rewardCurrency}/> Earned
+      </EarnExtra>
+      <Action currency={lp} />
+    </CardRoot>
   );
 };

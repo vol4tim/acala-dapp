@@ -70,13 +70,10 @@ export const TotalReward: FC<{ currency: CurrencyId; rewardCurrency: CurrencyId;
   );
 };
 
-export const UserReward: FC<{ currency: CurrencyId; rewardCurrency: CurrencyId; poolId: PoolId }> = ({ currency, poolId, rewardCurrency }) => {
+export const UserReward: FC<{ currency: CurrencyId; rewardCurrency: CurrencyId; poolId: PoolId }> = ({ currency, poolId }) => {
   const share = useIncentiveShare(poolId, currency);
 
   return (
-    <FormatBalance
-      balance={share.reward}
-      currency={rewardCurrency}
-    />
+    <FormatBalance balance={share.reward} />
   );
 };

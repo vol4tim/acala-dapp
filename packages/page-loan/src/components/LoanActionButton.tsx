@@ -130,7 +130,7 @@ export const LonaActionButton: FC<Props> = ({
     return (
       <>
         <span>{text}</span>
-        <InlineBlockBox margin={8}>
+        <InlineBlockBox margin={[0, 8]}>
           <TokenName currency={_token} />
         </InlineBlockBox>
       </>

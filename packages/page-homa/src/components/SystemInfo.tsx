@@ -10,9 +10,7 @@ export const SystemInfo: FC = () => {
   const { liquidCurrency, stakingCurrency } = useConstants();
   const stakingPool = useStakingPool();
 
-  if (!stakingPool) {
-    return null;
-  }
+  if (!stakingPool) return null;
 
   return (
     <Card header='System Info'

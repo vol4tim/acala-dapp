@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Grid } from '@acala-dapp/ui-components';
+import { Row, Col } from '@acala-dapp/ui-components';
 
 import { StakingTokeBalances } from './StakingTokenBalances';
 import { SystemInfo } from './SystemInfo';
@@ -10,36 +10,28 @@ import { RedeemList } from './RedeemList';
 
 export const Advanced: FC = () => {
   return (
-    <Grid container>
-      <Grid
-        container
-        item
-      >
-        <Grid
-          item
-          span={12}
-        >
-          <Console />
-        </Grid>
-        <Grid
-          container
-          item
-          span={12}
-        >
-          <Grid item>
-            <StakingTokeBalances />
-          </Grid>
-          <Grid item>
-            <SystemInfo />
-          </Grid>
-        </Grid>
-      </Grid>
-      <Grid item>
-        <RedeemList />
-      </Grid>
-      <Grid item>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
+        <Row gutter={[24, 24]}>
+          <Col span={12}>
+            <Console />
+          </Col>
+          <Col span={12}>
+            <Row gutter={[24, 24]}>
+              <Col span={24}>
+                <StakingTokeBalances />
+              </Col>
+              <Col span={24}>
+                <SystemInfo />
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+      </Col>
+      <RedeemList />
+      <Col span={24}>
         <StakingPool />
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

@@ -1,16 +1,17 @@
 import React, { FC } from 'react';
 
-import { NoAccounts, NoExtensions, ConnectStatus, AppSettings } from '@acala-dapp/react-components';
-import { ApiProvider } from './ApiProvider';
-import { AccountProvider } from './AccountProvider';
+import { ConnectStatus, AppSettings } from '@acala-dapp/react-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
+import { ApiProvider } from './ApiProvider';
 import { SettingProvider } from './SettingProvider';
 import { RxStoreProvider } from './RxStore';
 import { StoreProvier } from './store';
+import { ExtensionProvider } from './ExtensionProvider';
 
 interface AcalaProviderProps extends BareProps {
   applicationName: string;
+  applicationVersion?: string;
 }
 
 export const AcalaProvider: FC<AcalaProviderProps> = ({
@@ -20,11 +21,7 @@ export const AcalaProvider: FC<AcalaProviderProps> = ({
   return (
     <SettingProvider>
       <ApiProvider>
-        <AccountProvider
-          NoAccounts={<NoAccounts />}
-          NoExtensions={<NoExtensions />}
-          applicationName={applicationName}
-        >
+        <ExtensionProvider appName={applicationName}>
           <StoreProvier>
             <RxStoreProvider>
               <>
@@ -34,7 +31,7 @@ export const AcalaProvider: FC<AcalaProviderProps> = ({
               </>
             </RxStoreProvider>
           </StoreProvier>
-        </AccountProvider>
+        </ExtensionProvider>
       </ApiProvider>
     </SettingProvider>
   );

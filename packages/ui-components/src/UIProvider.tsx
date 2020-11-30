@@ -8,6 +8,10 @@ import { BareProps } from './types';
 
 export type BreakPoint = 'sm' | 'md' | 'lg'
 
+const setFontSize = (basicUnit = 10, defaultViewPortWidth = 1440): void => {
+  document.documentElement.style.fontSize = basicUnit / defaultViewPortWidth * 100 + 'vw';
+};
+
 const breakpointConfig: Record<BreakPoint, number> = {
   lg: 1920,
   md: 1440,
@@ -22,6 +26,7 @@ export const UIContext = React.createContext<UIData>({ breakpoint: 'lg' });
 
 export const UIProvider: FC<BareProps> = ({ children }) => {
   const [breakpoint, setBreakpoint] = useState<BreakPoint>('lg');
+  const [isUIReady, setUIReady] = useState<boolean>(false);
 
   useEffect(() => {
     const inner = debounce((): void => {
@@ -36,7 +41,14 @@ export const UIProvider: FC<BareProps> = ({ children }) => {
     return (): void => {
       window.removeEventListener('resize', inner);
     };
-  });
+  }, []);
+
+  useEffect(() => {
+    setFontSize();
+    setUIReady(true);
+  }, []);
+
+  if (!isUIReady) return null;
 
   return (
     <UIContext.Provider value={{ breakpoint }}>

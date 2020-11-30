@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Page, Col, Row } from '@acala-dapp/ui-components';
 
 import { LoanCollateralRatio } from './components/LoanCollateralRatio';
 import { LoanLiquidationRatio } from './components/LoanLiquidationRatio';
@@ -13,22 +13,20 @@ const PageWallet: FC = () => {
       <Page.Title breadcrumb='Loans'
         title='Stablecoin' />
       <Page.Content>
-        <Grid container>
-          <Grid item>
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
             <TotalDebitAndCollateral />
-          </Grid>
-          <Grid item
-            span={12}>
+          </Col>
+          <Col span={12}>
             <LoanCollateralRatio />
-          </Grid>
-          <Grid item
-            span={12}>
+          </Col>
+          <Col span={12}>
             <LoanLiquidationRatio />
-          </Grid>
-          <Grid item>
+          </Col>
+          <Col span={24}>
             <LoansOverview />
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

@@ -1,9 +1,8 @@
 import React, { FC, ReactNode } from 'react';
-import { Card, TableConfig, Table, SpaceBetweenBox } from '@acala-dapp/ui-components';
+import { Card, TableConfig, Table, FlexBox } from '@acala-dapp/ui-components';
 import { useApi } from '@acala-dapp/react-hooks';
 import { tokenEq, AirDropAmount } from '@acala-dapp/react-components';
 import { AirDropCurrencyId } from '@acala-network/types/interfaces';
-import { Candy } from './Candy';
 
 export const AirDrop: FC = () => {
   const { api } = useApi();
@@ -28,10 +27,9 @@ export const AirDrop: FC = () => {
   return (
     <Card
       header={
-        <SpaceBetweenBox>
+        <FlexBox justifyContent='space-between'>
           <p>AirDrop</p>
-          <Candy />
-        </SpaceBetweenBox>
+        </FlexBox>
       }
       padding={false}
     >

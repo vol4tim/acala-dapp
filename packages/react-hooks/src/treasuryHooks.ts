@@ -1,38 +1,49 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
-import { Balance } from '@acala-network/types/interfaces';
+import { stringToU8a } from '@polkadot/util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { Balance, CurrencyId } from '@acala-network/types/interfaces';
+import { AccountData } from '@polkadot/types/interfaces';
 
 import { useCall } from './useCall';
-import { CurrencyLike, WithNull } from './types';
+import { WithNull } from './types';
 import { useApi } from './useApi';
 import { combineLatest } from 'rxjs';
 import { useConstants } from './useConstants';
+import { useBalance } from './balanceHooks';
 
 interface TreasuryOverview {
-  debitPool: Fixed18;
-  surplusPool: Fixed18;
+  debitPool: FixedPointNumber;
+  surplusPool: FixedPointNumber;
   totalCollaterals: {
-    currency: CurrencyLike;
-    balance: Fixed18;
+    currency: CurrencyId;
+    balance: FixedPointNumber;
   }[];
 }
 
 export const useTreasuryOverview = (): WithNull<TreasuryOverview> => {
   const { api } = useApi();
-  const { loanCurrencies } = useConstants();
-  const _debitPool = useCall<Balance>('query.cdpTreasury.debitPool');
-  const _surplusPool = useCall<Balance>('query.cdpTreasury.surplusPool');
+
+  const moduleAccount = useMemo(() => api.createType(
+    'AccountId',
+    stringToU8a('modl' + ((api.consts.cdpTreasury.moduleId as any).toUtf8() as string).padEnd(32, '\0'))
+  ), [api]);
+
+  const { loanCurrencies, stableCurrency } = useConstants();
+  const surplusPool = useCall<Balance>('query.cdpTreasury.debitPool');
+  const debitPool = useBalance(stableCurrency, moduleAccount);
   const [result, setResult] = useState<WithNull<TreasuryOverview>>(null);
 
   useEffect(() => {
-    const subscriber = combineLatest(loanCurrencies.map((currency) => api.query.cdpTreasury.totalCollaterals<Balance>(currency))).subscribe((result) => {
+    const subscriber = combineLatest(
+      loanCurrencies.map((currency) => api.query.tokens.accounts<AccountData>(moduleAccount, currency))
+    ).subscribe((result) => {
       setResult({
-        debitPool: convertToFixed18(_debitPool || 0),
-        surplusPool: convertToFixed18(_surplusPool || 0),
+        debitPool: debitPool,
+        surplusPool: FixedPointNumber.fromInner(surplusPool?.toString() || 0),
         totalCollaterals: result ? result.map((item, index) => {
           return {
-            balance: convertToFixed18(item || 0),
+            balance: FixedPointNumber.fromInner(item?.toString() || 0),
             currency: loanCurrencies[index]
           };
         }) : []
@@ -40,7 +51,7 @@ export const useTreasuryOverview = (): WithNull<TreasuryOverview> => {
     });
 
     return (): void => subscriber.unsubscribe();
-  }, [_debitPool, _surplusPool, setResult, api.query.cdpTreasury, loanCurrencies]);
+  }, [api.query.tokens, debitPool, surplusPool, setResult, api.query.cdpTreasury, loanCurrencies, moduleAccount]);
 
   return result;
 };

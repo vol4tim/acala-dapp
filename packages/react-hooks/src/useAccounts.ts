@@ -1,11 +1,11 @@
 import { useContext } from 'react';
-import { AccountsData, AccountContext } from '@acala-dapp/react-environment';
+import { ExtensionData, ExtensionContext } from '@acala-dapp/react-environment';
 
 /**
  * @name useAccounts
  */
-export const useAccounts = (): AccountsData => {
-  const data = useContext(AccountContext);
+export const useAccounts = (): ExtensionData => {
+  const data = useContext(ExtensionContext);
 
   return data;
 };

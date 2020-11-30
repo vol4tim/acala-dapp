@@ -27,7 +27,7 @@ export const useStorage = (
   _options: Options = { customPrefix: '', useAccountPrefix: true, useCustomPrefix: false }
 ): { getStorage: Get; setStorage: Set } => {
   const options = useMemorized(_options);
-  const { appReadyStatus: isReady } = useIsAppReady();
+  const isReady = useIsAppReady();
   const { active: activeAccount } = useAccounts();
 
   const getStorage: Get = useCallback((key) => {

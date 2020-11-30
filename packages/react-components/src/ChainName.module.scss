@@ -28,11 +28,6 @@
       background: var(--color-primary);
       color: var(--color-white);
     }
-
-    @include media-breakpoint-up('md') {
-      display: none;
-    }
-
   }
 
   .networkIcon {

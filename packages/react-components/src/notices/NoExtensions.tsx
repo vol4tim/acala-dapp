@@ -1,22 +1,12 @@
 import React, { memo, useCallback } from 'react';
 import { Dialog } from '@acala-dapp/ui-components';
-import { useSetting } from '@acala-dapp/react-hooks';
 
-const POLKADOT_EXTENSIONS_CHROME = 'https://chrome.google.com/webstore/detail/polkadot%7Bjs%7D-extension/mopnmbcafieddcagagdcbnhejhlodfdd';
-const POLKADOT_EXTENSIONS_FIREFOX = 'https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension';
+const POLKADOT_EXTENSION_PAGE = 'https://polkadot.js.org/extension';
 
 export const NoExtensions: React.FC = memo(() => {
-  const { browser } = useSetting();
-
   const handleGetExtensionBtnClick = useCallback((): void => {
-    if (browser === 'firefox') {
-      window.open(POLKADOT_EXTENSIONS_FIREFOX);
-
-      return;
-    }
-
-    window.open(POLKADOT_EXTENSIONS_CHROME);
-  }, [browser]);
+    window.open(POLKADOT_EXTENSION_PAGE);
+  }, []);
 
   return (
     <Dialog

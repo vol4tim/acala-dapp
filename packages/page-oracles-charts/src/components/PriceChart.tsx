@@ -1,44 +1,73 @@
-import { useRequestChart } from '@acala-dapp/react-hooks';
-import { Card } from '@acala-dapp/ui-components';
-import { Chart, Line, Tooltip } from 'bizcharts';
-import dayjs from 'dayjs';
 import React, { FC, useMemo } from 'react';
+import { Chart, Tooltip, Legend, Axis, Geom } from 'bizcharts';
+import dayjs from 'dayjs';
+import DataSet from '@antv/data-set';
+import { set } from 'lodash';
+
+import { useOracleHistoryChart } from '@acala-dapp/react-hooks';
+import { Card } from '@acala-dapp/ui-components';
 
 const PriceChart: FC<{ currency: string }> = ({ currency }) => {
-  const _data = useRequestChart(
-    `SELECT mean("value") AS "mean_value" FROM "acala"."autogen"."oracle" WHERE time > now() - 1d AND time < now() AND asset = '${currency.toUpperCase()}' GROUP BY time(5m), asset, account  FILL(previous)`
-  );
+  const _data = useOracleHistoryChart(currency);
 
-  const data = useMemo(() => {
-    if (!_data) return [];
+  const dv = useMemo(() => {
+    if (!_data) return;
 
-    return _data?.[0].values.map((item: any) => {
-      return {
-        time: dayjs(item[0]).format('YYYY/MM/DD HH:mm'),
-        value: item[1]
-      };
+    // transfrom data
+    const temp: Record<string, Record<string, string | number>> = {};
+    const providers: string[] = Object.keys(_data.data);
+
+    Object.keys(_data.data).forEach((provider) => {
+      _data.data[provider].forEach((item) => {
+        set(temp, [
+          dayjs(item.time).format('YYYY/MM/DD HH:mm'),
+          provider
+        ], item.value);
+      });
     });
+
+    const data = Object.keys(temp).map((time) => ({ time, ...temp[time] }));
+
+    const ds = new DataSet();
+    const dv = ds.createView().source(data);
+
+    dv.transform({
+      fields: providers,
+      key: 'key',
+      type: 'fold',
+      value: 'value'
+    });
+
+    console.log(dv);
+
+    return dv;
   }, [_data]);
 
   return (
     <Card>
       <Chart
         autoFit
-        data={data}
-        height={500}
+        data={dv}
+        height={400}
         padding={[40, 40, 80, 40]}
         scale={{
           time: { tickCount: 10 },
           value: { min: 0 }
         }}
       >
-        <Line
-          position='time*value'
-          shape='hv'
-        />
+        <Legend />
+        <Axis name='time' />
+        <Axis name='price' />
         <Tooltip
-          showCrosshairs
-          title='time'
+          crosshairs={{
+            type: 'y'
+          }}
+        />
+        <Geom
+          position='time*value'
+          shape={'hv'}
+          size={2}
+          type='line'
         />
       </Chart>
     </Card>

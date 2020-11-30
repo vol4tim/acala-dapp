@@ -1,5 +1,5 @@
 import React, { createContext, FC, PropsWithChildren, useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { useLockPrices, LockedPricesResult } from '@acala-dapp/react-hooks/useLockPrices';
 import { useConstants, useReclaimCollateral, useBalance } from '@acala-dapp/react-hooks';
@@ -14,9 +14,9 @@ export interface EmergencyShutdownContextData {
   lockedPrices: LockedPricesResult;
   canReclaim: boolean;
   setCanReclaim: (flag: boolean) => void;
-  collaterals: Record<string, Fixed18>;
-  collateralRef: Record<string, Fixed18>;
-  updateCollateralRef: (data: Record<string, Fixed18>) => void;
+  collaterals: Record<string, FixedPointNumber>;
+  collateralRef: Record<string, FixedPointNumber>;
+  updateCollateralRef: (data: Record<string, FixedPointNumber>) => void;
   reclaimBalanceIsEmpty: boolean;
 }
 
@@ -29,7 +29,7 @@ export const EmergencyShutdownProvider: FC<PropsWithChildren<unknown>> = ({ chil
   const { stableCurrency } = useConstants();
   const { calcCanReceive } = useReclaimCollateral();
   const stableCoinBalance = useBalance(stableCurrency);
-  const collateralsRef = useRef<Record<string, Fixed18>>({});
+  const collateralsRef = useRef<Record<string, FixedPointNumber>>({});
   const reclaimBalanceIsEmpty = useMemo(() => {
     if (stableCoinBalance.isNaN() || stableCoinBalance.isZero()) {
       return true;
@@ -38,7 +38,7 @@ export const EmergencyShutdownProvider: FC<PropsWithChildren<unknown>> = ({ chil
     return false;
   }, [stableCoinBalance]);
 
-  const collaterals = useMemo<Record<string, Fixed18>>((): Record<string, Fixed18> => {
+  const collaterals = useMemo((): Record<string, FixedPointNumber> => {
     if (!stableCoinBalance) return {};
 
     const result = calcCanReceive(stableCoinBalance);
@@ -52,7 +52,7 @@ export const EmergencyShutdownProvider: FC<PropsWithChildren<unknown>> = ({ chil
     }
   }, [calcCanReceive, stableCoinBalance]);
 
-  const updateCollateralRef = useCallback((data: Record<string, Fixed18>) => {
+  const updateCollateralRef = useCallback((data: Record<string, FixedPointNumber>) => {
     collateralsRef.current = data;
   }, []);
 

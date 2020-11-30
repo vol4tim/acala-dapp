@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { Grid, List } from '@acala-dapp/ui-components';
+import { Row, Col, List, FlexBox } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, FormatBalance, BalanceInputValue, eliminateGap } from '@acala-dapp/react-components';
 import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool, useBalanceValidator } from '@acala-dapp/react-hooks';
 
@@ -67,29 +67,28 @@ export const StakingConsole: FC = () => {
   if (!stakingPool) return null;
 
   return (
-    <Grid
+    <Row
       className={classes.root}
-      container
+      gutter={[24, 24]}
     >
-      <Grid item>
+      <Col span={24}>
         <p className={classes.notice}>
           Deposit DOT & Mint Liquid DOT (L-DOT). Your DOTs will be staked to earn returns, meanwhile you can use, trade and invest L-DOT balance in your wallet.
         </p>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <BalanceInput
           error={error}
           onChange={setStakingValue}
           onMax={handleMax}
           value={stakingValue}
         />
-      </Grid>
-      <Grid
-        container
-        item
-        justity='center'
-      >
-        <Grid item>
+      </Col>
+      <Col span={24}>
+        <FlexBox
+          alignItems='center'
+          justifyContent='center'
+        >
           <TxButton
             className={classes.txBtn}
             disabled={isDisable}
@@ -101,9 +100,9 @@ export const StakingConsole: FC = () => {
           >
             Deposit
           </TxButton>
-        </Grid>
-      </Grid>
-      <Grid item>
+        </FlexBox>
+      </Col>
+      <Col span={24}>
         <List>
           <List.Item
             label='Mint'
@@ -124,7 +123,7 @@ export const StakingConsole: FC = () => {
             }
           />
         </List>
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

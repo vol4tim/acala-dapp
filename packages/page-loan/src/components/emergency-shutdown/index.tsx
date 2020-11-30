@@ -1,5 +1,5 @@
 import React, { FC, useContext } from 'react';
-import { Card, Grid, Condition, Fadein } from '@acala-dapp/ui-components';
+import { Card, Row, Col, Condition, Fadein } from '@acala-dapp/ui-components';
 import { Steps } from 'antd';
 
 import { LockPrices } from './LockPrices';
@@ -29,44 +29,44 @@ export const Inner = (): JSX.Element => {
       <Condition condition={step !== 'success'}>
         <Tips />
       </Condition>
-      <Grid container>
+      <Row gutter={[24, 24]}>
         <Condition condition={step === 'trigger'}>
-          <Grid item>
+          <Col span={24}>
             <Fadein>
               <LockPrices />
             </Fadein>
-          </Grid>
-          <Grid item>
+          </Col>
+          <Col span={24}>
             <Fadein>
               <WithdrawNoDebitLoan />
             </Fadein>
-          </Grid>
+          </Col>
         </Condition>
         <Condition condition={step === 'process'}>
-          <Grid item>
+          <Col span={24}>
             <Fadein>
               <Process />
             </Fadein>
-          </Grid>
+          </Col>
         </Condition>
         <Condition condition={step === 'reclaim'}>
-          <Grid item>
+          <Col span={24}>
             <Fadein>
               <ReclaimCollateral />
             </Fadein>
-          </Grid>
+          </Col>
         </Condition>
         <Condition condition={step === 'success'}>
-          <Grid item>
+          <Col span={24}>
             <Fadein>
               <Success />
             </Fadein>
-          </Grid>
+          </Col>
         </Condition>
-        <Grid item>
+        <Col span={24}>
           <Controller />
-        </Grid>
-      </Grid>
+        </Col>
+      </Row>
     </Card>
   );
 };

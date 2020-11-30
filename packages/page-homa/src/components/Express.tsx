@@ -1,19 +1,19 @@
 import React, { FC } from 'react';
 
-import { Grid } from '@acala-dapp/ui-components';
+import { Row, Col } from '@acala-dapp/ui-components';
 
 import { StakingOverview } from './StakingOverview';
 import { ExpressConsole } from './ExpressConsole';
 
 export const Express: FC = () => {
   return (
-    <Grid container>
-      <Grid item>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
         <StakingOverview />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <ExpressConsole />
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

@@ -1,4 +1,4 @@
-import { getTokenColor } from '@acala-dapp/react-components';
+import { getTokenColor, getTokenName } from '@acala-dapp/react-components';
 import { useAllLoansType } from '@acala-dapp/react-hooks';
 import { Card } from '@acala-dapp/ui-components';
 import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
@@ -14,7 +14,7 @@ export const LoanLiquidationRatio: FC = () => {
     return (
       Object.keys(types).map((currency) => {
         return {
-          currency: currency,
+          currency: getTokenName(currency),
           ratio: convertToFixed18(types[currency].liquidationRatio)
         };
       }) || []

@@ -4,27 +4,10 @@ import { useNavigate } from 'react-router';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import classes from './RewardCard.module.scss';
-import { Token, TokenName, TxButton } from '@acala-dapp/react-components';
-import { List, Button } from '@acala-dapp/ui-components';
+import { TokenName } from '@acala-dapp/react-components';
 import { useIncentiveShare, getPoolId } from '@acala-dapp/react-hooks';
-import { TotalReward, UserReward, PoolRate, UserPoolRate } from './reward-components';
-
-interface DescriptionProps {
-  rewardCurrency: CurrencyId;
-  currency: CurrencyId;
-}
-
-const Description: FC<DescriptionProps> = ({
-  currency,
-  rewardCurrency
-}) => {
-  return (
-    <div className={classes.decription}>
-      Earn <TokenName currency={rewardCurrency}/> by create <TokenName currency={currency} /> loan
-    </div>
-  );
-};
+import { UserReward } from './reward-components';
+import { CardRoot, Description, TokenImage, EarnNumber, EarnExtra, ActionContainer, ClimeBtn, ExtraBtn } from './components';
 
 interface LoanRewardCardProps {
   currency: CurrencyId;
@@ -42,8 +25,14 @@ const Action: FC<ActionProps> = ({ currency }) => {
   const share = useIncentiveShare('Loans', currency);
   const navigate = useNavigate();
 
-  const isShowClaim = useMemo<boolean>((): boolean => {
+  const isShowClaim = useMemo((): boolean => {
     return !share.share.isZero();
+  }, [share]);
+
+  const isDisabledClaim = useMemo((): boolean => {
+    if (!share.reward.isFinaite()) return false;
+
+    return share.reward.isLessThan(new FixedPointNumber('0.0000001'));
   }, [share]);
 
   const params = useMemo(() => {
@@ -55,89 +44,47 @@ const Action: FC<ActionProps> = ({ currency }) => {
   }, [navigate]);
 
   return (
-    <div className={classes.action}>
+    <ActionContainer>
       {
         isShowClaim ? (
-          <TxButton
-            className={classes.btn}
-            disabled={share.reward.isZero()}
+          <ClimeBtn
+            disabled={isDisabledClaim}
             method='claimRewards'
             params={params}
             section='incentives'
           >
             Claim
-          </TxButton>
+          </ClimeBtn>
         ) : null
       }
-      <Button
-        className={classes.btn}
-        onClick={goToLoan}
-      >{ share.share.isZero() ? 'Get Reward!' : 'Get More Reward!'}</Button>
-    </div>
+      <ExtraBtn onClick={goToLoan} >
+        Borrow aUSD
+      </ExtraBtn>
+    </ActionContainer>
   );
 };
 
 export const LoanRewardCard: FC<LoanRewardCardProps> = ({
-  accumulatePeriod,
   currency,
-  rewardCurrency,
-  totalReward
+  rewardCurrency
 }) => {
   return (
-    <div className={classes.root}>
-      <Token
-        currency={currency}
-        icon
-      />
-      <Description
-        currency={currency}
-        rewardCurrency={rewardCurrency}
-      />
-      <List className={classes.information}>
-        <List.Item
-          label={'Pool Total Reward'}
-          value={
-            <TotalReward
-              currency={currency}
-              poolId='Loans'
-              rewardCurrency={rewardCurrency}
-            />
-          }
+    <CardRoot>
+      <TokenImage currency={currency} />
+      <Description>
+        Collateralize <TokenName currency={currency} />
+      </Description>
+      <EarnNumber>
+        <UserReward
+          currency={currency}
+          poolId='Loans'
+          rewardCurrency={rewardCurrency}
         />
-        <List.Item
-          label={'Pool Rate'}
-          value={
-            <PoolRate
-              accumulatePeriod={accumulatePeriod}
-              rewardCurrency={rewardCurrency}
-              totalReward={totalReward}
-            />
-          }
-        />
-        <List.Item
-          label={'Your Rate'}
-          value={
-            <UserPoolRate
-              accumulatePeriod={accumulatePeriod}
-              currency={currency}
-              poolId='Loans'
-              rewardCurrency={rewardCurrency}
-              totalReward={totalReward}
-            />
-          }
-        />
-        <List.Item
-          label={'Your Earned'}
-          value={
-            <UserReward
-              currency={currency}
-              poolId='Loans'
-              rewardCurrency={rewardCurrency}
-            />
-          }
-        />
-      </List>
+      </EarnNumber>
+      <EarnExtra>
+        <TokenName currency={rewardCurrency}/> Earned
+      </EarnExtra>
       <Action currency={currency} />
-    </div>
+    </CardRoot>
   );
 };

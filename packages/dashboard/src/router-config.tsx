@@ -1,9 +1,10 @@
 import React, { ReactElement, lazy, LazyExoticComponent, Suspense } from 'react';
 
 import { PageLoading } from '@acala-dapp/ui-components';
+import { Layout } from '@acala-dapp/react-components';
 
-import { MainLayout } from './layouts/Main';
-import { sideBarConfig } from './sidebar-config';
+// import { MainLayout } from './layouts/Main';
+import { sidebarConfig } from './sidebar-config';
 
 export interface RouterConfigData {
   children?: RouterConfigData[];
@@ -13,7 +14,7 @@ export interface RouterConfigData {
 }
 
 const PageDashboardHome = lazy(() => import('@acala-dapp/page-dashboard-home'));
-const PageLiquidationsCharts = lazy(() => import('@acala-dapp/page-liquidations-charts'));
+// const PageLiquidationsCharts = lazy(() => import('@acala-dapp/page-liquidations-charts'));
 const PageStablecoinOverview = lazy(() => import('@acala-dapp/page-stablecoin-overview'));
 const PageOraclesCharts = lazy(() => import('@acala-dapp/page-oracles-charts'));
 const PageLoanCharts = lazy(() => import('@acala-dapp/page-loan-charts'));
@@ -35,10 +36,10 @@ export const config: RouterConfigData[] = [
         element: <Suspense fallback={<PageLoading />}><PageLoanCharts/></Suspense>,
         path: 'loan'
       },
-      {
-        element: <Suspense fallback={<PageLoading />}><PageLiquidationsCharts/></Suspense>,
-        path: 'liquidations'
-      },
+      // {
+      //   element: <Suspense fallback={<PageLoading />}><PageLiquidationsCharts/></Suspense>,
+      //   path: 'liquidations'
+      // },
       {
         element: <Suspense fallback={<PageLoading />}><PageTreasuryCharts /></Suspense>,
         path: 'treasury'
@@ -56,7 +57,12 @@ export const config: RouterConfigData[] = [
         redirectTo: 'home'
       }
     ],
-    element: <MainLayout sideBarProps={{ config: sideBarConfig }} />,
+    element: (
+      <Layout.Main
+        enableCollapse={false}
+        sidebar={sidebarConfig}
+      />
+    ),
     path: '*'
   }
 ];

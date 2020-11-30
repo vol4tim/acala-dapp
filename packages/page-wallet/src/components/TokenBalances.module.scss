@@ -21,11 +21,12 @@
   background: #ffffff;
   box-shadow: 0 1px 20px rgba(23, 65, 212, 0.02);
   overflow: hidden;
-  transition: box-shadow 200ms;
+  transition: all 0.2s;
 }
 
 .item:hover {
-  box-shadow: 0 1px 20px rgba(23, 65, 212, 0.1);
+  box-shadow: 0 1px 20px rgba(23, 65, 212, 0.2);
+  // border: 2px solid var(--color-primary);
 }
 
 .totalAsset {

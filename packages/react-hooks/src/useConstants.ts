@@ -1,7 +1,7 @@
 
 import { useMemo } from 'react';
 
-import { CurrencyId } from '@acala-network/types/interfaces';
+import { CurrencyId, TradingPair } from '@acala-network/types/interfaces';
 import { Vec } from '@polkadot/types';
 import { Codec } from '@polkadot/types/types';
 
@@ -27,8 +27,7 @@ const CURRENCIES_WEIGHT = new Map<string, number>([
 export type HooksReturnType = {
   allCurrencies: CurrencyId[];
   crossChainCurrencies: CurrencyId[];
-  dexBaseCurrency: CurrencyId;
-  dexCurrencies: CurrencyId[];
+  dexTradingPair: TradingPair[];
   loanCurrencies: CurrencyId[];
   expectedBlockTime: number;
   nativeCurrency: CurrencyId;
@@ -62,10 +61,7 @@ export const useConstants = (): HooksReturnType => {
     .sort((a, b): number => (LOAN_CURRENCIES_WEIGHT.get(b.toString()) || 0) - (LOAN_CURRENCIES_WEIGHT.get(a.toString()) || 0)), [api]);
 
   // all currencies in dex
-  const dexCurrencies = useMemo(() => api.consts.dex.enabledCurrencyIds as unknown as Vec<CurrencyId>, [api]);
-
-  // dex base currency
-  const dexBaseCurrency = useMemo(() => api.consts.dex.getBaseCurrencyId as unknown as CurrencyId, [api]);
+  const dexTradingPair = useMemo(() => api.consts.dex.enabledTradingPairs as unknown as Vec<TradingPair>, [api]);
 
   // stable currency id
   const stableCurrency = useMemo(() => api.consts.cdpEngine.getStableCurrencyId as unknown as CurrencyId, [api]);
@@ -88,8 +84,7 @@ export const useConstants = (): HooksReturnType => {
   return {
     allCurrencies,
     crossChainCurrencies,
-    dexBaseCurrency,
-    dexCurrencies,
+    dexTradingPair,
     expectedBlockTime,
     liquidCurrency,
     loanCurrencies,

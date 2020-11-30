@@ -1,0 +1,9 @@
+{
+  "name": "@acala-dapp/page-oracle-price",
+  "version": "0.2.0",
+  "description": "oracle price page",
+  "main": "index.js",
+  "author": "Acala Developers <hello@acala.network>",
+  "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
+  "license": "Apache-2.0"
+}

@@ -6,6 +6,7 @@ import { Fixed18 } from '@acala-network/app-util';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
+import { styled } from '@acala-dapp/ui-components';
 
 import { formatBalance, sortCurrency } from '../utils';
 import { FormatNumber, FormatNumberProps, FormatterColor } from './FormatNumber';
@@ -27,6 +28,10 @@ export interface FormatBalanceProps extends BareProps {
   isSort?: boolean;
   negativeToZero?: boolean;
 }
+
+const CTokenName = styled(TokenName)`
+  margin-left: 4px;
+`;
 
 const formatBalanceConfig: FormatNumberProps['formatNumberConfig'] = {
   decimalLength: 6,
@@ -62,8 +67,7 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
           data={displayNumber}
           formatNumberConfig={{ ...formatBalanceConfig, decimalLength }}
         />
-        {data.currency ? <span>{' '}</span> : null}
-        {data.currency ? <TokenName currency={data.currency} /> : null}
+        {data.currency ? <CTokenName currency={data.currency} /> : null}
       </span>,
       (pairSymbol && index !== pairLength - 1) ? <span key={'format-balance-symbol-' + index}>{' '}{pairSymbol}{' '}</span> : null
     ];

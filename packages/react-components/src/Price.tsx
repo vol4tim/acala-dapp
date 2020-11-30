@@ -3,7 +3,6 @@ import React, { FC, useMemo } from 'react';
 import { usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 
-import { Fixed18 } from '@acala-network/app-util';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { FormatPrice } from './format';

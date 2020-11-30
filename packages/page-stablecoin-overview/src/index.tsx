@@ -1,4 +1,4 @@
-import { Grid, Page } from '@acala-dapp/ui-components';
+import { Row, Col, Page, Typology } from '@acala-dapp/ui-components';
 import React, { FC } from 'react';
 
 import AssetOverview from './components/AssetOverview';
@@ -13,21 +13,20 @@ const PageDashboardHome: FC = () => {
         title='Stablecoin'
       />
       <Page.Content>
-        <Overview />
-      </Page.Content>
-      <Page.Title title='System Overview' />
-      <Page.Content fullscreen>
-        <Grid container>
-          <Grid item>
+        <Row gutter={[0, 24]}>
+          <Col span={24}>
+            <Overview />
+          </Col>
+          <Col span={24}>
+            <Typology.Title>System Overview</Typology.Title>
+          </Col>
+          <Col span={24}>
             <SystemOverview />
-          </Grid>
-          <Grid
-            item
-            span={24}
-          >
+          </Col>
+          <Col span={24}>
             <AssetOverview />
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

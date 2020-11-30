@@ -12,7 +12,7 @@ interface Options {
  * @name useIsAppReady
  * @description check app status, return true when chain connected and has active account, in ohter case return false.
  */
-export const useIsAppReady = (options?: Options): { appReadyStatus: boolean } => {
+export const useIsAppReady = (options?: Options): boolean => {
   const [appReadyStatus, setAppReadyStatus] = useState<boolean>(false);
   const { api } = useApi();
   const { active: activeAccount, authRequired } = useAccounts();
@@ -24,8 +24,12 @@ export const useIsAppReady = (options?: Options): { appReadyStatus: boolean } =>
 
     // handle onSuccess or onError callback
     (status ? get(options, 'onSuccess', noop) : get(options, 'onError', noop))();
-    setAppReadyStatus(status);
+
+    if (status !== appReadyStatus) {
+      setAppReadyStatus(status);
+    }
+  /* eslint-disable-next-line */
   }, [authRequired, activeAccount, api, options]);
 
-  return { appReadyStatus };
+  return appReadyStatus;
 };

@@ -2,7 +2,7 @@ import React, { FC, useContext, useCallback } from 'react';
 import clsx from 'clsx';
 import axios from 'axios';
 
-import { Dialog, Button, Grid, List, message } from '@acala-dapp/ui-components';
+import { Dialog, Button, Row, Col, List, message } from '@acala-dapp/ui-components';
 import { TokenImage, FormatBalance, getCurrencyIdFromName } from '@acala-dapp/react-components';
 import { useAccounts, useApi } from '@acala-dapp/react-hooks';
 
@@ -80,29 +80,28 @@ const BtcAddressContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
   }, [setStep, active]);
 
   return (
-    <Grid
-      className={classes.sendDialog}
-      container
+    <Row className={classes.sendDialog}
+      gutter={[24, 24]}
     >
-      <Grid item>
+      <Col span={24}>
         <AddressBar
           address={btcAddress}
           amount={amount}
         />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <p style={{ fontSize: 16, fontWeight: 'bold' }}>For testnet purpose, renBTC is minted from faucet. RenVM will be used upon mainnet launch.</p>
         <p style={{ color: 'var(--text-color-second)', fontSize: 14 }}>Quota: max 1 renBTC / month</p>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <Button
           className={classes.btn}
           onClick={handleNext}
         >
           Get test renBTC from Faucet
         </Button>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <List>
           <List.Item
             label='Integrator'
@@ -127,8 +126,8 @@ const BtcAddressContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
             )}
           />
         </List>
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };
 
@@ -154,22 +153,22 @@ const SuccessContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
   }, [changeActiveTab]);
 
   return (
-    <Grid
+    <Row
       className={classes.sendDialog}
-      container
+      gutter={[24, 24]}
     >
-      <Grid item>
+      <Col span={24}>
         <SuccessBar />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <Button
           className={classes.btn}
           onClick={handleNext}
         >
           Return
         </Button>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <List>
           <List.Item
             label='Integrator'
@@ -194,8 +193,8 @@ const SuccessContent: FC<Omit<RenBtcDialogProps, 'show'>> = ({
             )}
           />
         </List>
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };
 

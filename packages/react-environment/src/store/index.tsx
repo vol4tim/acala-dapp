@@ -1,13 +1,15 @@
-/* eslint-disable */
 import React, { createContext, FC, useEffect, useContext } from 'react';
 
-import { Fixed18 } from '@acala-network/app-util';
 import { useApi } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useApiQueryStore } from './modules/api-query';
+import { useOraclePrices } from './modules/oracle-price';
+import { useUIConfig, UseUIConfigReturnType } from './modules/ui';
 
-type StoreData = {
-  apiQueryStore: ReturnType<typeof useApiQueryStore>
+export type StoreData = {
+  apiQueryStore: ReturnType<typeof useApiQueryStore>;
+  oraclePrice: ReturnType<typeof useOraclePrices>;
+  ui: UseUIConfigReturnType;
 };
 
 const StoreContext = createContext<StoreData>({} as any);
@@ -16,6 +18,8 @@ export const StoreProvier: FC<BareProps> = ({ children }) => {
   const { api } = useApi();
   // const { state: pricesStore, setState: setPricesStore } = usePricesStore();
   const apiQueryStore = useApiQueryStore();
+  const oraclePrice = useOraclePrices();
+  const ui = useUIConfig();
 
   useEffect(() => {
     // api.isReady && api.isReady.subscribe(() => {
@@ -27,7 +31,9 @@ export const StoreProvier: FC<BareProps> = ({ children }) => {
 
   return (
     <StoreContext.Provider value={{
-      apiQueryStore
+      apiQueryStore,
+      oraclePrice,
+      ui
     }}>
       {children}
     </StoreContext.Provider>

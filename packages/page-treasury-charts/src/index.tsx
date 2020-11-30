@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Page, Row, Col } from '@acala-dapp/ui-components';
 
 import { TreasuryOverview } from './components/TreasuryOverview';
 import { AuctionOverview } from './components/AuctionOverview';
@@ -15,16 +15,14 @@ const PageWallet: FC = () => {
       </Page.Content>
       <Page.Title title='Auction' />
       <Page.Content fullscreen>
-        <Grid container>
-          <Grid item>
+        <Row gutter={[24, 24]}>
+          <Col span={24}>
             <AuctionOverview />
-          </Grid>
-          <Grid
-            item
-            span={24}>
+          </Col>
+          <Col span={24}>
             <AuctionList />
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

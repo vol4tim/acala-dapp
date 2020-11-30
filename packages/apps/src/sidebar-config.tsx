@@ -8,47 +8,35 @@ import { ReactComponent as ExchangeSVG } from '@acala-dapp/apps/assets/exchange.
 import { ReactComponent as LiquidSVG } from '@acala-dapp/apps/assets/liquid.svg';
 import { ReactComponent as GuideSVG } from '@acala-dapp/apps/assets/guide.svg';
 import { ReactComponent as FaucetSVG } from '@acala-dapp/apps/assets/faucet.svg';
+import { SidebarConfig } from '@acala-dapp/react-components/Sidebar';
 
-import { SideBarConfig } from './types/sidebar';
-
-export const sideBarConfig: SideBarConfig = {
+export const sideBarConfig: SidebarConfig = {
   products: [
     {
-      content: 'Self Serviced Loan',
       icon: <LoanSVG />,
-      path: 'loan',
-      rel: 'loan'
+      name: 'Borrow aUSD',
+      path: 'loan'
     },
     {
-      content: 'Swap',
       icon: <ExchangeSVG />,
-      path: 'swap',
-      rel: 'swap'
+      name: 'Swap',
+      path: 'swap'
     },
     {
-      content: 'AMM',
       icon: <DepositSVG />,
-      path: 'amm',
-      rel: 'amm'
+      name: 'Earn',
+      path: 'earn'
     },
     {
-      content: 'Earn',
-      icon: <DepositSVG />,
-      path: 'earn',
-      rel: 'earn'
-    },
-    {
-      content: 'Liquid DOT',
       icon: <LiquidSVG />,
-      path: 'homa',
-      rel: 'homa'
+      name: 'Liquid Staking',
+      path: 'homa'
+    },
+    {
+      icon: <LiquidSVG />,
+      name: 'Oracle Price',
+      path: 'oracle-price'
     }
-    // {
-    //   content: 'NFT',
-    //   icon: <DepositSVG />,
-    //   path: 'nft',
-    //   rel: 'nft'
-    // },
     // {
     //   content: 'Governance',
     //   icon: <GovernanceSVG />,
@@ -56,38 +44,30 @@ export const sideBarConfig: SideBarConfig = {
     //   rel: 'governance'
     // }
   ],
-  socialMedia: [
+  socialPlatforms: [
     {
-      content: 'Faucet',
+      href: 'https://discord.gg/CmqXvMP',
       icon: <FaucetSVG />,
-      isExternal: true,
-      path: 'https://discord.gg/CmqXvMP',
-      rel: 'faucet',
-      target: '_blank'
+      name: 'Faucet',
+      rel: 'faucet'
     },
     {
-      content: 'Wiki',
+      href: 'https://github.com/AcalaNetwork/Acala/wiki',
       icon: <GuideSVG />,
-      isExternal: true,
-      path: 'https://github.com/AcalaNetwork/Acala/wiki',
-      rel: 'wiki',
-      target: '_blank'
+      name: 'Wiki',
+      rel: 'wiki'
     },
     {
-      content: 'Email',
+      href: 'mailto:hello@acala.network',
       icon: <EmailSVG />,
-      isExternal: true,
-      path: 'mailto:hello@acala.network',
-      rel: 'email',
-      target: '_blank'
+      name: 'Email',
+      rel: 'email'
     },
     {
-      content: 'Twitter',
+      href: 'https://twitter.com/AcalaNetwork',
       icon: <TwitterSVG />,
-      isExternal: true,
-      path: 'https://twitter.com/AcalaNetwork',
-      rel: 'twitter',
-      target: '_blank'
+      name: 'Twitter',
+      rel: 'twitter'
     }
   ]
 };

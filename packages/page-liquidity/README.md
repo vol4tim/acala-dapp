@@ -1,1 +1,0 @@
-@acala-dapp/page-liquidity

@@ -1,26 +1,53 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Tabs, useTabs } from '@acala-dapp/ui-components';
 import { SwapConsole } from './components/SwapConsole';
-import { LPInformations } from './components/LPInformations';
+import { DepositConsole } from './components/DepositConsole';
+import { WithdrawConsole } from './components/WithdrawConsole';
 import { SwapProvider } from './components/SwapProvider';
 
+const swapTabs = ['swap', 'add-liquidity', 'withdraw-liquidity'];
+
+type SwapTabType = 'swap' | 'add-liquidity' | 'withdraw-liquidity';
+
 const PageSwap: FC = () => {
+  const { changeTabs, currentTab } = useTabs<SwapTabType>('swap');
+
+  useEffect(() => {
+    const hash = window.location.hash.replace(/.*(?=\?)/, '');
+    const searchParams = new URLSearchParams(hash);
+    const tab = searchParams.get('tab');
+
+    if (tab && swapTabs.find((i) => i === tab)) {
+      changeTabs(searchParams.get('tab') as SwapTabType);
+    }
+  }, [changeTabs]);
+
   return (
     <SwapProvider>
-      <Page>
-        <Page.Title title='Swap' />
-        <Page.Content>
-          <Grid container>
-            <Grid item>
-              <SwapConsole />
-            </Grid>
-            <Grid item>
-              <LPInformations />
-            </Grid>
-          </Grid>
-        </Page.Content>
-      </Page>
+      <Tabs
+        active={currentTab}
+        onChange={changeTabs}
+      >
+        <Tabs.Panel
+          $key='swap'
+          tab='Swap'
+        >
+          <SwapConsole />
+        </Tabs.Panel>
+        <Tabs.Panel
+          $key='add-liquidity'
+          tab='Add Liquidity'
+        >
+          <DepositConsole />
+        </Tabs.Panel>
+        <Tabs.Panel
+          $key='widthdraw-liquidity'
+          tab='Withdraw Liquidity'
+        >
+          <WithdrawConsole />
+        </Tabs.Panel>
+      </Tabs>
     </SwapProvider>
   );
 };

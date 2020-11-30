@@ -30,11 +30,19 @@ export const TOKEN_FULLNAMES: Map<string, string> = new Map([
 
 export const TOKEN_COLOR: Map<string, string> = new Map([
   ['SYSTEM', '#173DC9'],
+  ['ACA', '#173dc9'],
   ['BTC', '#F7931A'],
   ['XBTC', '#F7931A'],
-  ['RENBTC', '#87888C'],
+  ['renBTC', '#87888C'],
   ['LDOT', '#00F893'],
-  ['DOT', '#e6007a']
+  ['DOT', '#e6007a'],
+  ['ACA-aUSD', '#173dc9'],
+  ['aUSD-DOT', '#e6007a'],
+  ['aUSD-BTC', '#F7931A'],
+  ['aUSD-XBTC', '#F7931A'],
+  ['aUSD-renBTC', '#87888C'],
+  ['aUSD-LDOT', '#00F893'],
+  ['aUSD-DOT', '#e6007a']
 ]);
 
 export const TOKEN_NAME: Map<string, string> = new Map([
@@ -129,8 +137,8 @@ export function getDexShareFromCurrencyId (api: ApiRx, token1: CurrencyId, token
 }
 
 export function sortCurrency (currency1?: CurrencyId, currency2?: CurrencyId): number {
-  const currency1Weight = (currency1 ? TOKEN_WEIGHT.get(currency1.asToken.toString()) : 0) || 0;
-  const currency2Weight = (currency2 ? TOKEN_WEIGHT.get(currency2.asToken.toString()) : 0) || 0;
+  const currency1Weight = (currency1 ? TOKEN_WEIGHT.get(currency1?.asToken?.toString()) : 0) || 0;
+  const currency2Weight = (currency2 ? TOKEN_WEIGHT.get(currency2?.asToken?.toString()) : 0) || 0;
 
   return currency1Weight - currency2Weight;
 }

@@ -22,7 +22,7 @@ export function useLockPrices (): LockedPricesResult {
   useEffect(() => {
     if (!api || !oracleCurrencies || !stakingPool) return;
 
-    const subscriber = combineLatest(oracleCurrencies.map((currency: CurrencyLike) => api.query.prices.lockedPrice<Option<Price>>(currency as string)))
+    const subscriber = combineLatest(oracleCurrencies.map((currency: CurrencyLike) => api.query.prices.lockedPrice<Option<Price>>({ token: currency })))
       .subscribe((result: Option<Price>[]): void => {
         const priceList: LockedPricesResult = {};
 

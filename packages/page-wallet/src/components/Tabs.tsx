@@ -1,30 +1,36 @@
 import React, { FC, useContext } from 'react';
-import { useTranslation } from 'react-i18next';
 
+import { useTranslation } from '@acala-dapp/react-hooks';
 import { Tabs as UITabs } from '@acala-dapp/ui-components';
 
-import { WalletContext } from './WalletProvider';
+import { WalletContext, WalletTabType } from './WalletProvider';
 import { AcalaConsole } from './AcalaConsole';
-import { CrossChainConsole } from './CrossChainConsole';
+import { CrossChainConsole } from './cross-chain';
+import { NFT } from './NFT';
 
 export const Tabs: FC = () => {
   const { t } = useTranslation('page-wallet');
   const { activeTab, changeActiveTab } = useContext(WalletContext);
 
   return (
-    <UITabs
-      defaultKey={activeTab}
+    <UITabs<WalletTabType>
+      active={activeTab}
       onChange={changeActiveTab}
-      type='button'
     >
       <UITabs.Panel
-        key='acala'
+        $key='acala'
         tab='Acala'
       >
         <AcalaConsole />
       </UITabs.Panel>
       <UITabs.Panel
-        key='cross-chain'
+        $key='collectibles'
+        tab={t('Collectibles')}
+      >
+        <NFT />
+      </UITabs.Panel>
+      <UITabs.Panel
+        $key='cross-chain'
         tab={t('Cross-Chain')}
       >
         <CrossChainConsole />

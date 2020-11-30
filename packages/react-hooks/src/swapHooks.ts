@@ -1,21 +1,23 @@
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
-
-import { useConstants } from './useConstants';
-import { CurrencyLike, WithNull } from './types';
-import { useAllPrices } from './priceHooks';
-import { useApi } from './useApi';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { useState, useEffect } from 'react';
 import { combineLatest } from 'rxjs';
-import { Balance } from '@acala-network/types/interfaces';
-import { tokenEq } from '@acala-dapp/react-components';
+import { Balance, CurrencyId } from '@acala-network/types/interfaces';
+import { getDexShareFromCurrencyId, tokenEq } from '@acala-dapp/react-components';
+
+import { useConstants } from './useConstants';
+import { WithNull } from './types';
+import { useAllPrices } from './priceHooks';
+import { useApi } from './useApi';
 
 interface SwapOverview {
-  total: Fixed18;
+  total: FixedPointNumber;
   details: {
-    currency: CurrencyLike;
-    base: Fixed18;
-    other: Fixed18;
-    value: Fixed18;
+    currency: CurrencyId;
+    token1: CurrencyId;
+    token2: CurrencyId;
+    token1Amount: FixedPointNumber;
+    token2Amount: FixedPointNumber;
+    value: FixedPointNumber;
   }[];
 }
 
@@ -25,29 +27,39 @@ interface SwapOverview {
  */
 export const useSwapOverview = (): WithNull<SwapOverview> => {
   const { api } = useApi();
-  const { dexCurrencies } = useConstants();
+  const { dexTradingPair } = useConstants();
   const prices = useAllPrices();
   const [result, setResult] = useState<WithNull<SwapOverview>>(null);
 
   useEffect(() => {
     if (!api) return;
 
-    combineLatest(dexCurrencies.map((item) => api.query.dex.liquidityPool<[Balance, Balance]>(item))).subscribe((result: [Balance, Balance][]): void => {
+    combineLatest(dexTradingPair.map((item) => api.query.dex.liquidityPool<[Balance, Balance]>(item))).subscribe((result: [Balance, Balance][]): void => {
       const details = result.map((item, index) => {
-        const currency = dexCurrencies[index];
-        const price = prices.find((item) => tokenEq(currency, item.currency));
-        const other = item[0] ? convertToFixed18(item[0]) : Fixed18.ZERO;
-        const base = item[1] ? convertToFixed18(item[1]) : Fixed18.ZERO;
-        const value = other.mul(price ? price.price : Fixed18.ZERO).add(base);
+        const currency = getDexShareFromCurrencyId(api, dexTradingPair[index][0], dexTradingPair[index][1]);
+        const [token1, token2] = dexTradingPair[index];
 
-        return { base, currency, other, value };
+        const token1Price = prices.find((item) => tokenEq(token1, item.currency))?.price || FixedPointNumber.ZERO;
+        const token2Price = prices.find((item) => tokenEq(token2, item.currency))?.price || FixedPointNumber.ZERO;
+        const token1Amount = FixedPointNumber.fromInner(item[0] ? item[0].toString() : 0);
+        const token2Amount = FixedPointNumber.fromInner(item[1] ? item[1].toString() : 0);
+        const value = token1Amount.times(token1Price).plus(token2Amount.times(token2Price));
+
+        return {
+          currency,
+          token1,
+          token1Amount,
+          token2,
+          token2Amount,
+          value
+        };
       });
 
-      const total = details.reduce((pre, cur) => pre.add(cur.value), Fixed18.ZERO);
+      const total = details.reduce((pre, cur) => pre.plus(cur.value), FixedPointNumber.ZERO);
 
       setResult({ details, total });
     });
-  }, [api, dexCurrencies, prices]);
+  }, [api, dexTradingPair, prices]);
 
   return result;
 };

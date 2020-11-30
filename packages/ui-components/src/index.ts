@@ -1,11 +1,18 @@
 import { Skeleton } from 'antd';
+import styled from 'styled-components';
+
+// export common thirdpart packages
+export {
+  Skeleton,
+  styled
+};
 
 export * from './Alert';
 export * from './AutoComplete';
 export * from './Button';
 export * from './Card';
 export * from './Controller';
-export * from './ComingSoon';
+export * from './Empty';
 export * from './Dropdown';
 export * from './Dialog';
 export * from './Grid';
@@ -37,5 +44,5 @@ export * from './NumberInput';
 export * from './Statistic';
 export * from './InputField';
 export * from './Box';
-
-export { Skeleton };
+export * from './Typology';
+export * from './Information';

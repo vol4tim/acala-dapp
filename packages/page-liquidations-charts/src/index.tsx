@@ -1,4 +1,4 @@
-import { Page, Grid } from '@acala-dapp/ui-components';
+import { Page, Row, Col } from '@acala-dapp/ui-components';
 import React, { FC } from 'react';
 
 import CollateralAuctionList from './components/CollateralAuctionList';
@@ -9,11 +9,11 @@ const PageDashboardHome: FC = () => {
       <Page.Title breadcrumb='Liquidations'
         title='Stablecoin' />
       <Page.Content>
-        <Grid container>
-          <Grid item>
+        <Row gutter={[24, 24]}>
+          <Col>
             <CollateralAuctionList />
-          </Grid>
-        </Grid>
+          </Col>
+        </Row>
       </Page.Content>
     </Page>
   );

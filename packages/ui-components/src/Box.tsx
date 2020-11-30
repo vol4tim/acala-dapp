@@ -1,46 +1,28 @@
-import React, { FC, useMemo, ReactElement, ReactNode, useCallback, isValidElement, cloneElement } from 'react';
-import CSS from 'csstype';
-import clsx from 'clsx';
+import { FC } from 'react';
 import styled from 'styled-components';
 
 import { BareProps } from './types';
-import classes from './Box.module.scss';
 
-export const InlineBlockBox: FC<{ margin: number } & BareProps> = ({ children, className, margin }) => {
-  return (
-    <div className={clsx(classes.inlineBlockBox, className)}
-      style={{
-        margin: `0 ${margin}px`
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+export const InlineBlockBox = styled.div<{ margin?: number | number[] }>`
+  display: inline-block;
+  margin: ${({ margin }): string => {
+    if (Array.isArray(margin)) {
+      return margin.map((i) => i + 'px').join(' ');
+    }
 
-export const SpaceBetweenBox: FC<BareProps> = ({ children, className }) => {
-  return (
-    <div className={clsx(classes.spaceBetweenBox, className)}>
-      {children}
-    </div>
-  );
-};
-
-export const AlignCenterBox: FC<BareProps> = ({ children, className }) => {
-  return (
-    <div className={clsx(classes.alignCenterBox, className)}>
-      {children}
-    </div>
-  );
-};
+    return margin + 'px';
+  }};
+`;
 
 interface FlexBoxProps extends BareProps {
-  alignItems: 'center' | 'flex-start' | 'flex-end' | 'stretch' | 'center';
-  justifyContent: 'flex-start' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly';
+  alignItems?: 'center' | 'flex-start' | 'flex-end' | 'stretch' | 'center';
+  justifyContent?: 'flex-start' | 'flex-end' | 'space-between' | 'space-around' | 'space-evenly' | 'center';
+  width?: string;
 }
 
 export const FlexBox: FC<FlexBoxProps> = styled.div`
   display: flex;
+  width: ${({ width }): string => width || 'auto'}
   justify-content: ${({ justifyContent }: FlexBoxProps): string => justifyContent || 'flex-start'};
   align-items: ${({ alignItems }: FlexBoxProps): string => alignItems || 'center'};
 `;
@@ -61,44 +43,9 @@ interface GridBoxProps extends BareProps {
   padding?: number;
 }
 
-export const GridBox: FC<GridBoxProps> = ({
-  children,
-  className,
-  column,
-  padding = 16,
-  row
-}) => {
-  const style = useMemo<CSS.Properties>((): CSS.Properties => {
-    return {
-      gridTemplateColumns: `repeat(${column}, 1fr)`,
-      gridTemplateRows: row === 'auto' ? 'auto' : `repeat(${row}, 1fr)`,
-      margin: `-${padding}px -${padding}px 0 0`
-    };
-  }, [row, column, padding]);
-
-  const justifyChild = useCallback((child: ReactNode): ReactNode => {
-    if (isValidElement(child)) {
-      const _child = child as ReactElement<any>;
-
-      return cloneElement(_child, {
-        style: {
-          ..._child?.props?.style,
-          margin: `${padding}px ${padding}px 0 0`
-        }
-      });
-    }
-
-    return child;
-  }, [padding]);
-
-  return (
-    <div
-      className={clsx(classes.gridBox, className)}
-      style={style}
-    >
-      {
-        React.Children.map(children, justifyChild)
-      }
-    </div>
-  );
-};
+export const GridBox = styled.div<GridBoxProps>`
+  display: grid;
+  grid-gap: ${({ padding }): string => padding + 'px'};
+  grid-template-columns: ${({ column }): string => `repeat(${column}, 1fr)`};
+  grid-template-rows: ${({ row }): string => row === 'auto' ? 'auto' : `repeat(${row}) 1fr`};
+`;

@@ -1,8 +1,6 @@
 .root {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  flex-direction: row;
-  flex-wrap: wrap;
   margin: -12px;
 }
 

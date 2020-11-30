@@ -111,7 +111,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         or={(
           <div className={clsx(classes.token, { [classes.showIcon]: showIcon })}>
             { showIcon ? <TokenImage currency={value?.token} /> : null }
-            <InlineBlockBox margin={8}>
+            <InlineBlockBox margin={[0, 8]}>
               <TokenName currency={value?.token} />
             </InlineBlockBox>
           </div>

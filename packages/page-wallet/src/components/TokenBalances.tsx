@@ -1,12 +1,11 @@
 import React, { FC, ReactElement } from 'react';
-import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { UserAssetBalance, UserAssetValue, TotalUserAssetValue, TokenImage, TokenName, TokenFullName, TransferButton, tokenEq, StakingPoolExchangeRate } from '@acala-dapp/react-components';
 import { Condition } from '@acala-dapp/ui-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { useConstants, useBalance } from '@acala-dapp/react-hooks';
+import { useConstants, useBalance, useTranslation } from '@acala-dapp/react-hooks';
 
 import classes from './TokenBalances.module.scss';
 

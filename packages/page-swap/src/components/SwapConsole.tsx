@@ -3,11 +3,12 @@ import React, { FC, useContext, ReactElement, useCallback, useMemo, useState, us
 import { ITuple } from '@polkadot/types/types';
 import { Balance } from '@acala-network/types/interfaces';
 
-import { Card, IconButton, InputField, SpaceBetweenBox } from '@acala-dapp/ui-components';
-import { TxButton, BalanceInputValue, UserBalance, BalanceInput } from '@acala-dapp/react-components';
+import { Row, Col, Card, IconButton, InputField, FlexBox } from '@acala-dapp/ui-components';
+import { BalanceInputValue, UserBalance, BalanceInput } from '@acala-dapp/react-components';
 import { useApi, useSubscription, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
+import TxButton from './TxButton';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInput } from './SlippageInput';
 import { SwapContext } from './SwapProvider';
@@ -184,87 +185,89 @@ export const SwapConsole: FC = () => {
   }, [api, swapTrade, setParameters]);
 
   return (
-    <Card className={classes.root}
-      padding={false}>
-      <div className={classes.main}>
-        <InputField
-          actionRender={(): JSX.Element => {
-            return (
-              <TxButton
-                disabled={isDisable}
-                method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
-                onInblock={handleSuccess}
-                params={params}
-                section='dex'
-                size='large'
-              >
-                Swap
-              </TxButton>
-            );
-          }}
-          leftRender={(): JSX.Element => {
-            return (
-              <BalanceInput
-                className={classes.inputLeft}
-                disableTokens={[token2CurrencyId(api, userInput.outputToken)]}
-                enableTokenSelect
-                error={inputError}
-                onChange={setInput}
-                onFocus={(): void => setTradeMode('EXACT_INPUT')}
-                onMax={handleMax}
-                selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
-                value={{
-                  amount: userInput.inputAmount,
-                  token: token2CurrencyId(api, userInput.inputToken)
-                }}
-              />
-            );
-          }}
-          leftTitle={(): JSX.Element => {
-            return (
-              <SpaceBetweenBox>
-                <p>{`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}</p>
-                <div className={classes.extra}>
-                  <span>max: </span>
-                  <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
-                </div>
-              </SpaceBetweenBox>
-            );
-          }}
-          rightRender={(): JSX.Element => {
-            return (
-              <BalanceInput
-                checkSelectBalance={false}
-                className={classes.inputRight}
-                disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
-                enableTokenSelect
-                error={outputError}
-                onChange={setOutput}
-                onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
-                selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
-                value={{
-                  amount: userInput.outputAmount,
-                  token: token2CurrencyId(api, userInput.outputToken)
-                }}
-              />
-            );
-          }}
-          rightTitle={(): JSX.Element => {
-            return (
-              <div>{`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}</div>
-            );
-          }}
-          separation={(): JSX.Element => {
-            return <SwapBtn onClick={handleReverse} />;
-          }}
-        />
-      </div>
-      {
-        (parameters && !isDisable) ? (
-          <SwapInfo parameters={parameters} />
-        ) : null
-      }
-      <SlippageInput />
-    </Card>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
+        <Card className={classes.root}
+          padding={false}>
+          <div className={classes.main}>
+            <InputField
+              leftRender={(): JSX.Element => {
+                return (
+                  <BalanceInput
+                    className={classes.inputLeft}
+                    disableTokens={[token2CurrencyId(api, userInput.outputToken)]}
+                    enableTokenSelect
+                    error={inputError}
+                    onChange={setInput}
+                    onFocus={(): void => setTradeMode('EXACT_INPUT')}
+                    onMax={handleMax}
+                    selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
+                    value={{
+                      amount: userInput.inputAmount,
+                      token: token2CurrencyId(api, userInput.inputToken)
+                    }}
+                  />
+                );
+              }}
+              leftTitle={(): JSX.Element => {
+                return (
+                  <FlexBox justifyContent='space-between'>
+                    <p>{`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}</p>
+                    <div className={classes.extra}>
+                      <span>max: </span>
+                      <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
+                    </div>
+                  </FlexBox>
+                );
+              }}
+              rightRender={(): JSX.Element => {
+                return (
+                  <BalanceInput
+                    checkSelectBalance={false}
+                    className={classes.inputRight}
+                    disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
+                    enableTokenSelect
+                    error={outputError}
+                    onChange={setOutput}
+                    onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
+                    selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
+                    value={{
+                      amount: userInput.outputAmount,
+                      token: token2CurrencyId(api, userInput.outputToken)
+                    }}
+                  />
+                );
+              }}
+              rightTitle={(): JSX.Element => {
+                return (
+                  <div>{`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}</div>
+                );
+              }}
+              separation={(): JSX.Element => {
+                return <SwapBtn onClick={handleReverse} />;
+              }}
+            />
+          </div>
+          {
+            (parameters && !isDisable) ? (
+              <SwapInfo parameters={parameters} />
+            ) : null
+          }
+          <SlippageInput />
+        </Card>
+      </Col>
+      <Col span={24}>
+        <TxButton
+          disabled={isDisable}
+          method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
+          onInblock={handleSuccess}
+          params={params}
+          section='dex'
+          size='large'
+        >
+          Swap
+        </TxButton>
+      </Col>
+    </Row>
   );
 };

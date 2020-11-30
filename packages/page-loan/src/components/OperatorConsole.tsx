@@ -4,7 +4,7 @@ import { useConstants, useLoanHelper, useBalance } from '@acala-dapp/react-hooks
 import { getTokenName, TokenImage, FormatBalance, FormatValue } from '@acala-dapp/react-components';
 import { Card } from '@acala-dapp/ui-components';
 import classes from './OperatorConsole.module.scss';
-import { debitToStableCoin, convertToFixed18 } from '@acala-network/app-util';
+import { debitToStableCoin } from '@acala-network/app-util';
 import { LonaActionButton } from './LoanActionButton';
 
 interface OperatorConsoleProps {

@@ -1,67 +1,83 @@
-import React, { ReactElement, lazy, LazyExoticComponent, Suspense } from 'react';
+import React, { FC, lazy, Suspense, useEffect, useState } from 'react';
 
 import PageGovernance from '@acala-dapp/page-governance';
-import { PageLoading } from '@acala-dapp/ui-components';
+import { PageContentLoading } from '@acala-dapp/ui-components';
 
-import { MainLayout } from './layouts/Main';
 import { sideBarConfig } from './sidebar-config';
-
-export interface RouterConfigData {
-  children?: RouterConfigData[];
-  element?: ReactElement | LazyExoticComponent<any>;
-  path: string;
-  redirectTo?: string;
-}
+import { Layout } from '@acala-dapp/react-components';
+import { RouterConfigData } from '@acala-dapp/react-environment';
 
 const PageWallet = lazy(() => import('@acala-dapp/page-wallet'));
-const PageLiquidity = lazy(() => import('@acala-dapp/page-liquidity'));
 const PageLoan = lazy(() => import('@acala-dapp/page-loan'));
 const PageHoma = lazy(() => import('@acala-dapp/page-homa'));
 const PageSwap = lazy(() => import('@acala-dapp/page-swap'));
+const PageOraclePrice = lazy(() => import('@acala-dapp/page-oracle-price'));
 const PageIncentives = lazy(() => import('@acala-dapp/page-incentives'));
-const PageNFT = lazy(() => import('@acala-dapp/page-nft'));
+
+const CSuspense: FC = ({ children }) => {
+  const [flag, setFlag] = useState(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setFlag(true), 1000);
+
+    return (): void => {
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  if (!flag && children) return <PageContentLoading />;
+
+  return (
+    <Suspense fallback={<PageContentLoading />}>
+      {children}
+    </Suspense>
+  );
+};
 
 export const config: RouterConfigData[] = [
   {
     children: [
       {
-        element: <Suspense fallback={<PageLoading />}><PageWallet/></Suspense>,
-        path: 'wallet'
+        element: <CSuspense><PageWallet/></CSuspense>,
+        path: 'wallet',
+        title: 'Wallet'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageLiquidity /></Suspense>,
-        path: 'amm'
+        element: <CSuspense><PageLoan /></CSuspense>,
+        path: 'loan',
+        title: 'Borrow aUSD'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageLoan /></Suspense>,
-        path: 'loan'
+        element: <CSuspense><PageHoma /></CSuspense>,
+        path: 'homa',
+        title: 'Liquid Staking'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageHoma /></Suspense>,
-        path: 'homa'
+        element: <CSuspense><PageSwap /></CSuspense>,
+        path: 'swap',
+        title: 'Swap'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageSwap /></Suspense>,
-        path: 'swap'
+        element: <CSuspense><PageIncentives /></CSuspense>,
+        path: 'earn',
+        title: 'Earn'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageIncentives /></Suspense>,
-        path: 'earn'
+        element: <CSuspense><PageOraclePrice /></CSuspense>,
+        path: 'oracle-price',
+        title: 'Oracle Price'
       },
       {
-        element: <Suspense fallback={<PageLoading />}><PageNFT /></Suspense>,
-        path: 'nft'
-      },
-      {
-        element: <Suspense fallback={<PageLoading />}><PageGovernance /></Suspense>,
-        path: 'governance'
+        element: <CSuspense><PageGovernance /></CSuspense>,
+        path: 'governance',
+        title: 'Oracle Price'
       },
       {
         path: '*',
         redirectTo: 'loan'
       }
     ],
-    element: <MainLayout sideBarProps={{ config: sideBarConfig }} />,
+    element: <Layout.Main sidebar={sideBarConfig} />,
     path: '*'
   }
 ];

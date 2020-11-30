@@ -1,6 +1,6 @@
 import React, { FC, ReactNode } from 'react';
 
-import { Card, TableConfig, Table, Condition, SpaceBetweenBox, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
+import { Col, Card, TableConfig, Table, Condition, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
 import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
 import { Fixed18 } from '@acala-network/app-util';
@@ -13,7 +13,10 @@ export const RedeemList: FC = () => {
 
   const renderHeader = (): ReactNode => {
     return (
-      <SpaceBetweenBox>
+      <FlexBox
+        justifyContent='space-between'
+        width='100%'
+      >
         <div>Redeem Tracker</div>
         {
           !currentRedeem.isZero() ? (
@@ -39,7 +42,7 @@ export const RedeemList: FC = () => {
 
           ) : null
         }
-      </SpaceBetweenBox>
+      </FlexBox>
     );
   };
 
@@ -94,18 +97,20 @@ export const RedeemList: FC = () => {
   }
 
   return (
-    <Card
-      header={renderHeader()}
-      padding={false}
-    >
-      <Condition condition={!!redeemList.length}>
-        <Table
-          config={tableConfig}
-          data={redeemList}
-          showHeader
-          size='small'
-        />
-      </Condition>
-    </Card>
+    <Col span={24}>
+      <Card
+        header={renderHeader()}
+        padding={false}
+      >
+        <Condition condition={!!redeemList.length}>
+          <Table
+            config={tableConfig}
+            data={redeemList}
+            showHeader
+            size='small'
+          />
+        </Condition>
+      </Card>
+    </Col>
   );
 };

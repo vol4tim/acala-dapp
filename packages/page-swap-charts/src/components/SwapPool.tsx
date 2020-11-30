@@ -20,8 +20,8 @@ export const SwapPool: FC = () => {
     return overview.details.map((item) => {
       return {
         currency: getTokenName(item.currency),
-        percent: item.value.div(overview.total).toNumber(2, 3),
-        value: item.value.toNumber(2, 3)
+        percent: item.value.div(overview.total).toNumber() || 0,
+        value: item.value.toNumber()
       };
     });
   }, [overview]);

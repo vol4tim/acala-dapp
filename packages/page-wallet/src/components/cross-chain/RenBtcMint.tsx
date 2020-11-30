@@ -4,7 +4,7 @@ import { noop } from 'lodash';
 import clsx from 'clsx';
 
 import { Fixed18 } from '@acala-network/app-util';
-import { List, Button, Grid, Condition } from '@acala-dapp/ui-components';
+import { List, Button, Row, Col, Condition } from '@acala-dapp/ui-components';
 import { BalanceInput, FormatAddress, FormatBalance, getCurrencyIdFromName, BalanceInputValue } from '@acala-dapp/react-components';
 
 import classes from './RenBtc.module.scss';
@@ -63,10 +63,9 @@ const InputStep: FC = () => {
 
   return (
     <div className={classes.step}>
-      <Grid container>
-        <Grid item>
+      <Row gutter={[24, 24]}>
+        <Col span={24}>
           <BalanceInput
-            checkBalance={false}
             className={classes.input}
             error={form.errors.amount}
             numberInputProps={{
@@ -76,8 +75,8 @@ const InputStep: FC = () => {
             onChange={handleInput}
             value={{ amount: form.values.amount, token: getCurrencyIdFromName(api, 'RENBTC') }}
           />
-        </Grid>
-        <Grid item>
+        </Col>
+        <Col span={24}>
           <List className={classes.inputStepInfo}>
             <List.Item
               className={clsx(classes.item, classes.destination)}
@@ -100,8 +99,8 @@ const InputStep: FC = () => {
               }
             />
           </List>
-        </Grid>
-      </Grid>
+        </Col>
+      </Row>
       <div className={classes.actionArea}>
         <Button
           className={classes.nextBtn}

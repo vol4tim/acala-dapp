@@ -1,6 +1,14 @@
+import { Grid } from 'antd';
 import useRequest from '@umijs/use-request';
+import { useTranslation } from 'react-i18next';
 
-export { useRequest };
+const { useBreakpoint } = Grid;
+
+export {
+  useRequest,
+  useBreakpoint,
+  useTranslation
+};
 
 // system
 export * from './useAccounts';
@@ -59,7 +67,7 @@ export * from './auctionHooks';
 export * from './utils';
 
 // dashboard
-export * from './useRequestChart';
+export * from './useChartData';
 export * from './dashboardHomeHooks';
 
 // nft

@@ -45,9 +45,7 @@ export const ApiProvider: FC<Props> = ({
   const apiSubscriber = useRef<Subscription>();
 
   const init = useCallback((endpoint: string, allEndpoints: string[]) => {
-    if (apiSubscriber.current) {
-      apiSubscriber.current.unsubscribe();
-    }
+    if (apiSubscriber.current) return;
 
     const provider = new WsProvider([endpoint, ...allEndpoints]);
 

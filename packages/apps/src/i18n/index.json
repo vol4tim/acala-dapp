@@ -18,8 +18,14 @@
     },
     "page-loan": {},
     "page-swap": {},
-    "page-liquidity": {},
     "page-homa": {},
+    "page-oracle-price": {
+      "Oracle Price": "Oracle Price",
+      "Open Oracle Gateway": "Open Oracle Gateway",
+      "open_oracle_gateway_information": "Open Oracle Gateway allows multiple (authorized) oracle providers to sign and feed price data on-chain. Quality of Service is applied to these price feed transactions, guaranteeing they are included in a block.",
+      "Aggregated": "Aggregated",
+      "Details": "Details"
+    },
     "page-governance": {}
   },
   "zh": {
@@ -41,8 +47,8 @@
     },
     "page-loan": {},
     "page-swap": {},
-    "page-liquidity": {},
     "page-homa": {},
+    "page-oracle-price": {},
     "page-governance": {}
   }
 }

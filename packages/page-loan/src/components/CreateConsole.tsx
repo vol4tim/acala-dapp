@@ -1,6 +1,6 @@
 import React, { FC, useContext, useMemo } from 'react';
 
-import { Card, Step, Condition, Grid, SubTitle } from '@acala-dapp/ui-components';
+import { Card, Step, Condition, Row, Col, SubTitle } from '@acala-dapp/ui-components';
 import { useConstants } from '@acala-dapp/react-hooks';
 import { TokenName, getTokenName } from '@acala-dapp/react-components';
 
@@ -78,33 +78,29 @@ const Inner: FC = () => {
   const { selectedToken, step } = useContext(createProviderContext);
 
   return (
-    <Grid container>
+    <Row gutter={[24, 24]}>
       <Condition condition={step !== 'select'}>
-        <Grid item>
+        <Col span={24}>
           <SubTitle>
             <span style={{ marginRight: 8 }}>Collateration</span>
             <TokenName currency={selectedToken} />
           </SubTitle>
-        </Grid>
+        </Col>
       </Condition>
-      <Grid
-        container
-        item
-      >
-        <Grid item
-          span={new Set(['select', 'success']).has(step) ? 24 : 12}>
-          <Main />
-        </Grid>
-        <Condition condition={step !== 'select' && step !== 'success' }>
-          <Grid
-            item
-            span={12}
-          >
-            <CreateOverview />
-          </Grid>
-        </Condition>
-      </Grid>
-    </Grid>
+      <Col span={24}>
+        <Row gutter={24}>
+          <Col
+            span={new Set(['select', 'success']).has(step) ? 24 : 12}>
+            <Main />
+          </Col>
+          <Condition condition={step !== 'select' && step !== 'success' }>
+            <Col span={12}>
+              <CreateOverview />
+            </Col>
+          </Condition>
+        </Row>
+      </Col>
+    </Row>
   );
 };
 

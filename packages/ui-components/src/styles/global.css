@@ -2,9 +2,10 @@ html, body {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-variant-numeric: tabular-nums;
   color: #333333;
   font-weight: 400;
 }
@@ -43,8 +44,9 @@ p, span {
   --color-primary-active: #0c30ae;
 
   --color-blue: #108ee9;
-  --color-green: #8fce65;
+  --color-green: #48b87e;
   --color-red: #e02020;
+  --color-red-light: #ff5a5a;
   --color-yellow: #f0fa41;
   --color-origin: #f7b500;
   --color-white: #ffffff;
@@ -59,6 +61,15 @@ p, span {
 
   --border-color: #e9e9e9;
 
+  --text-size-sm: 14px;
+  --text-size-md: 16px;
+  --text-size-lg: 18px;
+  --text-size-xl: 24px;
+
+  --text-weight-light: 400;
+  --text-weight-md: 500;
+
+  --text-color-black: #000000;
   --text-color-white: #ffffff;
   --text-color-primary: #333333;
   --text-color-normal: #666666;
@@ -67,6 +78,18 @@ p, span {
   --screen-small: 960px;
   --screen-middle: 1440px;
   --screen-large: 1920px;
+
+  --tab-border: #ebeef5;
+
+  --card-shadow: 0 1px 20px 0 rgba(23, 65, 212, 0.02);
+
+  --sidebar-item-height: 58px;
+
+  --platform-background: #f8f9fd;
+
+  --information-background: #edf3ff;
+  --information-title-color: #0155ff;
+  --information-content-color: #95ADDC;
 }
 
 /* overwrite ant style */

@@ -1,9 +1,18 @@
-import { Statistic } from '@acala-dapp/ui-components';
+import { styled, Statistic } from '@acala-dapp/ui-components';
 import { Token, FormatValue } from '@acala-dapp/react-components';
 import React, { FC } from 'react';
 import { useIssuance, useConstants, useTotalDebit, useTotalCollateral } from '@acala-dapp/react-hooks';
 
-import classes from './Overview.module.scss';
+const OverviewRoot = styled.div`
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin: -12px;
+`;
+
+const OverviewItem = styled.div`
+  padding: 12px;
+`;
 
 const Overview: FC = () => {
   const { stableCurrency } = useConstants();
@@ -12,8 +21,8 @@ const Overview: FC = () => {
   const totalCollateral = useTotalCollateral();
 
   return (
-    <div className={classes.root}>
-      <div className={classes.item}>
+    <OverviewRoot>
+      <OverviewItem>
         <Statistic
           title={<Token
             currency={stableCurrency}
@@ -24,8 +33,8 @@ const Overview: FC = () => {
             prefix='$'
           />}
         />
-      </div>
-      <div className={classes.item}>
+      </OverviewItem>
+      <OverviewItem>
         <Statistic
           title='Total Debits'
           value={
@@ -34,16 +43,16 @@ const Overview: FC = () => {
             />
           }
         />
-      </div>
-      <div className={classes.item}>
+      </OverviewItem>
+      <OverviewItem>
         <Statistic
           title='Total Collateral'
           value={<FormatValue data={totalCollateral?.amount}
             prefix='$'
           />}
         />
-      </div>
-    </div>
+      </OverviewItem>
+    </OverviewRoot>
   );
 };
 

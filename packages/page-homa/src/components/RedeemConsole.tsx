@@ -1,7 +1,7 @@
 import React, { FC, useState, useMemo, useCallback } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { Grid, Radio, List, Condition } from '@acala-dapp/ui-components';
+import { Row, Col, Radio, List, Condition, FlexBox } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, formatDuration, FormatBalance, BalanceInputValue, getTokenName } from '@acala-dapp/react-components';
 import { useStakingPool, useStakingPoolFreeList, useBalance, useConstants, useInputValue, useBalanceValidator } from '@acala-dapp/react-hooks';
 
@@ -170,14 +170,14 @@ export const RedeemConsole: FC = () => {
   }, [reset, setReceived, setFee]);
 
   return (
-    <Grid
+    <Row
       className={classes.root}
-      container
+      gutter={[24, 24]}
     >
-      <Grid item>
+      <Col span={24}>
         <p className={classes.notice}>Withdraw deposit and interest</p>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <div className={classes.select}>
           <Radio
             checked={redeemType === 'Immediately'}
@@ -215,39 +215,40 @@ export const RedeemConsole: FC = () => {
             onClick={(): void => handleTypeChange('WaitForUnbonding')}
           />
         </div>
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <BalanceInput
           error={error}
           onChange={handleInput}
           onMax={handleMax}
           value={liquidValue}
         />
-      </Grid>
-      <Grid item>
+      </Col>
+      <Col span={24}>
         <p className={classes.eraInfo}>
           Current Era = {stakingPool?.derive.currentEra.toNumber()} Unbounding Period = {formatDuration(duration)} Days, Era {stakingPool?.derive.bondingDuration.toNumber()}
         </p>
-      </Grid>
-      <Grid
-        container
-        item
-        justity='center'
-      >
-        <TxButton
-          className={classes.txBtn}
-          disabled={isDisabled}
-          method='redeem'
-          onInblock={handleSuccess}
-          params={params}
-          section='homa'
+      </Col>
+      <Col span={24}>
+        <FlexBox
+          alignItems='center'
+          justifyContent='center'
         >
-          Redeem
-        </TxButton>
-      </Grid>
-      <Grid
+          <TxButton
+            className={classes.txBtn}
+            disabled={isDisabled}
+            method='redeem'
+            onInblock={handleSuccess}
+            params={params}
+            section='homa'
+          >
+            Redeem
+          </TxButton>
+        </FlexBox>
+      </Col>
+      <Col
         className={classes.info}
-        item
+        span={24}
       >
         <List>
           <List.Item
@@ -286,7 +287,7 @@ export const RedeemConsole: FC = () => {
             />
           </Condition>
         </List>
-      </Grid>
-    </Grid>
+      </Col>
+    </Row>
   );
 };

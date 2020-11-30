@@ -1,9 +1,61 @@
 import React, { FC, ReactNode, useMemo } from 'react';
+import styled from 'styled-components';
 
 import { ReactComponent as RightArrowIcon } from './assets/right-arrow.svg';
 import { ReactComponent as AddIcon } from './assets/add.svg';
-import classes from './InputField.module.scss';
-import clsx from 'clsx';
+
+const Root = styled.div`
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 58px 1fr;
+  grid-template-rows: auto 58px auto;
+  grid-template-areas: 
+    'left-title . right-title'
+    'left-content separation right-content'
+    'left-addition . right-addition'
+  ;
+`;
+
+const Title = styled.div`
+  font-size: var(--text-size-md);
+  line-height: 1.1875;
+`;
+
+const LeftTitle = styled(Title)`
+  grid-area: left-title;
+  margin-bottom: 24px;
+`;
+
+const RightTitle = styled(Title)`
+  grid-area: right-title;
+  margin-bottom: 24px;
+`;
+
+const LeftContent = styled.div`
+  grid-area: left-content
+`;
+
+const RightContent = styled.div`
+  grid-area: right-content
+`;
+
+const Separation = styled.div`
+  grid-area: separation;
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+`;
+
+const LeftAddition = styled.div`
+  grid-area: left-addition;
+  margin-top: 16px;
+`;
+
+const RightAddition = styled.div`
+  grid-area: right-addition;
+  margin-top: 16px;
+`;
 
 export interface InputFieldProps {
   leftAddition?: () => ReactNode;
@@ -12,78 +64,63 @@ export interface InputFieldProps {
   rightAddition?: () => ReactNode;
   rightTitle: () => ReactNode;
   rightRender: () => ReactNode;
-  actionRender: () => ReactNode;
   separation: 'right-arrow' | 'plus' | (() => ReactNode);
   leftContentClassName?: string;
   rightContentClassName?: string;
 }
 
 export const InputField: FC<InputFieldProps> = ({
-  actionRender,
   leftAddition,
-  leftContentClassName,
   leftRender,
   leftTitle,
   rightAddition,
-  rightContentClassName,
   rightRender,
   rightTitle,
   separation
 }) => {
   const _separation = useMemo(() => {
     if (separation === 'right-arrow') {
-      return (
-        <div className={classes.rightArrow}>
-          <RightArrowIcon />
-        </div>
-      );
+      return <RightArrowIcon />;
     }
 
     if (separation === 'plus') {
-      return (
-        <div className={classes.rightArrow}>
-          <AddIcon />
-        </div>
-      );
+      return <AddIcon />;
     }
 
     return separation();
   }, [separation]);
 
   return (
-    <div className={classes.root}>
-      <div className={clsx(classes.leftTitle, classes.title)}>
+    <Root>
+      <LeftTitle>
         {leftTitle()}
-      </div>
-      <div className={clsx(classes.leftContent, leftContentClassName)}>
+      </LeftTitle>
+      <LeftContent>
         {leftRender()}
-      </div>
-      <div className={clsx(classes.separation)}>
+      </LeftContent>
+      <Separation>
         {_separation}
-      </div>
-      <div className={clsx(classes.rightTitle, classes.title)}>
+      </Separation>
+      <RightTitle>
         {rightTitle()}
-      </div>
-      <div className={clsx(classes.rightContent, rightContentClassName)}>
+      </RightTitle>
+      <RightContent>
         {rightRender()}
-      </div>
-      <div className={clsx(classes.actionBtn)}>
-        {actionRender()}
-      </div>
+      </RightContent>
       {
         leftAddition ? (
-          <div className={clsx(classes.leftAddition)}>
+          <LeftAddition>
             {leftAddition()}
-          </div>
+          </LeftAddition>
         ) : null
       }
       {
         rightAddition ? (
-          <div className={clsx(classes.rightAddition)}>
+          <RightAddition>
             {rightAddition()}
-          </div>
+          </RightAddition>
         ) : null
       }
-    </div>
+    </Root>
   );
 };

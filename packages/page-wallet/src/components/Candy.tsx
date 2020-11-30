@@ -51,6 +51,8 @@ export const Candy: FC = () => {
   useEffect(() => {
     if (!active?.address) return;
 
+    return;
+
     axios.get(`${QUERY_CANDY}${active.address}`).then((result) => {
       if (result.status === 200 && result.data.code === 200) {
         setCandy({

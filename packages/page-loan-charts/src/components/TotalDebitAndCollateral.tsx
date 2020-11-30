@@ -4,7 +4,7 @@ import { LooseObject } from 'bizcharts/lib/interface';
 
 import { Fixed18 } from '@acala-network/app-util';
 
-import { Card, Grid } from '@acala-dapp/ui-components';
+import { Card, Row, Col } from '@acala-dapp/ui-components';
 import { useTotalDebit, useTotalCollateral, TotalDebitOrCollateralData } from '@acala-dapp/react-hooks';
 import { getTokenColor, getTokenName, FormatValue } from '@acala-dapp/react-components';
 
@@ -56,10 +56,7 @@ const OverviewDataDisplay: FC<OverviewDataDisplayProps> = ({ data, title }) => {
   if (!data) return null;
 
   return (
-    <Grid
-      item
-      span={12}
-    >
+    <Col span={12}>
       <Card
         extra={<FormatValue data={data.amount} />}
         header={title}
@@ -99,7 +96,7 @@ const OverviewDataDisplay: FC<OverviewDataDisplayProps> = ({ data, title }) => {
           </Chart>
         </div>
       </Card>
-    </Grid>
+    </Col>
   );
 };
 
@@ -127,9 +124,9 @@ const TotalCollateral: FC = () => {
 
 export const TotalDebitAndCollateral: FC = () => {
   return (
-    <Grid container >
+    <Row gutter={[24, 0]}>
       <TotalCollateral />
       <TotalDebit />
-    </Grid>
+    </Row>
   );
 };

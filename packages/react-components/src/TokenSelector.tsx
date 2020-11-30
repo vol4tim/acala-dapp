@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback, useMemo } from 'react';
+import React, { FC, useState, useCallback, useMemo, ReactNode } from 'react';
 import clsx from 'clsx';
 import { noop } from 'lodash';
 
@@ -84,15 +84,18 @@ interface Props extends BareProps {
   onChange?: CurrencyChangeFN;
   showIcon?: boolean;
   showDetail?: boolean;
+  valueRender?: (value: CurrencyId) => ReactNode;
 }
 
 export const TokenSelector: FC<Props> = ({
+  className,
   currencies,
   checkBalance = true,
   disabledCurrencies = [],
   onChange = noop,
   value,
-  showIcon
+  showIcon,
+  valueRender
 }) => {
   const [visible, setVisible] = useState<boolean>(false);
 
@@ -106,6 +109,7 @@ export const TokenSelector: FC<Props> = ({
 
   return (
     <Dropdown
+      className={className}
       getPopupContainer={(triggerNode): any => triggerNode.parentNode}
       onVisibleChange={setVisible}
       overlay={(
@@ -132,11 +136,13 @@ export const TokenSelector: FC<Props> = ({
       <div className={classes.selected}>
         {
           value ? (
-            <Token
-              className={classes.token}
-              currency={value}
-              icon={showIcon}
-            />
+            valueRender ? valueRender(value) : (
+              <Token
+                className={classes.token}
+                currency={value}
+                icon={showIcon}
+              />
+            )
           ) : null
         }
         <ArrowDownIcon className={classes.arrow} />

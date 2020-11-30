@@ -1,10 +1,10 @@
 import React, { FC, useCallback, useMemo, useContext } from 'react';
 
-import { Fixed18 } from '@acala-network/app-util';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Dialog, Button } from '@acala-dapp/ui-components';
-import { useConstants, useAccounts, useBalance, useAllPrices } from '@acala-dapp/react-hooks';
+import { useConstants, useAccounts, useBalance, useAllPrices, useApi } from '@acala-dapp/react-hooks';
 
-import { TxButton, tokenEq, FormatValue, TokenName, FormatAddress, Token, FormatBalance } from '@acala-dapp/react-components';
+import { TxButton, tokenEq, FormatValue, TokenName, FormatAddress, Token, FormatBalance, getCurrencyIdFromName } from '@acala-dapp/react-components';
 import { EmergencyShutdownContext } from './EmergencyShutdownProvider';
 import classes from './ReclaimModal.module.scss';
 
@@ -13,13 +13,13 @@ const AssetBoard: FC = () => {
   const prices = useAllPrices();
   const { collaterals } = useContext(EmergencyShutdownContext);
   const totalValue = useMemo(() => {
-    if (!prices || !collaterals) return Fixed18.ZERO;
+    if (!prices || !collaterals) return FixedPointNumber.ZERO;
 
     return Object.keys(collaterals).reduce((acc, currency) => {
       const price = prices.find((i) => tokenEq(currency, i.currency));
 
-      return acc.add(price ? price.price.mul(collaterals[currency]) : Fixed18.ZERO);
-    }, Fixed18.ZERO);
+      return acc.plus(price ? price.price.times(collaterals[currency]) : FixedPointNumber.ZERO);
+    }, FixedPointNumber.ZERO);
   }, [prices, collaterals]);
 
   return (
@@ -50,6 +50,7 @@ export const ReclaimModal: FC<ReclaimModalProps> = ({
   onClose,
   visiable
 }) => {
+  const { api } = useApi();
   const { stableCurrency } = useConstants();
   const stableBalance = useBalance(stableCurrency);
 
@@ -62,15 +63,15 @@ export const ReclaimModal: FC<ReclaimModalProps> = ({
   }, [setStep, onClose]);
 
   const params = useMemo(() => {
-    return [stableBalance.innerToString()];
+    return [stableBalance.toChainData()];
   }, [stableBalance]);
 
   const beforeSend = useCallback(() => {
     const copyCollaterals = Object.keys(collaterals).reduce((acc, cur) => {
-      acc[cur] = Fixed18.fromNatural(collaterals[cur].toFixed(18));
+      acc[cur] = FixedPointNumber._fromBN(collaterals[cur]._getInner());
 
       return acc;
-    }, {} as Record<string, Fixed18>);
+    }, {} as Record<string, FixedPointNumber>);
 
     updateCollateralRef(copyCollaterals);
   }, [collaterals, updateCollateralRef]);
@@ -128,7 +129,7 @@ export const ReclaimModal: FC<ReclaimModalProps> = ({
                   key={`reclaim-collaterall-${currency}`}
                 >
                   <Token
-                    currency={currency}
+                    currency={getCurrencyIdFromName(api, currency)}
                     icon
                     imageClassName={classes.tokenImage}
                   />

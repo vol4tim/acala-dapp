@@ -1,23 +1,44 @@
 import React, { FC } from 'react';
 
-import { Tabs, Card } from '@acala-dapp/ui-components';
+import { Card, Tabs, useTabs, CardTabTitle } from '@acala-dapp/ui-components';
 
 import { RenBtcMint } from './RenBtcMint';
 
+type RenBTCTabType = 'mint' | 'release';
+
 export const RenBtc: FC = () => {
+  const { changeTabs, currentTab } = useTabs<RenBTCTabType>('mint');
+
   return (
-    <Card padding={false} >
-      <Tabs type='card'>
+    <Card padding={false}>
+      <Tabs<RenBTCTabType>
+        active={currentTab}
+        onChange={changeTabs}
+        showTabsContainerBorderLine={false}
+      >
         <Tabs.Panel
-          key='mint'
-          tab='Mint'
+          $key='mint'
+          tab={(): JSX.Element => (
+            <CardTabTitle
+              active={currentTab === 'mint'}
+              disabled={false}
+            >
+              Mint
+            </CardTabTitle>
+          )}
         >
           <RenBtcMint />
         </Tabs.Panel>
         <Tabs.Panel
-          disabled
-          key='release'
-          tab='Release'
+          $key='release'
+          tab={(): JSX.Element => (
+            <CardTabTitle
+              active={currentTab === 'release'}
+              disabled={true}
+            >
+              Release
+            </CardTabTitle>
+          )}
         >
           <p>hello</p>
         </Tabs.Panel>

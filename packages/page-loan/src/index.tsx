@@ -1,6 +1,6 @@
 import React, { FC, useContext } from 'react';
 
-import { Page, Grid, Condition, Tabs } from '@acala-dapp/ui-components';
+import { Row, Col, Condition, Tabs, useTabs } from '@acala-dapp/ui-components';
 
 import { LoanTopBar } from './components/LoanTopBar';
 import { CreateConsole } from './components/CreateConsole';
@@ -11,83 +11,79 @@ import { EmergencyShutdown } from './components/emergency-shutdown';
 import { WalletBalance } from '@acala-dapp/react-components';
 import { LoanAlert } from './components/LoanAlert';
 
+type LoanTabType = 'shutdown' | 'loans';
+
 const Inner: FC = () => {
   const { currentTab, isShutdown } = useContext(LoanContext);
+  const { changeTabs, currentTab: pageCurrentTab } = useTabs<LoanTabType>(isShutdown ? 'shutdown' : 'loans');
 
   return (
-    <Page>
-      <Page.Title title='Self Serviced Loan' />
-      <Page.Content>
-        <Grid container>
-          <LoanAlert />
-          <Grid item>
-            <Tabs
-              defaultKey={isShutdown ? 'shutdown' : 'loans'}
-              type='button'
-            >
-              {
-                <Tabs.Panel
-                  disabled={!isShutdown}
-                  key='shutdown'
-                  tab='Emergency Shutdown'
-                >
-                  <EmergencyShutdown />
-                </Tabs.Panel>
-              }
-              <Tabs.Panel
-                disabled={isShutdown}
-                key='loans'
-                tab='My Loans'
-              >
-                <Grid container>
-                  <Condition
-                    condition={currentTab !== 'create'}
-                    match={
-                      <Grid item>
-                        <LoanTopBar />
-                      </Grid>
-                    }
-                  />
+    <Row gutter={[24, 24]}>
+      <LoanAlert />
+      <Col span={24}>
+        <Tabs<LoanTabType>
+          active={pageCurrentTab}
+          onChange={changeTabs}
+        >
+          <Tabs.Panel
+            $key='loans'
+            disabled={isShutdown}
+            tab='My Loans'
+          >
+            <Row gutter={[24, 24]}>
+              <Condition
+                condition={currentTab !== 'create'}
+                match={
+                  <Col span={24}>
+                    <LoanTopBar />
+                  </Col>
+                }
+              />
 
-                  <Grid>
-                    <WalletBalance />
-                  </Grid>
+              <Col span={24}>
+                <WalletBalance />
+              </Col>
 
-                  <Condition
-                    condition={currentTab === 'overview'}
-                    match={(
-                      <Grid item>
-                        <Overview />
-                      </Grid>
-                    )}
-                  />
+              <Condition
+                condition={currentTab === 'overview'}
+                match={(
+                  <Col span={24}>
+                    <Overview />
+                  </Col>
+                )}
+              />
 
-                  <Condition
-                    condition={currentTab === 'create'}
-                    match={(
-                      <Grid item>
-                        <CreateConsole />
-                      </Grid>
-                    )}
-                  />
+              <Condition
+                condition={currentTab === 'create'}
+                match={(
+                  <Col span={24}>
+                    <CreateConsole />
+                  </Col>
+                )}
+              />
 
-                  <Condition
-                    condition={currentTab !== 'create' && currentTab !== 'overview'}
-                    match={(
-                      <>
-                        <Grid item>
-                          <LoanConsole />
-                        </Grid>
-                      </>
-                    )}
-                  />
-                </Grid>
-              </Tabs.Panel>
-            </Tabs>
-          </Grid>
-        </Grid>
-      </Page.Content>
-    </Page>
+              <Condition
+                condition={currentTab !== 'create' && currentTab !== 'overview'}
+                match={(
+                  <>
+                    <Col span={24}>
+                      <LoanConsole />
+                    </Col>
+                  </>
+                )}
+              />
+            </Row>
+          </Tabs.Panel>
+          <Tabs.Panel
+            $key='shutdown'
+            disabled={!isShutdown}
+            tab='Emergency Shutdown'
+          >
+            <EmergencyShutdown />
+          </Tabs.Panel>
+        </Tabs>
+      </Col>
+    </Row>
   );
 };
 

@@ -78,8 +78,8 @@ const dappModules = [
   'page-wallet',
   'page-loan',
   'page-swap',
-  'page-liquidity',
   'page-homa',
+  'page-oracle-price',
   'page-governance'
 ];
 

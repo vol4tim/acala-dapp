@@ -26,8 +26,6 @@ export const LoanProvider: FC<BareProps> = ({
 }) => {
   const prevTabRef = useRef<LoanTab>('overview');
   const [currentTab, _setCurrentTab] = useState<LoanTab>('overview');
-  const loans = useAllUserLoans();
-  const { isInitialized, setEnd } = useInitialize();
   const { canRefund, isShutdown } = useEmergencyShutdown();
 
   const setCurrentTab = useCallback((tab: LoanTab) => {
@@ -48,11 +46,6 @@ export const LoanProvider: FC<BareProps> = ({
     setCurrentTab(prevTabRef.current);
   }, [setCurrentTab]);
 
-  // handle init status
-  useEffect(() => {
-    if (loans) setEnd();
-  }, [loans, setEnd]);
-
   return (
     <LoanContext.Provider
       value={{
@@ -65,9 +58,7 @@ export const LoanProvider: FC<BareProps> = ({
         showOverview
       }}
     >
-      {
-        isInitialized ? children : <PageLoading />
-      }
+      {children}
     </LoanContext.Provider>
   );
 };

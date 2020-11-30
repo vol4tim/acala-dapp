@@ -183,7 +183,7 @@ export const TransferModal: FC<TransferModalProps> = ({
   const renderHeader = useCallback((): JSX.Element => {
     return (
       <>
-        <InlineBlockBox margin={8}>
+        <InlineBlockBox margin={[0, 8]}>
           <span>Transfer</span>
         </InlineBlockBox>
         <TokenName currency={selectedCurrency}/>

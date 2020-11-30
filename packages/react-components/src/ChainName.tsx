@@ -1,4 +1,4 @@
-import React, { FC, useCallback } from 'react';
+import React, { FC } from 'react';
 import clsx from 'clsx';
 
 import { useApi, useModal } from '@acala-dapp/react-hooks';
@@ -10,13 +10,13 @@ import { ReactComponent as AcalaIcon } from './assets/aca-network.svg';
 import classes from './ChainName.module.scss';
 import { SelectNetwork } from './SelectNetwork';
 
-export const ChainName: FC<BareProps> = ({ className }) => {
-  const { chainInfo, loading } = useApi();
-  const { close, open, status } = useModal();
+interface ChainNameProps extends BareProps {
+  collapse: boolean;
+}
 
-  const openChainSelect = useCallback(() => {
-    open();
-  }, [open]);
+export const ChainName: FC<ChainNameProps> = ({ className, collapse }) => {
+  const { chainInfo, loading } = useApi();
+  const { close, open: openChainSelector, status } = useModal();
 
   return (
     <>
@@ -27,7 +27,7 @@ export const ChainName: FC<BareProps> = ({ className }) => {
             classes.root
           )
         }
-        onClick={openChainSelect}
+        onClick={openChainSelector}
       >
         {
           loading || !chainInfo?.chainName ? (
@@ -39,12 +39,14 @@ export const ChainName: FC<BareProps> = ({ className }) => {
           ) : (
             <>
               <NetworkIcon className={classes.networkIcon} />
-              <div
-                className={classes.chainName}
-              >
-                <AcalaIcon className={classes.chainIcon} />
-                {chainInfo.chainName}
-              </div>
+              {
+                collapse ? null : (
+                  <div className={classes.chainName}>
+                    <AcalaIcon className={classes.chainIcon} />
+                    {chainInfo.chainName}
+                  </div>
+                )
+              }
             </>
           )
         }
