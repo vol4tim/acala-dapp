@@ -25,13 +25,13 @@ const PageDeposit: FC = () => {
         >
           <Tabs.Panel
             $key='aggregated'
-            tab={t('Aggregated')}
+            header={t('Aggregated')}
           >
             <OracleAggregated />
           </Tabs.Panel>
           <Tabs.Panel
             $key='details'
-            tab={t('Details')}
+            header={t('Details')}
           >
             <OracleDetails />
           </Tabs.Panel>

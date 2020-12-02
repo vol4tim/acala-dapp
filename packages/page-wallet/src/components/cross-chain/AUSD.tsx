@@ -2,7 +2,7 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { Form } from 'antd';
 
 import { BalanceInput, TxButton, numToFixed18Inner, UserAssetBalance } from '@acala-dapp/react-components';
-import { useConstants, useAccounts, useBalanceValidator, useAddressValidator } from '@acala-dapp/react-hooks';
+import { useConstants, useAccounts } from '@acala-dapp/react-hooks';
 import { Card, Select } from '@acala-dapp/ui-components';
 
 import { ReactComponent as LaminarLogo } from '../../assets/laminar-logo.svg';
@@ -20,18 +20,6 @@ export const AUSD: FC = () => {
   const { active } = useAccounts();
   const { stableCurrency } = useConstants();
   const [form] = Form.useForm();
-
-  const balanceValidator = useBalanceValidator({
-    currency: stableCurrency,
-    fieldName: 'amount',
-    getFieldValue: form.getFieldValue
-  });
-
-  const addressValidator = useAddressValidator({
-    fieldName: 'address',
-    getFieldVaule: form.getFieldValue,
-    required: true
-  });
 
   const formLayout = useMemo(() => {
     return {
@@ -83,7 +71,6 @@ export const AUSD: FC = () => {
             <FormItem
               label='Account'
               name='address'
-              rules={[{ validator: addressValidator }]}
             >
               <AddressToInput from={active?.address} />
             </FormItem>
@@ -102,13 +89,10 @@ export const AUSD: FC = () => {
                 {
                   message: 'Please Input Amount',
                   required: true
-                },
-                {
-                  validator: balanceValidator
                 }
               ]}
             >
-              <BalanceInput token={stableCurrency} />
+              <BalanceInput value={{ amount: 0, token: stableCurrency }} />
             </FormItem>
             <TxButton
               className={classes.txBtn}

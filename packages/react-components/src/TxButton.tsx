@@ -53,7 +53,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
   ...other
 }) => {
   const { api: acalaApi } = useApi();
-  const { active, authRequired, setAuthRequired } = useAccounts();
+  const { active } = useAccounts();
   const [isSending, setIsSending] = useState<boolean>(false);
   const { refresh } = useHistory();
 
@@ -95,10 +95,6 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     // ensuer that account is exist
     if (!_signAddress) {
       console.error('can not find available address');
-
-      if (!authRequired) {
-        setAuthRequired(true);
-      }
 
       return;
     }
@@ -283,7 +279,7 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
         }
       }
     });
-  }, [preCheck, _api, _signAddress, afterSend, authRequired, beforeSend, method, params, section, setAuthRequired, onExtrinsicSuccsss, onInblock, onFinalize, onFailed, refresh]);
+  }, [preCheck, _api, _signAddress, afterSend, beforeSend, method, params, section, onExtrinsicSuccsss, onInblock, onFinalize, onFailed, refresh]);
 
   return (
     <Button

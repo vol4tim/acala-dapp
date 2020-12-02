@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 // import { Dropdown as AntDropdown } from 'antd';
 
-import { ReactComponent as ArrowDownIcon } from './assets/arrow-down.svg';
+import { ReactComponent as ArrowIcon } from './assets/arrow-down.svg';
 import classes from './Dropdown.module.scss';
 import { BareProps } from './types';
 
@@ -107,7 +107,7 @@ export const Dropdown: FC<Props> = memo(({
           {renderSelected()}
         </div>
         <div className={clsx(classes.arrow, arrowClassName)}>
-          <ArrowDownIcon />
+          <ArrowIcon />
         </div>
       </div>
       <ul className={clsx(classes.menu, menuClassName)}>

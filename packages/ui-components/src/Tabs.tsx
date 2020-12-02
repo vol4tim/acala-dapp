@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState, useEffect, useMemo, Children, ReactElement, useRef, Dispatch, SetStateAction, createRef } from 'react';
+import React, { FC, ReactNode, useState, useEffect, useMemo, Children, ReactElement, useRef, Dispatch, SetStateAction, createRef, isValidElement } from 'react';
 
 import { BareProps } from './types';
 import styled from 'styled-components';
@@ -14,7 +14,7 @@ function useTabs<T = string | number> (defaultTab: T): { currentTab: T; changeTa
 }
 
 interface PanelProps extends BareProps {
-  tab: ReactNode | ((active: boolean, disabled?: boolean, onClick?: () => void) => ReactNode);
+  header: string | ReactElement | ((active: boolean, disabled?: boolean, onClick?: () => void) => ReactNode);
   $key: string | number;
   disabled?: boolean;
 }
@@ -25,17 +25,17 @@ const TabContainer = styled.div`
   width: 100%;
 `;
 
-export const TabTitleContainer = styled.ul<{ showBorder: boolean }>`
+export const TabHeaderContainer = styled.ul<{ divider: boolean }>`
   position: relative;
   display: flex;
   width: 100%;
   list-style: none;
-  border-bottom: ${({ showBorder }): string => showBorder ? '1px solid var(--tab-border)' : 'none'};
+  border-bottom: ${({ divider }): string => divider ? '1px solid var(--tab-border)' : 'none'};
 `;
 
-export const TabTitle = styled.li<{
+export const TabHeader = styled.li<{
   active: boolean;
-  disabled: boolean;
+  disabled?: boolean;
 }>`
   position: relative;
   flex-shink: 0;
@@ -66,7 +66,7 @@ export const TabTitle = styled.li<{
   }
 `;
 
-export const CardTabTitle = styled.div<{
+export const CardTabHeader = styled.div<{
   active: boolean;
   disabled?: boolean;
 }>`
@@ -102,14 +102,14 @@ const ActiveSlider: FC<{ index: number }> = ({ index }) => {
 
     // get and set dom position information
     const $container = $dom?.parentNode;
-    const $tabList = $container?.querySelectorAll('li');
+    const $headerList = $container?.querySelectorAll('li');
 
-    if (!$tabList?.length) return;
+    if (!$headerList?.length) return;
 
-    setPrevWidth($tabList[prevIndex.current]?.clientWidth ?? 0);
-    setCurrentWidth($tabList[index]?.clientWidth ?? 0);
-    setPrevLeft($tabList[prevIndex.current]?.offsetLeft ?? 0);
-    setCurrentLeft($tabList[index]?.offsetLeft ?? 0);
+    setPrevWidth($headerList[prevIndex.current]?.clientWidth ?? 0);
+    setCurrentWidth($headerList[index]?.clientWidth ?? 0);
+    setPrevLeft($headerList[prevIndex.current]?.offsetLeft ?? 0);
+    setCurrentLeft($headerList[index]?.offsetLeft ?? 0);
 
     // update prev index
     prevIndex.current = index;
@@ -153,33 +153,35 @@ interface TabsProps<T> extends BareProps {
   tabClassName?: string;
   active: T | string | number;
   onChange?: ((key: T | string | number) => void) | React.Dispatch<React.SetStateAction<T>>;
-  showTabsContainerBorderLine?: boolean;
+  divider?: boolean;
+  slider?: boolean;
 }
 
 function Tabs<T> ({
   active,
   children,
+  divider = true,
   onChange,
-  showTabsContainerBorderLine = true
+  slider = true
 }: TabsProps<T>): JSX.Element {
-  const [tabList, panelList, keyList, disabledList] = useMemo(() => {
+  const [headerList, panelList, keyList, disabledList] = useMemo(() => {
     if (!children) return [[], [], [], []];
 
-    const tabList: ReactNode[] = [];
+    const headerList: ReactNode[] = [];
     const panelList: ReactNode[] = [];
     const disabledList: boolean[] = [];
     const keyList: T[] = [];
 
     Children.forEach(children, (child) => {
       if (child && typeof child === 'object' && Reflect.has(child, 'key')) {
-        tabList.push((child as ReactElement<PanelProps>).props.tab);
+        headerList.push((child as ReactElement<PanelProps>).props.header);
         panelList.push((child as ReactElement<PanelProps>).props.children);
         keyList.push((child as ReactElement<PanelProps>).props.$key as unknown as T);
         disabledList.push(!!(child as ReactElement<PanelProps>).props.disabled);
       }
     });
 
-    return [tabList, panelList, keyList, disabledList] as unknown as [ReactNode[], ReactNode[], T[], boolean[]];
+    return [headerList, panelList, keyList, disabledList] as unknown as [ReactNode[], ReactNode[], T[], boolean[]];
   }, [children]);
 
   const activeTabIndex = useMemo(() => {
@@ -190,25 +192,26 @@ function Tabs<T> ({
 
   return (
     <TabContainer>
-      <TabTitleContainer showBorder={showTabsContainerBorderLine}>
+      <TabHeaderContainer divider={divider}>
         {
-          tabList?.map((tab, index) => (
-            typeof tab === 'function' ? tab(
-              activeTabIndex === index,
-              disabledList[activeTabIndex],
-              (): unknown => !disabledList[index] && onChange && onChange(keyList ? keyList[index] : firstKey)
-            ) : <TabTitle
-              active={activeTabIndex === index}
-              disabled={disabledList[index]}
-              key={`tab-${tab?.toString()}-${index}`}
-              onClick={(): unknown => !disabledList[index] && onChange && onChange(keyList ? keyList[index] : firstKey) }
-            >
-              {tab}
-            </TabTitle>
+          headerList?.map((header, index) => (
+            isValidElement(header) ? header
+              : typeof header === 'function' ? header(
+                activeTabIndex === index,
+                disabledList[activeTabIndex],
+                (): unknown => !disabledList[index] && onChange && onChange(keyList ? keyList[index] : firstKey)
+              ) : <TabHeader
+                active={activeTabIndex === index}
+                disabled={disabledList[index]}
+                key={`tab-${header}-${index}`}
+                onClick={(): unknown => !disabledList[index] && onChange && onChange(keyList ? keyList[index] : firstKey) }
+              >
+                {header}
+              </TabHeader>
           ))
         }
-        <ActiveSlider index={activeTabIndex} />
-      </TabTitleContainer>
+        {slider ? <ActiveSlider index={activeTabIndex} /> : null}
+      </TabHeaderContainer>
       <TabContent>
         {panelList[activeTabIndex]}
       </TabContent>

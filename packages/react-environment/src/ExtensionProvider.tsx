@@ -237,7 +237,7 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
   /* eslint-disable-next-line */
   }, [accounts, setAddressBook, getStorage, appName]);
 
-  const contextValue = useMemo(() => ({
+  const data = useMemo(() => ({
     accounts,
     active,
     addToAddressBook,
@@ -250,7 +250,7 @@ export const ExtensionProvider: FC<AccountProviderProps> = ({
   }), [accounts, active, isReady, authRequired, openSelectAccount, closeSelectAccount, addressBook, addToAddressBook, selectAccountStatus]);
 
   return (
-    <ExtensionContext.Provider value={contextValue}>
+    <ExtensionContext.Provider value={data}>
       <SelectAccount
         accounts={accounts}
         defaultAccount={active ? active.address : undefined}

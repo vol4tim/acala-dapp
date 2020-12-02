@@ -2,9 +2,9 @@ import React, { FC, useState, useEffect, ReactNode } from 'react';
 import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
 import { useAllUserLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
 import { DerivedUserLoan } from '@acala-network/api-derive';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { Token, FormatBalance, TxButton } from '@acala-dapp/react-components';
 import { convertToFixed18 } from '@acala-network/app-util';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 export const WithdrawNoDebitLoan: FC = () => {
   const [empty, setEmpty] = useState<boolean>(true);
@@ -16,8 +16,8 @@ export const WithdrawNoDebitLoan: FC = () => {
       align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyLike): ReactNode => (
-        <Token currency={token} />
+      render: (currency: CurrencyId): ReactNode => (
+        <Token currency={currency} />
       ),
       title: 'Token',
       width: 1

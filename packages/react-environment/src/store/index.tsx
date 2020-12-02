@@ -4,7 +4,7 @@ import { useApi } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useApiQueryStore } from './modules/api-query';
 import { useOraclePrices } from './modules/oracle-price';
-import { useUIConfig, UseUIConfigReturnType } from './modules/ui';
+import { useUIConfig, UseUIConfigReturnType, UIData } from './modules/ui';
 
 export type StoreData = {
   apiQueryStore: ReturnType<typeof useApiQueryStore>;
@@ -44,4 +44,13 @@ export function useStore<T extends StoreData, K extends keyof T> (namespace: K):
   const context = useContext(StoreContext) as T;
 
   return context[namespace];
+}
+
+export function usePageTitle (config: { content: string; breadcrumb?: UIData['breadcrumb'] }): void {
+  const ui = useStore('ui');
+
+  useEffect(() => {
+    ui.setTitle(config);
+  /* eslint-disable-next-line */
+  }, []);
 }

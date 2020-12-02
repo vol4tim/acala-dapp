@@ -2,7 +2,7 @@ import React, { FC, useState, ReactNode, useCallback, useMemo, useEffect } from 
 import clsx from 'clsx';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Dialog, ArrowDownIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
+import { Dialog, ArrowIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
 import { useModal, useAccounts, useConstants, useLPCurrencies, useBalance } from '@acala-dapp/react-hooks';
 
 import { tokenEq, eliminateGap } from './utils';
@@ -40,7 +40,7 @@ const AssetBoard: FC<AssetBoardProps> = ({
               className={classes.token}
               currency={currency}
             />
-            <ArrowDownIcon className={classes.icon} />
+            <ArrowIcon className={classes.icon} />
           </div>
           {
             currency.isToken ? (

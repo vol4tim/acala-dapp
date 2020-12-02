@@ -78,7 +78,7 @@ export class PriceStore extends BaseRxStore {
     );
   }
 
-  init (api: ApiRx, stakingPool$: Observable<StakingPoolWithHelper>): void {
+  init (api: ApiRx, stakingPool$: Observable<StakingPoolData>): void {
     this.stakingPool$ = stakingPool$;
     this.api = api;
     this.run();

@@ -9,7 +9,6 @@ const PageDashboardHome: FC = () => {
   return (
     <Page fullscreen>
       <Page.Title
-        breadcrumb='Overview'
         title='Stablecoin'
       />
       <Page.Content>

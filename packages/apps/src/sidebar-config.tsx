@@ -1,71 +1,71 @@
 import React from 'react';
 
-import { ReactComponent as DepositSVG } from '@acala-dapp/apps/assets/deposit.svg';
-import { ReactComponent as TwitterSVG } from '@acala-dapp/apps/assets/twitter.svg';
-import { ReactComponent as EmailSVG } from '@acala-dapp/apps/assets/email.svg';
-import { ReactComponent as LoanSVG } from '@acala-dapp/apps/assets/loan.svg';
-import { ReactComponent as ExchangeSVG } from '@acala-dapp/apps/assets/exchange.svg';
-import { ReactComponent as LiquidSVG } from '@acala-dapp/apps/assets/liquid.svg';
-import { ReactComponent as GuideSVG } from '@acala-dapp/apps/assets/guide.svg';
-import { ReactComponent as FaucetSVG } from '@acala-dapp/apps/assets/faucet.svg';
+import { ReactComponent as DepositIcon } from '@acala-dapp/apps/assets/deposit.svg';
+import { ReactComponent as TwitterIcon } from '@acala-dapp/apps/assets/twitter.svg';
+import { ReactComponent as EmailIcon } from '@acala-dapp/apps/assets/email.svg';
+import { ReactComponent as LoanIcon } from '@acala-dapp/apps/assets/loan.svg';
+import { ReactComponent as ExchangeIcon } from '@acala-dapp/apps/assets/exchange.svg';
+import { ReactComponent as LiquidIcon } from '@acala-dapp/apps/assets/liquid.svg';
+import { ReactComponent as GovernanceIcon } from '@acala-dapp/apps/assets/governance.svg';
+import { ReactComponent as GuideIcon } from '@acala-dapp/apps/assets/guide.svg';
+import { ReactComponent as FaucetIcon } from '@acala-dapp/apps/assets/faucet.svg';
 import { SidebarConfig } from '@acala-dapp/react-components/Sidebar';
 
 export const sideBarConfig: SidebarConfig = {
   products: [
     {
-      icon: <LoanSVG />,
+      icon: <LoanIcon />,
       name: 'Borrow aUSD',
       path: 'loan'
     },
     {
-      icon: <ExchangeSVG />,
+      icon: <ExchangeIcon />,
       name: 'Swap',
       path: 'swap'
     },
     {
-      icon: <DepositSVG />,
+      icon: <DepositIcon />,
       name: 'Earn',
       path: 'earn'
     },
     {
-      icon: <LiquidSVG />,
+      icon: <LiquidIcon />,
       name: 'Liquid Staking',
       path: 'homa'
     },
     {
-      icon: <LiquidSVG />,
+      icon: <LiquidIcon />,
       name: 'Oracle Price',
       path: 'oracle-price'
+    },
+    {
+      icon: <GovernanceIcon />,
+      name: 'Governance',
+      path: 'governance'
     }
-    // {
-    //   content: 'Governance',
-    //   icon: <GovernanceSVG />,
-    //   path: 'governance',
-    //   rel: 'governance'
-    // }
   ],
   socialPlatforms: [
     {
       href: 'https://discord.gg/CmqXvMP',
-      icon: <FaucetSVG />,
+      icon: <FaucetIcon />,
       name: 'Faucet',
       rel: 'faucet'
     },
     {
       href: 'https://github.com/AcalaNetwork/Acala/wiki',
-      icon: <GuideSVG />,
+      icon: <GuideIcon />,
       name: 'Wiki',
       rel: 'wiki'
     },
     {
       href: 'mailto:hello@acala.network',
-      icon: <EmailSVG />,
+      icon: <EmailIcon />,
       name: 'Email',
       rel: 'email'
     },
     {
       href: 'https://twitter.com/AcalaNetwork',
-      icon: <TwitterSVG />,
+      icon: <TwitterIcon />,
       name: 'Twitter',
       rel: 'twitter'
     }

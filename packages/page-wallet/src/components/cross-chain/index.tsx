@@ -106,8 +106,8 @@ export const CrossChainConsole: FC = () => {
   return (
     <Tabs<CrossChainType>
       active={currentTab}
+      divider={false}
       onChange={changeTabs}
-      showTabsContainerBorderLine={false}
     >
       {
         crossChainCurrencies.map((currency) => {
@@ -117,15 +117,15 @@ export const CrossChainConsole: FC = () => {
             <Tabs.Panel
               $key={currency.asToken.toString()}
               disabled={disabled}
-              key={`cross-chain-${currency.asToken.toString()}`}
-              tab={(active: boolean): JSX.Element => (
+              header={
                 <AssetCard
-                  active={active}
+                  active={currentTab === currency.asToken.toString()}
                   currency={currency}
                   disabled={disabled}
                   onClick={(): void => changeTabs(currency.asToken.toString() as CrossChainType)}
                 />
-              )}
+              }
+              key={`cross-chain-${currency.asToken.toString()}`}
             >
               {
                 crossChainConsoleList.get(currency.asToken.toString() as CrossChainType)

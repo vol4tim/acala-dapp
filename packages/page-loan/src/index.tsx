@@ -28,7 +28,7 @@ const Inner: FC = () => {
           <Tabs.Panel
             $key='loans'
             disabled={isShutdown}
-            tab='My Loans'
+            header='My Loans'
           >
             <Row gutter={[24, 24]}>
               <Condition
@@ -77,7 +77,7 @@ const Inner: FC = () => {
           <Tabs.Panel
             $key='shutdown'
             disabled={!isShutdown}
-            tab='Emergency Shutdown'
+            header='Emergency Shutdown'
           >
             <EmergencyShutdown />
           </Tabs.Panel>

@@ -5,10 +5,10 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useBalance, useValue, useTotalValue, usePrice } from '@acala-dapp/react-hooks';
 
-import { FormatBalance, FormatFixed18, FormatBalanceProps, FormatValue, FormatNumberProps } from './format';
-import { AccountLike, CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { Fixed18, convertToFixed18 } from '@acala-network/app-util';
+import { FormatBalance, FormatBalanceProps, FormatValue, FormatNumberProps } from './format';
+import { AccountLike } from '@acala-dapp/react-hooks/types';
 import { BareProps } from '@acala-dapp/ui-components/types';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 interface UserAssetBalanceProps extends FormatBalanceProps {
   account?: AccountLike;
@@ -38,7 +38,7 @@ export const UserAssetBalance: FC<UserAssetBalanceProps> = ({ account, currency,
 
 interface UserAssetValueProps extends BareProps {
   account?: AccountId | string;
-  currency: CurrencyId | string;
+  currency: CurrencyId;
 }
 
 /**
@@ -51,7 +51,7 @@ export const UserAssetValue: FC<UserAssetValueProps> = ({ account, className, cu
   return (
     <FormatValue
       className={className}
-      data={amount || Fixed18.ZERO}
+      data={amount || FixedPointNumber.ZERO}
     />
   );
 };
@@ -79,8 +79,8 @@ export const TotalUserAssetValue: FC<TotalUserAssetValueProps> = ({
 };
 
 export interface AssetValueProps extends FormatNumberProps {
-  quantity: number | Fixed18;
-  currency: CurrencyLike;
+  quantity: FixedPointNumber;
+  currency: CurrencyId;
 }
 
 export const AssetValue: FC<AssetValueProps> = ({
@@ -90,15 +90,14 @@ export const AssetValue: FC<AssetValueProps> = ({
 }) => {
   const price = usePrice(currency);
   const result = useMemo(() => {
-    if (!price || !quantity) return Fixed18.ZERO;
+    if (!price || !quantity) return FixedPointNumber.ZERO;
 
-    return convertToFixed18(quantity).mul(price);
+    return quantity.times(price);
   }, [price, quantity]);
 
   return (
-    <FormatFixed18
+    <FormatValue
       data={result}
-      prefix='≈ $USA'
       {...other}
     />
   );

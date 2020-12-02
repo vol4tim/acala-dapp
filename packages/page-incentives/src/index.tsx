@@ -19,13 +19,13 @@ const PageDeposit: FC = () => {
       >
         <Tabs.Panel
           $key='lp-staking'
-          tab='LP Staking'
+          header='LP Staking'
         >
           <LPIncentivesReward />
         </Tabs.Panel>
         <Tabs.Panel
           $key='distribution-program'
-          tab='Distribution Program'
+          header='Distribution Program'
         >
           <LoansReward />
         </Tabs.Panel>

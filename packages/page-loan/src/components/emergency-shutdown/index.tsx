@@ -1,5 +1,5 @@
 import React, { FC, useContext } from 'react';
-import { Card, Row, Col, Condition, Fadein } from '@acala-dapp/ui-components';
+import { Card, Row, Col, Condition } from '@acala-dapp/ui-components';
 import { Steps } from 'antd';
 
 import { LockPrices } from './LockPrices';
@@ -32,35 +32,25 @@ export const Inner = (): JSX.Element => {
       <Row gutter={[24, 24]}>
         <Condition condition={step === 'trigger'}>
           <Col span={24}>
-            <Fadein>
-              <LockPrices />
-            </Fadein>
+            <LockPrices />
           </Col>
           <Col span={24}>
-            <Fadein>
-              <WithdrawNoDebitLoan />
-            </Fadein>
+            <WithdrawNoDebitLoan />
           </Col>
         </Condition>
         <Condition condition={step === 'process'}>
           <Col span={24}>
-            <Fadein>
-              <Process />
-            </Fadein>
+            <Process />
           </Col>
         </Condition>
         <Condition condition={step === 'reclaim'}>
           <Col span={24}>
-            <Fadein>
-              <ReclaimCollateral />
-            </Fadein>
+            <ReclaimCollateral />
           </Col>
         </Condition>
         <Condition condition={step === 'success'}>
           <Col span={24}>
-            <Fadein>
-              <Success />
-            </Fadein>
+            <Success />
           </Col>
         </Condition>
         <Col span={24}>

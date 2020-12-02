@@ -1,12 +1,15 @@
 import React, { FC } from 'react';
 
-import { Row, Col, Page, Tabs } from '@acala-dapp/ui-components';
+import { Row, Col, Page, Tabs, useTabs } from '@acala-dapp/ui-components';
 
 import Oracles from './components/Oracles';
 import PriceChart from './components/PriceChart';
 
+type TabTypes = 'DOT' | 'XBTC' | 'RENBTC';
+
 const PageDashboardHome: FC = () => {
   const oracleCurrency = ['DOT', 'XBTC', 'RENBTC'];
+  const { changeTabs, currentTab } = useTabs<TabTypes>('DOT');
 
   return (
     <Page fullscreen>
@@ -18,11 +21,16 @@ const PageDashboardHome: FC = () => {
           </Col>
           <Col span={24}>
             <Page.Title title='Price Feeds' />
-            <Tabs type='button'>
+            <Tabs
+              active={currentTab}
+              onChange={changeTabs}
+            >
               {oracleCurrency.map((item: any) => {
                 return (
-                  <Tabs.Panel key={item.toString()}
-                    tab={item}
+                  <Tabs.Panel
+                    $key={item.toString()}
+                    header={item}
+                    key={item.toString()}
                   >
                     <PriceChart currency={item} />
                   </Tabs.Panel>

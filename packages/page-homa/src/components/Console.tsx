@@ -23,13 +23,13 @@ export const Console: FC = () => {
       >
         <Tabs.Panel
           $key='staking'
-          tab='Mint & Stake'
+          header='Mint & Stake'
         >
           <StakingConsole />
         </Tabs.Panel>
         <Tabs.Panel
           $key='redeem'
-          tab='Redeem'
+          header='Redeem'
         >
           <RedeemConsole />
         </Tabs.Panel>

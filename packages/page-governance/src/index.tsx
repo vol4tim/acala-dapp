@@ -1,33 +1,22 @@
 import React, { FC } from 'react';
+import { Route, Routes } from 'react-router';
+import { CouncilDetails } from './components/CouncilDetails';
 
-import { Page, Row, Col } from '@acala-dapp/ui-components';
+import { Overview } from './components/Overview';
 
-import { GovernanceProvider } from './components/provider';
-import { PageTypeSelector } from './components/PageTypeSelector';
-import { CouncilSelector } from './components/CouncilSelector';
-import { Content } from './components/Content';
-
-const PageWallet: FC = () => {
+const PageGovernance: FC = () => {
   return (
-    <Page>
-      <Page.Title title='Governance' />
-      <Page.Content>
-        <GovernanceProvider>
-          <Row>
-            <Col span={24}>
-              <PageTypeSelector />
-            </Col>
-            <Col span={24}>
-              <CouncilSelector />
-            </Col>
-            <Col span={24}>
-              <Content />
-            </Col>
-          </Row>
-        </GovernanceProvider>
-      </Page.Content>
-    </Page>
+    <Routes>
+      <Route
+        element={<Overview />}
+        path='/'
+      />
+      <Route
+        element={<CouncilDetails />}
+        path='/councils'
+      />
+    </Routes>
   );
 };
 
-export default PageWallet;
+export default PageGovernance;

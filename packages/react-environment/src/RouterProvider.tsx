@@ -2,17 +2,12 @@ import React, { FC, cloneElement, ReactElement, useMemo, useEffect, createElemen
 import { HashRouter, useRoutes } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 
-import { useStore, StoreData } from './store';
+import { StoreData, usePageTitle } from './store';
 
 /* HOC for auto set page title */
 const withTitle = (component: RouterConfigData['element'], title: string): FC => {
   const Inner: FC = () => {
-    const ui = useStore('ui');
-
-    useEffect(() => {
-      ui.setTitle({ content: title });
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, []);
+    usePageTitle({ content: title });
 
     return component || null;
   };

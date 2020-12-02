@@ -1,6 +1,5 @@
 import React, { FC, lazy, Suspense, useEffect, useState } from 'react';
 
-import PageGovernance from '@acala-dapp/page-governance';
 import { PageContentLoading } from '@acala-dapp/ui-components';
 
 import { sideBarConfig } from './sidebar-config';
@@ -13,6 +12,7 @@ const PageHoma = lazy(() => import('@acala-dapp/page-homa'));
 const PageSwap = lazy(() => import('@acala-dapp/page-swap'));
 const PageOraclePrice = lazy(() => import('@acala-dapp/page-oracle-price'));
 const PageIncentives = lazy(() => import('@acala-dapp/page-incentives'));
+const PageGovernance = lazy(() => import('@acala-dapp/page-governance'));
 
 const CSuspense: FC = ({ children }) => {
   const [flag, setFlag] = useState(false);
@@ -69,8 +69,8 @@ export const config: RouterConfigData[] = [
       },
       {
         element: <CSuspense><PageGovernance /></CSuspense>,
-        path: 'governance',
-        title: 'Oracle Price'
+        path: 'governance/*',
+        title: 'Governance Overview'
       },
       {
         path: '*',

@@ -31,19 +31,19 @@ const PageSwap: FC = () => {
       >
         <Tabs.Panel
           $key='swap'
-          tab='Swap'
+          header='Swap'
         >
           <SwapConsole />
         </Tabs.Panel>
         <Tabs.Panel
           $key='add-liquidity'
-          tab='Add Liquidity'
+          header='Add Liquidity'
         >
           <DepositConsole />
         </Tabs.Panel>
         <Tabs.Panel
           $key='widthdraw-liquidity'
-          tab='Withdraw Liquidity'
+          header='Withdraw Liquidity'
         >
           <WithdrawConsole />
         </Tabs.Panel>

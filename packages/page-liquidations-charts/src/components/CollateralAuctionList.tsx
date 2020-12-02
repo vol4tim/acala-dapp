@@ -1,11 +1,12 @@
-import { BalanceInput, FormatAddress, FormatBalance, numToFixed18Inner, TxButton } from '@acala-dapp/react-components';
-import { useCall, useCollateralAuctions, useConstants } from '@acala-dapp/react-hooks';
+import { BalanceInput, BalanceInputValue, FormatAddress, FormatBalance, getCurrencyIdFromName, TxButton } from '@acala-dapp/react-components';
+import { useApi, useCall, useCollateralAuctions, useConstants, useInputValue } from '@acala-dapp/react-hooks';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Card } from '@acala-dapp/ui-components';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
 import { AuctionInfo } from '@open-web3/orml-types/interfaces';
 import { Option } from '@polkadot/types';
 import { Table } from 'antd';
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useMemo } from 'react';
 
 import classes from './CollateralAuctionList.module.scss';
 
@@ -26,8 +27,10 @@ const AuctionLastBid: FC<{ id: string }> = ({ id }) => {
     <div>
       <FormatAddress address={bid[0].toString()}
         withCopy />
-      <FormatBalance balance={bid[1]}
-        currency='aUSD' />
+      <FormatBalance
+        balance={bid[1]}
+        currency='aUSD'
+      />
     </div>
   );
 };
@@ -82,24 +85,27 @@ const AuctionReceiveCollateral: FC<{ id: string; target: Fixed18; amount: Fixed1
 };
 
 const AuctionMakeBid: FC<{ id: string }> = ({ id }) => {
-  const [val, setVal] = useState(0);
+  const { api } = useApi();
+  const [value, onChange] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: getCurrencyIdFromName(api, 'AUSD')
+  });
 
   return (
     <div className={classes.auctionMakeBid}>
       <BalanceInput
         className={classes.auctionMakeBidInput}
-        onChange={setVal}
+        onChange={onChange}
         showIcon={false}
         showToken={false}
         size='mini'
-        token='AUSD'
-        value={val}
+        value={value}
       />
       <TxButton
         className={classes.auctionMakeBidButton}
-        disabled={val === 0}
+        disabled={value.amount === 0}
         method='bid'
-        params={[id, numToFixed18Inner(val)]}
+        params={[id, new FixedPointNumber(value.amount).toChainData()]}
         section='auction'
         size='small'
       >

@@ -1,4 +1,4 @@
-import React, { ReactElement, lazy, LazyExoticComponent, Suspense } from 'react';
+import React, { ReactElement, lazy, Suspense } from 'react';
 
 import { PageLoading } from '@acala-dapp/ui-components';
 import { Layout } from '@acala-dapp/react-components';
@@ -8,7 +8,7 @@ import { sidebarConfig } from './sidebar-config';
 
 export interface RouterConfigData {
   children?: RouterConfigData[];
-  element?: ReactElement | LazyExoticComponent<any>;
+  element?: ReactElement;
   path: string;
   redirectTo?: string;
 }

@@ -2,7 +2,7 @@ import React, { FC, useMemo, useCallback, useState } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { StakingPool } from '@acala-network/sdk-homa';
-import { Card, Tabs, List, useTabs, CardTabTitle } from '@acala-dapp/ui-components';
+import { Card, Tabs, List, useTabs, CardTabHeader } from '@acala-dapp/ui-components';
 import { TxButton, TwoWayBalanceInput, FormatBalance, BalanceInputValue, UserBalance, eliminateGap } from '@acala-dapp/react-components';
 import { useConstants, useStakingPool, useBalance, useInputValue, useBalanceValidator } from '@acala-dapp/react-hooks';
 
@@ -304,27 +304,27 @@ export const ExpressConsole: FC = () => {
       >
         <Tabs.Panel
           $key='stake'
-          tab={(): JSX.Element => (
-            <CardTabTitle
+          header={
+            <CardTabHeader
               active={currentTab === 'stake'}
               onClick={(): void => changeTabs('stake')}
             >
               Stake
-            </CardTabTitle>
-          )}
+            </CardTabHeader>
+          }
         >
           <StakePanel />
         </Tabs.Panel>
         <Tabs.Panel
           $key='unstake'
-          tab={(): JSX.Element => (
-            <CardTabTitle
+          header={
+            <CardTabHeader
               active={currentTab === 'unstake'}
               onClick={(): void => changeTabs('unstake')}
             >
               Unstake
-            </CardTabTitle>
-          )}
+            </CardTabHeader>
+          }
         >
           <UnstakePanel />
         </Tabs.Panel>

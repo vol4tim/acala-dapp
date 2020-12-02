@@ -1,7 +1,7 @@
 import React, { FC, useContext } from 'react';
 
-import { useConstants } from '@acala-dapp/react-hooks';
-import { TokenImage, TokenName, UserAssetValue, TokenFullName, Token, FormatBalance } from '@acala-dapp/react-components';
+import { useApi, useConstants } from '@acala-dapp/react-hooks';
+import { TokenImage, TokenName, UserAssetValue, TokenFullName, Token, FormatBalance, getCurrencyIdFromName } from '@acala-dapp/react-components';
 
 import classes from './ReClaimCollaterals.module.scss';
 import { EmergencyShutdownContext } from './EmergencyShutdownProvider';
@@ -40,6 +40,7 @@ const MyLoan: FC = () => {
 };
 
 const BasketCollateral: FC = () => {
+  const { api } = useApi();
   const { collaterals } = useContext(EmergencyShutdownContext);
 
   return (
@@ -55,7 +56,7 @@ const BasketCollateral: FC = () => {
                   key={`collateral-${currency}`}
                 >
                   <Token
-                    currency={currency}
+                    currency={getCurrencyIdFromName(api, currency)}
                     icon
                     imageClassName={classes.img}
                   />

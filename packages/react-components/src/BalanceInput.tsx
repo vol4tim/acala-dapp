@@ -112,7 +112,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
           <div className={clsx(classes.token, { [classes.showIcon]: showIcon })}>
             { showIcon ? <TokenImage currency={value?.token} /> : null }
             <InlineBlockBox margin={[0, 8]}>
-              <TokenName currency={value?.token} />
+              <TokenName currency={value?.token || ''} />
             </InlineBlockBox>
           </div>
         )}
@@ -154,7 +154,6 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         {renderToken}
       </Condition>
       <NumberInput
-        {...numberInputProps}
         className={classes.input}
         disabled={disabled}
         max={max}
@@ -164,6 +163,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         onFocus={_onFocus}
         placeholder={placeholder}
         value={value?.amount}
+        {...numberInputProps}
       />
       <Condition condition={showMaxBtn}>
         <Button

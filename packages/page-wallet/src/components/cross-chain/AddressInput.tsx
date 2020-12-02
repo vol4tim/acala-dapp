@@ -5,7 +5,6 @@ import { AddressInput } from '@acala-dapp/react-components/AddressInput';
 import { FormatAddress } from '@acala-dapp/react-components';
 
 import classes from './AddressInput.module.scss';
-import { AddressInfo } from '@acala-dapp/react-environment';
 
 export interface AddressToInputProps {
   from?: string;
@@ -43,13 +42,11 @@ export const AddressToInput: FC<AddressToInputProps> = ({
 export interface AddressFromInputProps {
   from?: string;
   to?: string;
-  addressList?: AddressInfo[];
   value?: string;
   onChange?: (value: string) => void;
 }
 
 export const AddressFromInput: FC<AddressFromInputProps> = ({
-  addressList,
   from,
   onChange,
   to,
@@ -62,7 +59,6 @@ export const AddressFromInput: FC<AddressFromInputProps> = ({
         {
           from ? (<p className={classes.fixedAddress}><FormatAddress address={from} /> </p>) : (
             <AddressInput
-              addressList={addressList}
               border={false}
               inputClassName={classes.addressInput}
               onChange={onChange || noop}

@@ -3,8 +3,8 @@ import { Form, Skeleton } from 'antd';
 
 import { Fixed18 } from '@acala-network/app-util';
 
-import { Network, NetworkType, getNetworkName, BalanceInput, FormatBalance, TxButton, numToFixed18Inner, UserAssetBalance } from '@acala-dapp/react-components';
-import { useAccounts, useBalanceValidator, useAddressValidator } from '@acala-dapp/react-hooks';
+import { Network, NetworkType, getNetworkName, FormatBalance, TxButton, numToFixed18Inner, UserAssetBalance, getCurrencyIdFromName } from '@acala-dapp/react-components';
+import { useAccounts, useApi } from '@acala-dapp/react-hooks';
 import { CrossChainProvider, CrossChainContextData, CrossChainContext } from '@acala-dapp/react-environment';
 import { Card, IconButton } from '@acala-dapp/ui-components';
 
@@ -56,7 +56,7 @@ const SelectNetwork: FC<SelectNetworkProps> = ({ onChange, value }) => {
 
 export const TransferIn: FC = () => {
   const { connected, getApi, getNativeBalance } = useContext<CrossChainContextData>(CrossChainContext);
-  const { accounts, active } = useAccounts();
+  const { active } = useAccounts();
   const [nativeBalance, setNativaBalance] = useState<Fixed18>(Fixed18.ZERO);
   const [form] = Form.useForm();
 
@@ -113,7 +113,6 @@ export const TransferIn: FC = () => {
     >
       <FormItem label='Account'>
         <AddressFromInput
-          addressList={accounts}
           from={active?.address}
           to={active?.address}
         />
@@ -141,7 +140,6 @@ export const TransferIn: FC = () => {
             type: 'number'
           }]}
       >
-        <BalanceInput token={'DOT'} />
       </FormItem>
       <FormItem>
         {
@@ -165,20 +163,13 @@ export const TransferIn: FC = () => {
 };
 
 export const TransferOut: FC = () => {
+  const { api } = useApi();
   const { active } = useAccounts();
   const [form] = Form.useForm();
 
-  const balanceValidator = useBalanceValidator({
-    currency: 'DOT',
-    fieldName: 'amount',
-    getFieldValue: form.getFieldValue
-  });
-
-  const addressValidator = useAddressValidator({
-    fieldName: 'transferOut',
-    getFieldVaule: form.getFieldValue,
-    required: true
-  });
+  // const balanceValidator = useBalanceValidator({
+  //   currency: getCurrencyIdFromName(api, 'DOT')
+  // });
 
   const getParams = useCallback((): any[] => {
     const values = form.getFieldsValue();
@@ -208,7 +199,6 @@ export const TransferOut: FC = () => {
       <FormItem
         label='Account'
         name='transferOut'
-        rules={[{ validator: addressValidator }]}
       >
         <AddressToInput from={active?.address} />
       </FormItem>
@@ -216,20 +206,11 @@ export const TransferOut: FC = () => {
         extra={
           <div className={classes.amountExtra}>
             <p>Available</p>
-            <UserAssetBalance
-              currency={'DOT'}
-              showCurrency
-            />
+            <UserAssetBalance currency={getCurrencyIdFromName(api, 'DOT')} />
           </div>
         }
         name='amount'
-        rules={[
-          {
-            validator: balanceValidator
-          }
-        ]}
       >
-        <BalanceInput token={'DOT'} />
       </FormItem>
       <TxButton
         className={classes.txBtn}

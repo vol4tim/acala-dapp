@@ -14,7 +14,7 @@ const PageWallet: FC = () => {
         <TreasuryOverview />
       </Page.Content>
       <Page.Title title='Auction' />
-      <Page.Content fullscreen>
+      <Page.Content>
         <Row gutter={[24, 24]}>
           <Col span={24}>
             <AuctionOverview />

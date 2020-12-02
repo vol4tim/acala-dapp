@@ -8,7 +8,7 @@ import { List, Button, Row, Col, Condition } from '@acala-dapp/ui-components';
 import { BalanceInput, FormatAddress, FormatBalance, getCurrencyIdFromName, BalanceInputValue } from '@acala-dapp/react-components';
 
 import classes from './RenBtc.module.scss';
-import { useFormValidator, useAccounts, useApi } from '@acala-dapp/react-hooks';
+import { useAccounts, useApi } from '@acala-dapp/react-hooks';
 import { RenBtcDialog } from './RenBtcDialog';
 import { RenBtcMintContext, MintStep } from './RenBtcContext';
 
@@ -31,19 +31,11 @@ const MAX_BTC_AMOUNT = 10000000;
 const InputStep: FC = () => {
   const { api } = useApi();
   const { setAmount, setStep } = useContext(RenBtcMintContext);
-  const validator = useFormValidator({
-    amount: {
-      max: MAX_BTC_AMOUNT,
-      min: 0,
-      type: 'number'
-    }
-  });
   const form = useFormik({
     initialValues: {
       amount: '' as unknown as number
     },
-    onSubmit: noop,
-    validate: validator
+    onSubmit: noop
   });
 
   const isDisabled = useMemo<boolean>((): boolean => {

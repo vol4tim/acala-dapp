@@ -72,8 +72,10 @@ export const TokenImage: FC<TokenComponentProps> = ({ className, currency }) => 
  * @descript show token name
  * @param currency
  */
-export const TokenName: FC<TokenComponentProps> = ({ className, currency }) => {
+export const TokenName: FC<{ currency: CurrencyId | string } & BareProps> = ({ className, currency }) => {
   if (!currency) return null;
+
+  if (typeof currency === 'string') return <span className={className}>{currency}</span>;
 
   if (currency.isToken) {
     return (

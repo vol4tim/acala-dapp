@@ -1,7 +1,7 @@
 import React, { FC, useCallback, useMemo, useEffect, ReactNode } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { Card, Alert, Row, Col, InputField, List, Fadein, FlexBox } from '@acala-dapp/ui-components';
+import { Card, Alert, Row, Col, InputField, List, FlexBox } from '@acala-dapp/ui-components';
 import { useApi, useLP, useBalance, useBalanceValidator, useLPEnabledCurrencies } from '@acala-dapp/react-hooks';
 import { BalanceInput, UserBalance, BalanceInputValue, getCurrencyIdFromName, TokenImage, TokenName, getDexShareFromCurrencyId, LPExchangeRate, LPSize, LPShare, tokenEq, eliminateGap } from '@acala-dapp/react-components';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
@@ -247,22 +247,20 @@ export const DepositConsole: FC = () => {
             {
               !availableLP ? (
                 <Col span={24}>
-                  <Fadein>
-                    <Alert
-                      message={
-                        <>
-                          <TokenImage currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)} />
-                          <TokenName
-                            className={classes.tokenName}
-                            currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)}
-                          />
-                          <span>is not an available liquidity pool.</span>
-                        </>
-                      }
-                      messageClassName={classes.alertContent}
-                      type='error'
-                    />
-                  </Fadein>
+                  <Alert
+                    message={
+                      <>
+                        <TokenImage currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)} />
+                        <TokenName
+                          className={classes.tokenName}
+                          currency={getDexShareFromCurrencyId(api, token1Info.token, token2Info.token)}
+                        />
+                        <span>is not an available liquidity pool.</span>
+                      </>
+                    }
+                    messageClassName={classes.alertContent}
+                    type='error'
+                  />
                 </Col>
               ) : null
             }

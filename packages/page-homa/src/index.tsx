@@ -19,19 +19,19 @@ const PageHoma: FC = () => {
       >
         <Tabs.Panel
           $key='express'
-          tab='Express'
+          header='Express'
         >
           <Express />
         </Tabs.Panel>
         <Tabs.Panel
           $key='advance'
-          tab='Advanced'
+          header='Advanced'
         >
           <Advanced />
         </Tabs.Panel>
         <Tabs.Panel
           $key='validators'
-          tab='Vote For Validators'
+          header='Vote For Validators'
         >
           <ComingSoon />
         </Tabs.Panel>

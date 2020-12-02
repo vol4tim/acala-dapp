@@ -10,7 +10,7 @@ import { LoansOverview } from './components/LoansOverview';
 const PageWallet: FC = () => {
   return (
     <Page fullscreen>
-      <Page.Title breadcrumb='Loans'
+      <Page.Title
         title='Stablecoin' />
       <Page.Content>
         <Row gutter={[24, 24]}>

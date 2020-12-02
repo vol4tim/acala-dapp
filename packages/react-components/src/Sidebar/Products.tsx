@@ -1,9 +1,9 @@
-import React, { createRef, FC, useContext, useEffect } from 'react';
+import React, { createRef, FC, memo, useContext, useEffect } from 'react';
 import { NavLink, NavLinkProps, useMatch } from 'react-router-dom';
 
 import { ProductItem as IProductItem } from './types';
 import { useModal } from '@acala-dapp/react-hooks';
-import { styled, ArrowDownIcon } from '@acala-dapp/ui-components';
+import { styled, ArrowIcon } from '@acala-dapp/ui-components';
 import { SidebarActiveContext } from './context';
 
 interface ProductItemProps {
@@ -59,14 +59,14 @@ const ProductList = styled.div<ProductListProps>`
   display: ${(props): string => props.collapse ? 'none' : 'block'};
 `;
 
-const ProductArrow = styled(ArrowDownIcon)<{ open: boolean }>`
+const ProductArrow = styled(ArrowIcon)<{ open: boolean }>`
   transform: rotate(${(props): number => props.open ? -180 : 0}deg);
   & g {
     stroke: var(--color-primary);
   }
 `;
 
-const ProductItem: FC<ProductItemProps> = ({ collapse, data }) => {
+const ProductItem: FC<ProductItemProps> = memo(({ collapse, data }) => {
   const { status: isOpen, toggle } = useModal(false);
   const ref = createRef<HTMLAnchorElement>();
   const { active, setActive } = useContext(SidebarActiveContext);
@@ -120,7 +120,9 @@ const ProductItem: FC<ProductItemProps> = ({ collapse, data }) => {
       </ProductName>
     </CNavLink>
   );
-};
+});
+
+ProductItem.displayName = 'ProductItem';
 
 const ProductsRoot = styled.div`
   flex: 1;

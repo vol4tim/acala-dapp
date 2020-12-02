@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import { styled } from '@acala-dapp/ui-components';
 
@@ -38,9 +38,13 @@ export const Sidebar: FC<SidebarProps> = ({
   showAccount = true
 }) => {
   const [active, setActive] = useState<HTMLElement | null>(null);
+  const data = useMemo(() => ({
+    active,
+    setActive
+  }), [active, setActive]);
 
-  return (
-    <SidebarActiveContext.Provider value={{ active, setActive }}>
+  return useMemo(() => (
+    <SidebarActiveContext.Provider value={data}>
       <SidebarRoot collapse={collapse} >
         <Logo collapse={collapse} />
         <CChainName collapse={collapse} />
@@ -66,5 +70,5 @@ export const Sidebar: FC<SidebarProps> = ({
         <Slider target={active} />
       </SidebarRoot>
     </SidebarActiveContext.Provider>
-  );
+  ), [active, collapse, data, config, showAccount]);
 };

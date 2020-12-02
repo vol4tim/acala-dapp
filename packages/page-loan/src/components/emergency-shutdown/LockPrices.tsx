@@ -1,17 +1,17 @@
 import React, { FC } from 'react';
 import { useLockPrices } from '@acala-dapp/react-hooks/useLockPrices';
-import { FormatPrice, TokenImage, TokenName, TokenFullName } from '@acala-dapp/react-components';
-import { Fixed18 } from '@acala-network/app-util';
+import { FormatPrice, TokenImage, TokenName, TokenFullName, getCurrencyIdFromName } from '@acala-dapp/react-components';
+import { FixedPointNumber } from '@acala-network/sdk-core';
+import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { CurrencyLike } from '@acala-dapp/react-hooks/types';
-import { ReactComponent as LockIcon } from '../../assets/lock-tag.svg';
-import classes from './LockPrices.module.scss';
+import { useApi } from '@acala-dapp/react-hooks';
 
-type PriceData = { currency: string; price: Fixed18 };
+import classes from './LockPrices.module.scss';
+import { ReactComponent as LockIcon } from '../../assets/lock-tag.svg';
 
 interface PriceCardProps {
-  currency: CurrencyLike;
-  price: Fixed18;
+  currency: CurrencyId;
+  price: FixedPointNumber;
 }
 
 const PriceCard: FC<PriceCardProps> = ({ currency, price }) => {
@@ -43,6 +43,7 @@ const PriceCard: FC<PriceCardProps> = ({ currency, price }) => {
 };
 
 export const LockPrices: FC<BareProps> = () => {
+  const { api } = useApi();
   const prices = useLockPrices();
 
   return (
@@ -51,7 +52,7 @@ export const LockPrices: FC<BareProps> = () => {
         Object.keys(prices).map((currency) => {
           return (
             <PriceCard
-              currency={currency}
+              currency={getCurrencyIdFromName(api, currency)}
               key={`fixed-price-${currency}`}
               price={prices[currency]}
             />

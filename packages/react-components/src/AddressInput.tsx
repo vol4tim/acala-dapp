@@ -3,7 +3,7 @@ import clsx from 'clsx';
 
 import Identicon from '@polkadot/react-identicon';
 
-import { AutoComplete, Input, InputProps, ArrowDownIcon } from '@acala-dapp/ui-components';
+import { AutoComplete, Input, InputProps, ArrowIcon } from '@acala-dapp/ui-components';
 import { useAccounts, useAddressValidator } from '@acala-dapp/react-hooks';
 
 import classes from './AddressInput.module.scss';
@@ -99,7 +99,7 @@ export const AddressInput: FC<AddressInputProps> = ({
             value={value}
           />
         ) : undefined}
-        suffix={<ArrowDownIcon />}
+        suffix={<ArrowIcon />}
         {...other}
       />
     </AutoComplete>

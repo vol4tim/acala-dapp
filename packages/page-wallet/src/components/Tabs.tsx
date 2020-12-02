@@ -19,19 +19,19 @@ export const Tabs: FC = () => {
     >
       <UITabs.Panel
         $key='acala'
-        tab='Acala'
+        header='Acala'
       >
         <AcalaConsole />
       </UITabs.Panel>
       <UITabs.Panel
         $key='collectibles'
-        tab={t('Collectibles')}
+        header={t('Collectibles')}
       >
         <NFT />
       </UITabs.Panel>
       <UITabs.Panel
         $key='cross-chain'
-        tab={t('Cross-Chain')}
+        header={t('Cross-Chain')}
       >
         <CrossChainConsole />
       </UITabs.Panel>

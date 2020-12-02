@@ -1,159 +1,78 @@
-import { FormikErrors } from 'formik';
-import { useMemo } from 'react';
-
-import { ApiRx } from '@polkadot/api';
-import { InjectedAccountWithMeta } from '@polkadot/extension-inject/types';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import { tokenEq, getTokenName } from '@acala-dapp/react-components';
+import { getTokenName, isValidateAddress, BalanceInputValue } from '@acala-dapp/react-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { useApi } from './useApi';
-import { useAccounts } from './useAccounts';
-import { CurrencyLike } from './types';
-import { useAllBalances, BalanceData } from './balanceHooks';
+import { useBalance } from './balanceHooks';
+import { useCallback, useEffect } from 'react';
+import { useMemorized } from './useMemorized';
 
-interface BaseConfig {
-  custom?: (value: any) => string | undefined;
+interface UseBalanceValidatorConfig {
+  currency: CurrencyId;
+  max?: [FixedPointNumber, string];
+  min?: [FixedPointNumber, string];
+  checkBalance?: boolean;
+  updateValidator?: (value: (value: BalanceInputValue) => Promise<any>) => void;
 }
 
-interface BalanceConfig extends BaseConfig {
-  type: 'balance';
-  currency?: CurrencyId;
-  max?: number;
-  min?: number;
-  errorMsg?: string;
-}
+export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: BalanceInputValue) => Promise<any> => {
+  const _config = useMemorized(config);
+  const balance = useBalance(_config.currency);
 
-interface NumberConfig extends BaseConfig {
-  type: 'number';
-  max?: number;
-  min?: number;
-  equalMax?: boolean;
-  equalMin?: boolean;
-  errorMsg?: string;
-}
+  const fn = useCallback((value: BalanceInputValue): Promise<any> => {
+    const _amount = new FixedPointNumber(value.amount);
 
-interface StringConfig extends BaseConfig {
-  type: 'string';
-  pattern?: RegExp;
-  max?: number;
-  min?: number;
-  errorMsg?: string;
-}
+    if (_amount.isZero()) return Promise.resolve();
 
-type Config = {
-  [k in string]: BalanceConfig | NumberConfig | StringConfig;
-}
-
-export function getFormValidator<T> (config: Config, api: ApiRx, active: InjectedAccountWithMeta, allBalance: BalanceData[]): (values: T) => void | object | Promise<FormikErrors<T>> {
-  const numberPattern = /^([1-9]\d*|0)(\.\d*)?$/;
-
-  return (values: any): void | object | Promise<FormikErrors<T>> => {
-    const error = {} as any;
-
-    return new Promise((resolve) => {
-      Object.keys(values).forEach((key): void => {
-        const _config = config[key];
-        const value = values[key];
-
-        if (_config.type === 'balance' && _config.currency) {
-          const _balanceData = allBalance.find((item) => tokenEq(item.currency, _config.currency as CurrencyLike));
-
-          if (!_balanceData) {
-            error[key] = `Insufficient ${getTokenName(_config.currency.asToken.toString())} Balance`;
-            resolve(error);
-
-            return;
-          }
-
-          const _balance = _balanceData.balance;
-
-          const _value = new FixedPointNumber(value);
-          const _max = new FixedPointNumber(_config.max !== undefined ? _config.max : Number.MAX_VALUE);
-          const _min = new FixedPointNumber(_config.min !== undefined ? _config.min : 0);
-
-          // ensure balance is sufficient
-          if (_value.isGreaterThan(_balance)) {
-            error[key] = `Insufficient ${getTokenName(_config.currency)} Balance`;
-          }
-
-          // ensure balance is less than max
-          if (_value.isGreaterThan(_max)) {
-            error[key] = `Value is greater than ${_max.toNumber()}`;
-          }
-
-          // ensure balance is greater than min
-          if (_value.isLessThan(_min)) {
-            error[key] = `Value is less than ${_min.toNumber()}`;
-          }
-        }
-
-        if (_config.type === 'number') {
-          if (value.toString() && !numberPattern.test(value.toString())) {
-            error[key] = 'Not a valid number';
-          }
-
-          if (_config.max !== undefined && value > _config.max) {
-            error[key] = `Value is bigger than ${_config.max}`;
-          }
-
-          if (_config.min !== undefined && value < _config.min) {
-            error[key] = `Value is less than ${_config.min}`;
-          }
-
-          if (_config.equalMax === false && value === _config.max) {
-            error[key] = `Value should not equal ${_config.max}`;
-          }
-
-          if (_config.equalMin === false && value === _config.min) {
-            error[key] = `Value should not equal ${_config.min}`;
-          }
-        }
-
-        if (_config.type === 'string') {
-          const length = (value as string).length;
-
-          if (_config.pattern !== undefined && !_config.pattern.test(value)) {
-            error[key] = 'Value is not a valid string';
-          }
-
-          if (_config.max !== undefined && length > _config.max) {
-            error[key] = `Value's length is bigger than ${_config.max}`;
-          }
-
-          if (_config.min !== undefined && length < _config.min) {
-            error[key] = `Value's length is less than ${_config.min}`;
-          }
-        }
-
-        const preCheckCustom = _config.custom ? _config.custom(value) : undefined;
-
-        if (preCheckCustom) {
-          error[key] = preCheckCustom;
-        }
-      });
-
-      resolve(error);
-    });
-  };
-}
-
-export function useFormValidator<T extends any> (_config: Config): (values: T) => void | object | Promise<FormikErrors<T>> {
-  const { api } = useApi();
-  const { active } = useAccounts();
-  const allBalance = useAllBalances();
-
-  const formValidator = useMemo(() => {
-    if (!active) {
-      return (): object => ({ global: "can't get user address" });
+    if (_config.max && _amount.isGreaterThan(_config.max[0])) {
+      return Promise.reject(new Error(_config.max[1] ? _config.max[1] : `Greater than the max amount ${_config.max[0].toNumber()}`));
     }
 
-    if (!api) {
-      return (): object => ({ global: "can't connect endpoint" });
+    if (_config.min && _amount.isLessThan(_config.min[0])) {
+      return Promise.reject(new Error(_config.min[1] ? _config.min[1] : `Less than The min amount ${_config.min[0].toNumber()}`));
     }
 
-    return getFormValidator(_config, api, active, allBalance);
-  }, [api, active, allBalance, _config]);
+    let checkBalance = true;
 
-  return formValidator;
+    if (Reflect.has(_config, 'checkBalance')) {
+      checkBalance = _config.checkBalance as boolean;
+    }
+
+    if (checkBalance && _amount.isGreaterThan(balance)) {
+      return Promise.reject(new Error(`Insufficient ${getTokenName(_config.currency)} balance`));
+    }
+
+    return Promise.resolve();
+  }, [balance, _config]);
+
+  useEffect(() => {
+    if (_config.updateValidator) {
+      _config.updateValidator(fn);
+    }
+  }, [fn, _config]);
+
+  return fn;
+};
+
+interface UseAddressValidatorConfig {
+  required?: boolean;
 }
+
+export const useAddressValidator = (config: UseAddressValidatorConfig): (value: string) => Promise<any> => {
+  const _config = useMemorized(config);
+
+  const fn = useCallback((value: string) => {
+    if (_config.required && !value) {
+      return Promise.reject(new Error('Address is Required'));
+    }
+
+    const result = isValidateAddress(value);
+
+    if (!result) {
+      return Promise.reject(new Error('Invalid Address'));
+    }
+
+    return Promise.resolve();
+  }, [_config]);
+
+  return fn;
+};

@@ -1,11 +1,12 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, memo, useEffect, useState } from 'react';
 import { Motion, spring } from 'react-motion';
 import { styled } from '@acala-dapp/ui-components';
 
-const SliderRoot = styled.div<{ top: number }>`
+const SliderRoot = styled.div.attrs<{ top: number }>(({ top }) => ({
+  style: { top: top + 'px' }
+}))<{ top: number }>`
   position: absolute;
   left: 0;
-  top: ${({ top }): number => top}px;
   width: 5px;
   height: var(--sidebar-item-height);
   background: var(--color-primary);
@@ -15,7 +16,7 @@ interface SliderProps {
   target: HTMLElement | null;
 }
 
-export const Slider: FC<SliderProps> = ({ target }) => {
+export const Slider: FC<SliderProps> = memo(({ target }) => {
   const [currentTop, setCurrentTop] = useState<number>(0);
 
   useEffect(() => {
@@ -36,4 +37,6 @@ export const Slider: FC<SliderProps> = ({ target }) => {
       {(style): JSX.Element => (<SliderRoot top={style.top} />)}
     </Motion>
   );
-};
+});
+
+Slider.displayName = 'Slider';

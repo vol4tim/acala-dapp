@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import { Card, Tabs, useTabs, CardTabTitle } from '@acala-dapp/ui-components';
+import { Card, Tabs, useTabs, CardTabHeader } from '@acala-dapp/ui-components';
 
 import { RenBtcMint } from './RenBtcMint';
 
@@ -13,32 +13,32 @@ export const RenBtc: FC = () => {
     <Card padding={false}>
       <Tabs<RenBTCTabType>
         active={currentTab}
+        divider={false}
         onChange={changeTabs}
-        showTabsContainerBorderLine={false}
       >
         <Tabs.Panel
           $key='mint'
-          tab={(): JSX.Element => (
-            <CardTabTitle
+          header={
+            <CardTabHeader
               active={currentTab === 'mint'}
               disabled={false}
             >
               Mint
-            </CardTabTitle>
-          )}
+            </CardTabHeader>
+          }
         >
           <RenBtcMint />
         </Tabs.Panel>
         <Tabs.Panel
           $key='release'
-          tab={(): JSX.Element => (
-            <CardTabTitle
+          header={
+            <CardTabHeader
               active={currentTab === 'release'}
               disabled={true}
             >
               Release
-            </CardTabTitle>
-          )}
+            </CardTabHeader>
+          }
         >
           <p>hello</p>
         </Tabs.Panel>

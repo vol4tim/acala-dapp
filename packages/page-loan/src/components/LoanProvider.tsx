@@ -1,8 +1,7 @@
-import React, { createContext, FC, useState, useRef, useEffect, useCallback } from 'react';
+import React, { createContext, FC, useState, useRef, useCallback } from 'react';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { useInitialize, useEmergencyShutdown, useAllUserLoans } from '@acala-dapp/react-hooks';
-import { PageLoading } from '@acala-dapp/ui-components';
+import { useEmergencyShutdown } from '@acala-dapp/react-hooks';
 
 type LoanTab = 'overview' | 'create' | (CurrencyId | string);
 

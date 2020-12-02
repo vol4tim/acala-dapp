@@ -5,7 +5,7 @@ import { noop } from 'lodash';
 import { Menu, Dropdown } from 'antd';
 
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { ArrowDownIcon } from '@acala-dapp/ui-components';
+import { ArrowIcon } from '@acala-dapp/ui-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { Token, TokenImage, TokenName } from './Token';
@@ -145,7 +145,7 @@ export const TokenSelector: FC<Props> = ({
             )
           ) : null
         }
-        <ArrowDownIcon className={classes.arrow} />
+        <ArrowIcon className={classes.arrow} />
       </div>
     </Dropdown>
   );

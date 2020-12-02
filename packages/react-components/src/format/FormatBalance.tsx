@@ -8,24 +8,23 @@ import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { styled } from '@acala-dapp/ui-components';
 
-import { formatBalance, sortCurrency } from '../utils';
+import { formatBalance } from '../utils';
 import { FormatNumber, FormatNumberProps, FormatterColor } from './FormatNumber';
 import classes from './format.module.scss';
 import { TokenName } from '../Token';
 
 export interface BalancePair {
   balance?: BalanceType | Fixed18 | FixedPointNumber | number;
-  currency?: CurrencyId;
+  currency?: CurrencyId | string;
 }
 
 export interface FormatBalanceProps extends BareProps {
   balance?: BalanceType | Fixed18 | FixedPointNumber | number;
-  currency?: CurrencyId;
+  currency?: CurrencyId | string;
   pair?: BalancePair[];
   pairSymbol?: string;
   decimalLength?: number;
   color?: FormatterColor;
-  isSort?: boolean;
   negativeToZero?: boolean;
 }
 
@@ -45,7 +44,6 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
   color,
   currency,
   decimalLength = 6,
-  isSort = true,
   negativeToZero = true,
   pair,
   pairSymbol
@@ -77,7 +75,7 @@ export const FormatBalance: FC<FormatBalanceProps> = ({
     <span className={clsx(classes.balance, className, color)}>
       {
         pair
-          ? (isSort ? pair.sort((p1, p2) => sortCurrency(p1.currency, p2.currency)) : pair).map((data, index) => renderBalance(data, index))
+          ? pair.map((data, index) => renderBalance(data, index))
           : renderBalance({ balance, currency }, -1)
       }
     </span>

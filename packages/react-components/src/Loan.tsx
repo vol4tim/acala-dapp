@@ -1,4 +1,5 @@
 import React, { FC, useMemo } from 'react';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 import { FormatNumberProps, FormatRatio, FormatBalanceProps, FormatBalance } from './format';
 import { useLoanHelper, useConstants, useLoanType, useLoanOverview, usePrice } from '@acala-dapp/react-hooks';
 import { convertToFixed18, Fixed18 } from '@acala-network/app-util';
@@ -176,12 +177,15 @@ export const TotalDebit: FC<LoanPropertyProps<FormatBalanceProps>> = ({ currency
 export const TotalCollateralRatio: FC<LoanPropertyProps<Omit<FormatNumberProps, 'data'>>> = ({ currency, ...other }) => {
   const overview = useLoanOverview(currency);
   const price = usePrice(currency);
-  const result = useMemo<Fixed18>(() => {
-    if (!overview || !price) return Fixed18.ZERO;
+  const result = useMemo<FixedPointNumber>(() => {
+    if (!overview || !price) return FixedPointNumber.ZERO;
 
-    if (!overview.totalDebit || !overview.debitExchangeRate || !overview.totalCollateral) return Fixed18.ZERO;
+    if (!overview.totalDebit || !overview.debitExchangeRate || !overview.totalCollateral) return FixedPointNumber.ZERO;
 
-    return (convertToFixed18(overview.totalCollateral).mul(price)).div(convertToFixed18(overview.totalDebit).mul(convertToFixed18(overview.debitExchangeRate)));
+    const totalCollateralValue = FixedPointNumber.fromInner(overview.totalCollateral.toString()).times(price);
+    const totalDebitValue = FixedPointNumber.fromInner(overview.totalDebit.toString()).times(FixedPointNumber.fromInner(overview.debitExchangeRate.toString()));
+
+    return totalCollateralValue.div(totalDebitValue);
   }, [overview, price]);
 
   if (!overview) return null;
