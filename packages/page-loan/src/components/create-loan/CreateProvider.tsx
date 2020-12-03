@@ -1,4 +1,5 @@
 import React, { createContext, useState, FC, useCallback } from 'react';
+import { useNavigate } from 'react-router';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 
@@ -19,6 +20,8 @@ export interface ProviderData {
 
   generate: number;
   setGenerate: (num: number) => void;
+
+  cancelCreate: () => void;
 }
 
 export const createProviderContext = createContext<ProviderData>({} as ProviderData);
@@ -28,6 +31,7 @@ type Props = BareProps;
 export const CreateProvider: FC<Props> = ({
   children
 }) => {
+  const navigate = useNavigate();
   const { loanCurrencies } = useConstants();
   const [step, _setStep] = useState<CREATE_STEP>('select');
   const [selectedToken, _setSelectedToken] = useState<CurrencyId>(loanCurrencies[0]);
@@ -42,9 +46,14 @@ export const CreateProvider: FC<Props> = ({
     _setSelectedToken(token);
   }, [_setSelectedToken]);
 
+  const cancelCreate = useCallback(() => {
+    navigate('/loan');
+  }, [navigate]);
+
   return (
     <createProviderContext.Provider
       value={{
+        cancelCreate,
         deposit,
         generate,
         selectedToken,

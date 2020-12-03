@@ -24,7 +24,7 @@ export const FormatRatio: FC<FormatNumberProps> = ({ data, ...props }) => {
 
   return (
     <FormatNumber
-      data={_data.isNaN() ? 0 : _data}
+      data={_data}
       formatNumberConfig={FormatRatioConfig}
       suffix='%'
       {...props}

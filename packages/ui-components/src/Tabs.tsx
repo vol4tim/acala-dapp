@@ -72,8 +72,8 @@ export const CardTabHeader = styled.div<{
 }>`
   flex: 1;
   text-align: center;
-  font-size: 20px;
-  line-height: 24px;
+  font-size: var(--text-size-lg);
+  line-height: 1.1875;
   padding: 20px 0;
   font-weight: 500;
   background: ${({ active }): string => active ? '#ffffff' : '#ECF0F2'};
@@ -192,7 +192,10 @@ function Tabs<T> ({
 
   return (
     <TabContainer>
-      <TabHeaderContainer divider={divider}>
+      <TabHeaderContainer
+        className='tab__header__root'
+        divider={divider}
+      >
         {
           headerList?.map((header, index) => (
             isValidElement(header) ? header

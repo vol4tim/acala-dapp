@@ -46,7 +46,7 @@ export const FormatNumber: FC<FormatNumberProps> = ({
         { prefix ? <span>{prefix}</span> : null }
         { i ? <span>{i}</span> : null }
         { d ? <span className={classes.decimal}>.{d}</span> : null }
-        { suffix ? <span>{suffix}</span> : null }
+        { suffix && i !== 'N/A' ? <span>{suffix}</span> : null }
       </span>
     </Tooltip>
   );

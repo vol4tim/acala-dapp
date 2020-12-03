@@ -49,6 +49,7 @@ export const Card = forwardRef<HTMLDivElement, CardProps>(({
   );
 
   const _contentClassName = clsx(
+    'card__content',
     contentClassName,
     classes.content,
     {

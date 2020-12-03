@@ -1,17 +1,20 @@
 import React, { FC, useContext } from 'react';
+import { useNavigate } from 'react-router';
 import { Button } from '@acala-dapp/ui-components';
-import { ReactComponent as SuccessBg } from '../assets/success-bg.svg';
+import { ReactComponent as SuccessBg } from '../../assets/success-bg.svg';
 
 import classes from './Success.module.scss';
-import { LoanContext } from './LoanProvider';
+// import { LoanContext } from './LoanProvider';
 import { createProviderContext } from './CreateProvider';
 
 export const Success: FC = () => {
-  const { setCurrentTab } = useContext(LoanContext);
+  // const { setCurrentTab } = useContext(LoanContext);
+  const navigate = useNavigate();
   const { selectedToken } = useContext(createProviderContext);
 
   const handleDone = (): void => {
-    setCurrentTab(selectedToken);
+    // setCurrentTab(selectedToken);
+    navigate(`/loan/${selectedToken.asToken.toString()}`);
   };
 
   return (

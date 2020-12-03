@@ -9,17 +9,16 @@ import { Button } from '@acala-dapp/ui-components';
 
 import { createProviderContext } from './CreateProvider';
 import classes from './Generate.module.scss';
-import { LoanContext } from './LoanProvider';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 
 export const Generate: FC = () => {
   const {
+    cancelCreate,
     selectedToken,
     setDeposit,
     setGenerate,
     setStep
   } = useContext(createProviderContext);
-  const { cancelCurrentTab } = useContext(LoanContext);
   const { minmumDebitValue, stableCurrency } = useConstants();
   const selectedCurrencyBalance = useBalance(selectedToken);
   const helper = useLoanHelper(selectedToken);
@@ -162,7 +161,7 @@ export const Generate: FC = () => {
       </div>
       <div className={classes.action}>
         <Button
-          onClick={cancelCurrentTab}
+          onClick={cancelCreate}
           size='small'
           type='ghost'
         >

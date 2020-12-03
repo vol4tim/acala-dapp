@@ -7,7 +7,6 @@ import { Token, tokenEq, UserAssetBalance, UserAssetValue, Price, StableFeeAPR, 
 
 import classes from './SelectCollateral.module.scss';
 import { createProviderContext } from './CreateProvider';
-import { LoanContext } from './LoanProvider';
 
 interface SelectProps {
   currency: CurrencyId;
@@ -55,8 +54,7 @@ export const SelectCollateral: FC = () => {
   const { loanCurrencies } = useConstants();
   const loans = useAllUserLoans(true);
   const [selected, setSelected] = useState<CurrencyId>();
-  const { setSelectedToken, setStep } = useContext(createProviderContext);
-  const { cancelCurrentTab } = useContext(LoanContext);
+  const { cancelCreate, setSelectedToken, setStep } = useContext(createProviderContext);
   const collateralDisabled = useRef<Map<string, boolean>>(new Map());
 
   useEffect(() => {
@@ -159,7 +157,7 @@ export const SelectCollateral: FC = () => {
       />
       <div className={classes.action}>
         <Button
-          onClick={cancelCurrentTab}
+          onClick={cancelCreate}
           size='small'
           type='border'
         >

@@ -22,7 +22,7 @@ interface FlexBoxProps extends BareProps {
 
 export const FlexBox: FC<FlexBoxProps> = styled.div`
   display: flex;
-  width: ${({ width }): string => width || 'auto'}
+  width: ${({ width }): string => width || 'auto'};
   justify-content: ${({ justifyContent }: FlexBoxProps): string => justifyContent || 'flex-start'};
   align-items: ${({ alignItems }: FlexBoxProps): string => alignItems || 'center'};
 `;

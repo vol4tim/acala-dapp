@@ -166,7 +166,7 @@ export const SubTitle = memo(styled<FC<SubTitleProps>>(({ children, className, e
   margin-bottom: 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: ${({ extra }): string => extra ? 'space-between' : 'flex-start'};
   font-size: 16px;
   line-height: 21px;
   font-weight: 500;

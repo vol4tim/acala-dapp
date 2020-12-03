@@ -6,16 +6,15 @@ import { useConstants, useLoanHelper } from '@acala-dapp/react-hooks';
 import { Fixed18, stableCoinToDebit, calcCollateralRatio } from '@acala-network/app-util';
 import { Button, List } from '@acala-dapp/ui-components';
 import classes from './Confirm.module.scss';
-import { LoanContext } from './LoanProvider';
 
 export const Confirm: FC = () => {
   const {
+    cancelCreate,
     deposit,
     generate,
     selectedToken,
     setStep
   } = useContext(createProviderContext);
-  const { cancelCurrentTab } = useContext(LoanContext);
   const { stableCurrency } = useConstants();
   const helper = useLoanHelper(selectedToken);
   const isDisabled = useMemo((): boolean => {
@@ -95,7 +94,7 @@ export const Confirm: FC = () => {
       </List>
       <div className={classes.action}>
         <Button
-          onClick={cancelCurrentTab}
+          onClick={cancelCreate}
           size='small'
           type='ghost'
         >

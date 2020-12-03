@@ -300,6 +300,7 @@ export const ExpressConsole: FC = () => {
     >
       <Tabs
         active={currentTab}
+        divider={false}
         onChange={changeTabs}
       >
         <Tabs.Panel

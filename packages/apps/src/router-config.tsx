@@ -1,4 +1,4 @@
-import React, { FC, lazy, Suspense, useEffect, useState } from 'react';
+import React, { FC, lazy, Suspense } from 'react';
 
 import { PageContentLoading } from '@acala-dapp/ui-components';
 
@@ -15,18 +15,7 @@ const PageIncentives = lazy(() => import('@acala-dapp/page-incentives'));
 const PageGovernance = lazy(() => import('@acala-dapp/page-governance'));
 
 const CSuspense: FC = ({ children }) => {
-  const [flag, setFlag] = useState(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setFlag(true), 1000);
-
-    return (): void => {
-      clearTimeout(timeout);
-    };
-  }, []);
-
-  if (!flag && children) return <PageContentLoading />;
-
+  // TODO: add minimal time
   return (
     <Suspense fallback={<PageContentLoading />}>
       {children}
@@ -44,7 +33,7 @@ export const config: RouterConfigData[] = [
       },
       {
         element: <CSuspense><PageLoan /></CSuspense>,
-        path: 'loan',
+        path: 'loan/*',
         title: 'Borrow aUSD'
       },
       {

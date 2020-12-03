@@ -13,6 +13,7 @@ type SwapTabType = 'swap' | 'add-liquidity' | 'withdraw-liquidity';
 const PageSwap: FC = () => {
   const { changeTabs, currentTab } = useTabs<SwapTabType>('swap');
 
+  // TODO: need remove
   useEffect(() => {
     const hash = window.location.hash.replace(/.*(?=\?)/, '');
     const searchParams = new URLSearchParams(hash);

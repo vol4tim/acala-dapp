@@ -3,14 +3,14 @@ import React, { FC, useCallback, useMemo } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Row, Col, List, FlexBox } from '@acala-dapp/ui-components';
 import { TxButton, BalanceInput, FormatBalance, BalanceInputValue, eliminateGap } from '@acala-dapp/react-components';
-import { useBalance, useInputValue, useConstants, useStakingRewardAPR, useStakingPool, useBalanceValidator } from '@acala-dapp/react-hooks';
+import { useBalance, useInputValue, useConstants, useStakingRewardERA, useStakingPool, useBalanceValidator } from '@acala-dapp/react-hooks';
 
 import classes from './StakingConsole.module.scss';
 
 export const StakingConsole: FC = () => {
   const { liquidCurrency, stakingCurrency } = useConstants();
   const stakingPool = useStakingPool();
-  const rewardRate = useStakingRewardAPR();
+  const rewardRate = useStakingRewardERA();
   const balance = useBalance(stakingCurrency);
 
   const [stakingValue, setStakingValue, { error, ref, reset, setValidator }] = useInputValue<BalanceInputValue>({
@@ -19,6 +19,7 @@ export const StakingConsole: FC = () => {
   });
 
   useBalanceValidator({
+    checkBalance: true,
     currency: stakingCurrency,
     updateValidator: setValidator
   });

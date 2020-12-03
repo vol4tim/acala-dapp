@@ -17,6 +17,11 @@ export const NoExtensions: React.FC = memo(() => {
       visiable={true}
     >
       <p>{'No polkadot{.js} extension found, please install it first!'}</p>
+      <a
+        href={POLKADOT_EXTENSION_PAGE}
+        rel='noopener noreferrer'
+        target='_blank'
+      >{'Get Polkadot{.js}'}</a>
     </Dialog>
   );
 });

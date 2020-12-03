@@ -42,7 +42,8 @@ export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: 
     }
 
     return Promise.resolve();
-  }, [balance, _config]);
+  /* eslint-disable-next-line */
+  }, [_config, balance]);
 
   useEffect(() => {
     if (_config.updateValidator) {

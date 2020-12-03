@@ -105,7 +105,7 @@ export const useLoanHelper = (currency: CurrencyId, account?: AccountLike): Loan
 export const useAllUserLoans = (filterEmpyt?: boolean, account?: AccountLike): DerivedUserLoan[] | null => {
   const { active } = useAccounts();
   const _account = account || (active ? active.address : '');
-  const loans = useCall<DerivedUserLoan[]>('derive.loan.allLoans', [_account]) || [];
+  const loans = useCall<DerivedUserLoan[]>('derive.loan.allLoans', [_account]);
 
   if (!loans) {
     return null;

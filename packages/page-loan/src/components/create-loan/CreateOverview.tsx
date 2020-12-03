@@ -4,8 +4,8 @@ import { Row, Col, Card } from '@acala-dapp/ui-components';
 import { StableFeeAPR, LiquidationPenalty } from '@acala-dapp/react-components';
 
 import { createProviderContext } from './CreateProvider';
-import { DynamicLiquidationPrice } from './LiquidationPriceCard';
-import { DynamicLiquidationRatio } from './LiquidationRatioCard';
+import { DynamicLiquidationPrice } from '../common/LiquidationPriceCard';
+import { DynamicLiquidationRatio } from '../common/LiquidationRatioCard';
 import classes from './CreateOverview.module.scss';
 
 export const CreateOverview: FC = () => {

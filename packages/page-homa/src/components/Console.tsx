@@ -7,7 +7,14 @@ import { RedeemConsole } from './RedeemConsole';
 
 const CCard = styled(Card)`
   height: 100%;
-  padding-top: 0;
+
+  & > .card__content {
+    padding: 0;
+  }
+`;
+
+const Content = styled.div`
+  padding: 0 24px;
 `;
 
 type AdvanceConsoleTabType = 'staking' | 'redeem';
@@ -19,19 +26,24 @@ export const Console: FC = () => {
     <CCard>
       <Tabs
         active={currentTab}
+        divider={false}
         onChange={changeTabs}
       >
         <Tabs.Panel
           $key='staking'
-          header='Mint & Stake'
+          header='Mint & State'
         >
-          <StakingConsole />
+          <Content>
+            <StakingConsole />
+          </Content>
         </Tabs.Panel>
         <Tabs.Panel
           $key='redeem'
           header='Redeem'
         >
-          <RedeemConsole />
+          <Content>
+            <RedeemConsole />
+          </Content>
         </Tabs.Panel>
       </Tabs>
     </CCard>

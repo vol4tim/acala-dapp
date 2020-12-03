@@ -123,7 +123,7 @@ export const useStakingTotalAmount = (): FixedPointNumber => {
   const totalAmount = useMemo<FixedPointNumber>((): FixedPointNumber => {
     if (!stakingPool) return FixedPointNumber.ZERO;
 
-    return stakingPool.stakingPool.getCommunalBonded().times(ratio);
+    return stakingPool.stakingPool.getTotalCommunalBalance().times(ratio);
   }, [stakingPool, ratio]);
 
   return totalAmount;
@@ -162,6 +162,18 @@ export const useStakingRewardAPR = (): FixedPointNumber => {
 
     return FixedPointNumber.fromInner(subAccountStatus.mockRewardRate.toString()).times(new FixedPointNumber(eraNumOfYear));
   }, [api, subAccountStatus]);
+
+  return arp;
+};
+
+export const useStakingRewardERA = (): FixedPointNumber => {
+  const subAccountStatus = useCall<SubAccountStatus>('query.polkadotBridge.subAccounts', [1]);
+
+  const arp = useMemo<FixedPointNumber>(() => {
+    if (!subAccountStatus) return FixedPointNumber.ZERO;
+
+    return FixedPointNumber.fromInner(subAccountStatus.mockRewardRate.toString());
+  }, [subAccountStatus]);
 
   return arp;
 };
