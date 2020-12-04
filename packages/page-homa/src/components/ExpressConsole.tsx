@@ -313,6 +313,7 @@ export const ExpressConsole: FC = () => {
               Stake
             </CardTabHeader>
           }
+          key='tab-stake'
         >
           <StakePanel />
         </Tabs.Panel>
@@ -326,6 +327,7 @@ export const ExpressConsole: FC = () => {
               Unstake
             </CardTabHeader>
           }
+          key='tab-unstake'
         >
           <UnstakePanel />
         </Tabs.Panel>

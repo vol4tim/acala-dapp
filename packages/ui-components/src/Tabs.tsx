@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState, useEffect, useMemo, Children, ReactElement, useRef, Dispatch, SetStateAction, createRef, isValidElement } from 'react';
+import React, { FC, ReactNode, useState, useMemo, Children, ReactElement, useRef, Dispatch, SetStateAction, createRef, isValidElement, useLayoutEffect } from 'react';
 
 import { BareProps } from './types';
 import styled from 'styled-components';
@@ -95,7 +95,7 @@ const ActiveSlider: FC<{ index: number }> = ({ index }) => {
   const [prevWidth, setPrevWidth] = useState<number>(0);
   const [currentWidth, setCurrentWidth] = useState<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref) return;
 
     const $dom = ref.current;

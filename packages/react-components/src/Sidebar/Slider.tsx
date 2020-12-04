@@ -1,4 +1,4 @@
-import React, { FC, memo, useEffect, useState } from 'react';
+import React, { FC, memo, useLayoutEffect, useState } from 'react';
 import { Motion, spring } from 'react-motion';
 import { styled } from '@acala-dapp/ui-components';
 
@@ -19,7 +19,7 @@ interface SliderProps {
 export const Slider: FC<SliderProps> = memo(({ target }) => {
   const [currentTop, setCurrentTop] = useState<number>(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!target) return;
 
     const { top } = target.getBoundingClientRect();

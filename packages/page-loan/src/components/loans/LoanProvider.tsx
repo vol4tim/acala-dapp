@@ -1,4 +1,4 @@
-import React, { createContext, FC, useCallback, useReducer, useMemo, useEffect, useRef } from 'react';
+import React, { createContext, FC, useCallback, useReducer, useMemo } from 'react';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
 

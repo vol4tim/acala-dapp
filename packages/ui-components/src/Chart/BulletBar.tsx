@@ -1,4 +1,4 @@
-import React, { FC, createRef, useEffect, ReactElement, useMemo } from 'react';
+import React, { FC, createRef, useMemo, useLayoutEffect } from 'react';
 
 import { BulletBarConfigItem, drawBulletBar } from './bullet-bar-helper';
 import classes from './BulletBar.module.scss';
@@ -15,7 +15,7 @@ export const BulletBar: FC<BulletBarProps> = ({ config }) => {
     [config]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!ref.current) return;
 
     const $e = ref.current;
@@ -28,7 +28,7 @@ export const BulletBar: FC<BulletBarProps> = ({ config }) => {
       <div ref={ref} />
       <ul className={classes.labelArea}>
         {
-          sortedConfig.map((item: BulletBarConfigItem): ReactElement => {
+          sortedConfig.map((item: BulletBarConfigItem): JSX.Element => {
             return (
               <li className={classes.label}
                 data-color={item.color}

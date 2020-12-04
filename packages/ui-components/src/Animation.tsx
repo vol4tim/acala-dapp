@@ -1,4 +1,4 @@
-import React, { createRef, FC, PropsWithChildren, useEffect, useRef, useState } from 'react';
+import React, { createRef, FC, PropsWithChildren, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Motion, spring, presets } from 'react-motion';
 import styled from 'styled-components';
 import { BareProps } from './types';
@@ -58,7 +58,7 @@ export const TextAnimation: FC<{ value: string } & BareProps> = ({ className, va
   /* eslint-disable-next-line */
   }, [value, setPrevValue, setMotionData]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!$value.current || !$container.current) return;
 
     const height = window.getComputedStyle($value.current).height;

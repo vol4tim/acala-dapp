@@ -8,6 +8,7 @@ import { useLoanHelper, usePrice } from '@acala-dapp/react-hooks';
 
 import { getLoanStatus, LoanStatus } from '../../utils';
 import classes from './Liquidation.module.scss';
+import { formatNumber } from '@acala-dapp/react-components';
 
 interface Props {
   currency: CurrencyId;
@@ -30,14 +31,14 @@ export const LiquidationPriceCard: FC<Props> = ({ currency }) => {
       {
         color: status.color,
         data: price.toNumber(2, 3) || 0,
-        dataTransfer: (i: number): string => `$${i}`,
+        dataTransfer: (i: number): string => `$ ${formatNumber(i)}`,
         label: 'Current Price',
         labelStatus: status.description
       },
       {
         color: '#0f32da',
         data: helper.liquidationPrice.toNumber(2, 3) || 0,
-        dataTransfer: (i: number): string => `$${i}`,
+        dataTransfer: (i: number): string => `$ ${formatNumber(i)}`,
         label: 'Liquidation Price'
       }
     ];
@@ -105,14 +106,14 @@ export const DynamicLiquidationPrice: FC<DynamicLiquidationProps> = ({
       {
         color: status.color,
         data: price.toNumber(2, 3),
-        dataTransfer: (i: number): string => `$${i}`,
+        dataTransfer: (i: number): string => `$ ${formatNumber(i)}`,
         label: 'Current Price',
         labelStatus: status.description
       },
       {
         color: '#0f32da',
         data: liquidationPrice.toNumber(2, 3) || 0,
-        dataTransfer: (i: number): string => `$${i}`,
+        dataTransfer: (i: number): string => `$ ${formatNumber(i)}`,
         label: 'Liquidation Price'
       }
     ];

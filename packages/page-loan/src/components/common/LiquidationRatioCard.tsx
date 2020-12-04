@@ -9,6 +9,7 @@ import { useLoanHelper, usePrice } from '@acala-dapp/react-hooks';
 
 import { getLoanStatus, LoanStatus } from '../../utils';
 import classes from './Liquidation.module.scss';
+import { formatNumber } from '@acala-dapp/react-components';
 
 interface Props {
   currency: CurrencyId;
@@ -17,6 +18,14 @@ interface Props {
 const convertToPercentage = (data: Fixed18): number => {
   return data.mul(Fixed18.fromNatural(100)).toNumber(2, 3) || 0;
 };
+
+function dataTransfer (i: number): string {
+  const temp = formatNumber(i);
+
+  if (temp === 'N/A') return 'N/A';
+
+  return `${temp}%`;
+}
 
 export const LiquidationRatioCard: FC<Props> = ({ currency }) => {
   const helper = useLoanHelper(currency);
@@ -34,14 +43,14 @@ export const LiquidationRatioCard: FC<Props> = ({ currency }) => {
       {
         color: status.color,
         data: convertToPercentage(helper.collateralRatio),
-        dataTransfer: (i: number): string => `${i}%`,
+        dataTransfer,
         label: 'Current Ratio',
         labelStatus: status.description
       },
       {
         color: '#0f32da',
         data: convertToPercentage(helper.liquidationRatio),
-        dataTransfer: (i: number): string => `${i}%`,
+        dataTransfer,
         label: 'Liquidatio Ratio'
       }
     ];
@@ -99,14 +108,14 @@ export const DynamicLiquidationRatio: FC<DynamicLiquidationProps> = ({
       {
         color: status.color,
         data: convertToPercentage(collateralRatio),
-        dataTransfer: (i: number): string => `${i}%`,
+        dataTransfer,
         label: 'Current Ratio',
         labelStatus: status.description
       },
       {
         color: '#0f32da',
         data: convertToPercentage(helper.liquidationRatio),
-        dataTransfer: (i: number): string => `${i}%`,
+        dataTransfer,
         label: 'Liquidation Ratio'
       }
     ];

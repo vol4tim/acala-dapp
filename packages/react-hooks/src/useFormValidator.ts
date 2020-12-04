@@ -3,7 +3,7 @@ import { getTokenName, isValidateAddress, BalanceInputValue } from '@acala-dapp/
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useBalance } from './balanceHooks';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useLayoutEffect } from 'react';
 import { useMemorized } from './useMemorized';
 
 interface UseBalanceValidatorConfig {
@@ -45,7 +45,7 @@ export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: 
   /* eslint-disable-next-line */
   }, [_config, balance]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (_config.updateValidator) {
       _config.updateValidator(fn);
     }

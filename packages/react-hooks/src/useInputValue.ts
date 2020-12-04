@@ -1,4 +1,4 @@
-import { useState, useRef, MutableRefObject, useCallback, useMemo, useEffect } from 'react';
+import { useState, useRef, MutableRefObject, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useMemorized } from './useMemorized';
 
 interface Instance<T> {
@@ -63,7 +63,7 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
     };
   }, [ref, reset, error, setValidator]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!validator.current) return;
 
     const promise = validator.current(value);

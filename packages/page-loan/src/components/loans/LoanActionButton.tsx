@@ -156,10 +156,9 @@ export const LonaActionButton: FC<Props> = ({
             .negated()
             .isLessThan(minmumDebitValue)
         ) {
-          params[2] = loanHelper.debits.innerToString();
+          params[2] = loanHelper.debits.negated().innerToString();
         } else {
           params[2] = '-' + new FixedPointNumber(inputValue.amount)
-            .minus(new FixedPointNumber('0.000005'))
             .div(
               FixedPointNumber._fromBN(loanHelper.debitExchangeRate.getInner())
             ).toChainData();
