@@ -1,13 +1,13 @@
 import React, { FC, ReactNode } from 'react';
-import { Table, Card, TableConfig } from '@acala-dapp/ui-components';
+import { Table, Card, ColumnsType } from '@acala-dapp/ui-components';
 import { Token, FormatBalance, FormatRatio } from '@acala-dapp/react-components';
 import { useStakingPool, useConstants } from '@acala-dapp/react-hooks';
-import { StakingPoolData } from '@acala-dapp/react-environment/RxStore/type';
+import { StakingPoolData } from '@acala-dapp/react-environment/store';
 
 export const StakingPool: FC = () => {
   const { stakingCurrency } = useConstants();
   const stakingPool = useStakingPool();
-  const tableConfig: TableConfig[] = [
+  const tableConfig: ColumnsType<StakingPoolData> = [
     {
       align: 'left',
       /* eslint-disable-next-line react/display-name */
@@ -57,9 +57,9 @@ export const StakingPool: FC = () => {
       {
         stakingPool?.stakingPool ? (
           <Table
-            config={tableConfig}
-            data={[stakingPool]}
-            showHeader
+            columns={tableConfig}
+            dataSource={[stakingPool]}
+            pagination={false}
           />
         ) : null
       }

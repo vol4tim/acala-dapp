@@ -1,14 +1,8 @@
-@import '../../../ui-components/src/styles/index.scss';
-
 .root {
   margin: -24px -24px 0 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   flex-wrap: wrap;
-
-  @include media-breakpoint-up('sm') {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 .item {

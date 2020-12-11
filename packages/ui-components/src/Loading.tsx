@@ -5,7 +5,7 @@ import { Skeleton } from 'antd';
 import { BareProps } from './types';
 
 interface Props extends BareProps {
-  size?: 'normal' | 'small';
+  width?: number;
 }
 
 const ringAnimation = keyframes`
@@ -17,7 +17,7 @@ const ringAnimation = keyframes`
   }
 `;
 
-const LoadingRoot = styled.div`
+const LoadingRoot = styled.div<{ width: number }>`
   position: relative;
   width: 40px;
   height: 40px;
@@ -27,7 +27,7 @@ const LoadingRoot = styled.div`
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 4px solid var(--color-primary);
+    border: ${({ width }): number => width}px solid var(--color-primary);
     animation: ${ringAnimation} 1.5s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   }
 
@@ -51,9 +51,12 @@ const LoadingRoot = styled.div`
   }
 `;
 
-export const Loading: FC<Props> = () => {
+export const Loading: FC<Props> = ({ className, width }) => {
   return (
-    <LoadingRoot>
+    <LoadingRoot
+      className={className}
+      width={width ?? 4 }
+    >
       <div />
       <div />
       <div />

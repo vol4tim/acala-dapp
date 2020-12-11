@@ -1,33 +1,31 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { PriceData } from '@acala-dapp/react-environment/RxStore/type';
+import { useStore } from '@acala-dapp/react-environment';
 
-import { useRxStore } from './useRxStore';
+export interface PriceData {
+  currency: string;
+  price: FixedPointNumber;
+}
 
 /**
  * @name useAllPrices
  * @description get all prices from the chain
  */
 export const useAllPrices = (): PriceData[] => {
-  const { price: priceStore } = useRxStore();
-  const [prices, setPrices] = useState<PriceData[]>([]);
+  const { prices } = useStore('prices');
 
-  useEffect(() => {
-    const subscribe = priceStore.subscribe((result) => {
-      if (!result) return;
+  return useMemo(() => {
+    const result: PriceData[] = [];
 
-      if (!result.length) return;
-
-      setPrices(result);
+    prices.forEach((value, key) => {
+      result.push({ currency: key, price: value });
     });
 
-    return (): void => subscribe.unsubscribe();
-  }, [priceStore, setPrices]);
-
-  return prices;
+    return result;
+  }, [prices]);
 };
 
 /**
@@ -36,19 +34,11 @@ export const useAllPrices = (): PriceData[] => {
  * @param currency
  */
 export const usePrice = (currency?: CurrencyId): FixedPointNumber => {
-  const prices = useAllPrices();
-  const result = useMemo(() => {
-    if (!currency) return FixedPointNumber.ZERO;
+  const { prices } = useStore('prices');
 
-    // dex share should not have price
-    if (currency.isDexShare) return FixedPointNumber.ZERO;
+  if (!currency || !prices) return FixedPointNumber.ZERO;
 
-    const result = prices.find((item: PriceData): boolean => {
-      return item.currency === currency.asToken.toString();
-    });
+  if (currency.isDexShare) return FixedPointNumber.ZERO;
 
-    return result ? result.price : FixedPointNumber.ZERO;
-  }, [prices, currency]);
-
-  return result;
+  return prices.get(currency.asToken.toString()) || FixedPointNumber.ZERO;
 };

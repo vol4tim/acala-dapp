@@ -1,7 +1,7 @@
 import { useEffect, useReducer } from 'react';
 import { ApiRx } from '@polkadot/api';
 import { Observable, from } from 'rxjs';
-import { map, filter, mergeMap } from 'rxjs/operators';
+import { map, filter, mergeMap, startWith } from 'rxjs/operators';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { TimestampedValue } from '@open-web3/orml-types/interfaces';
@@ -59,6 +59,7 @@ export const getOraclePrices = (api: ApiRx, type: OracleProvider = 'Aggregated')
 
 export const subscribeOraclePrices = (api: ApiRx, type: OracleProvider = 'Aggregated'): ReturnType<typeof getOraclePrices> => {
   return api.query.system.events().pipe(
+    startWith([{ event: { method: 'NewFeedData' } }]),
     mergeMap((events) => {
       return from(events).pipe(
         // if oracle has new feed data, reflash oracle prices
@@ -73,7 +74,7 @@ export const subscribeOraclePrices = (api: ApiRx, type: OracleProvider = 'Aggreg
   );
 };
 
-export const useOraclePrices = (): OraclePriceState => {
+export const useOraclePricesStore = (): OraclePriceState => {
   const { api } = useApi();
   const [state, dispatch] = useReducer(reducer, initState);
 

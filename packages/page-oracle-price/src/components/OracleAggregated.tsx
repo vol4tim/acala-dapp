@@ -179,7 +179,7 @@ const OracleAggregatedCard: FC<OracleAggregatedCardProps> = ({ currency, price }
 };
 
 export const OracleAggregated: FC = () => {
-  const oraclePrice = useStore('oraclePrice');
+  const oraclePrice = useStore('oraclePrices');
 
   return (
     <GridBox

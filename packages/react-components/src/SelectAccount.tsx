@@ -1,11 +1,58 @@
 import React, { useState, useCallback, useEffect } from 'react';
 
 import Identicon from '@polkadot/react-identicon';
-import { Dialog } from '@acala-dapp/ui-components';
+import { Dialog, styled } from '@acala-dapp/ui-components';
 
 import { ReactComponent as CheckedIcon } from './assets/checked.svg';
-import classes from './SelectAccount.module.scss';
 import { InjectedAccount } from '@polkadot/extension-inject/types';
+
+const AccountList = styled.ul`
+  max-height: 500px;
+  list-style: none;
+  border-radius: 2px;
+  border: 1px solid #ecf0f2;
+  overflow: auto;
+`;
+
+const AccountItem = styled.li`
+  position: relative;
+  display: flex;
+  font-size: 16px;
+  line-height: 19px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: background 200ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 1px;
+    width: calc(100% - 50px);
+    background: #ecf0f2;
+  }
+
+  &:hover {
+    background: #f2f5f7;
+  }
+
+  &:last-child::after {
+    display: none;
+  }
+
+  .account__item__icon {
+    margin-right: 16px;
+  }
+
+  .account__item__account {
+    flex: 1;
+  }
+
+  .account__item__checked {
+    width: 16px;
+  }
+`;
 
 interface Props {
   defaultAccount?: string;
@@ -38,38 +85,37 @@ export const SelectAccount: React.FC<Props> = ({
 
   return (
     <Dialog
-      className={classes.root}
       onCancel={onCancel}
       onConfirm={confirmHandler}
+      showCancel
       title='Choose Account'
       visiable={visable}
-      withClose
     >
-      <ul className={classes.list}>
+      <AccountList>
         {
           accounts.map((item, index) => {
             return (
-              <li
-                className={classes.item}
+              <AccountItem
                 key={`account-${item.address}`}
                 onClick={(): void => setSelectedIndex(index)}
               >
                 <Identicon
-                  className={classes.icon}
+                  className='account__item__icon'
                   size={16}
+                  theme='polkadot'
                   value={item.address}
                 />
-                <p className={classes.account}>{item.name}</p>
-                <div className={classes.checked}>
+                <p className='account__item__account'>{item.name}</p>
+                <div className='account__item__checked'>
                   {
                     selectedIndex === index ? <CheckedIcon /> : null
                   }
                 </div>
-              </li>
+              </AccountItem>
             );
           })
         }
-      </ul>
+      </AccountList>
     </Dialog>
   );
 };

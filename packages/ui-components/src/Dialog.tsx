@@ -21,7 +21,7 @@ interface Props extends BareProps {
 
 export const Dialog: FC<Props> = ({
   action,
-  cancelText = 'Cancel',
+  cancelText = 'Close',
   children,
   className,
   confirmText = 'Confirm',
@@ -49,6 +49,7 @@ export const Dialog: FC<Props> = ({
           <Button
             onClick={onCancel}
             size='small'
+            style='normal'
             type='border'
           >
             {cancelText}

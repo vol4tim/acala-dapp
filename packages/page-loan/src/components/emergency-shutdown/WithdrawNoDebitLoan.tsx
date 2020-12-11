@@ -1,8 +1,7 @@
 import React, { FC, useState, useEffect, ReactNode } from 'react';
-import { Card, TableConfig, Table } from '@acala-dapp/ui-components';
+import { Card, ColumnsType, Table } from '@acala-dapp/ui-components';
 import { useAllUserLoans, filterEmptyLoan } from '@acala-dapp/react-hooks';
 import { DerivedUserLoan } from '@acala-network/api-derive';
-import { CurrencyId } from '@acala-network/types/interfaces';
 import { Token, FormatBalance, TxButton } from '@acala-dapp/react-components';
 import { convertToFixed18 } from '@acala-network/app-util';
 
@@ -11,12 +10,12 @@ export const WithdrawNoDebitLoan: FC = () => {
 
   const loans = useAllUserLoans();
 
-  const tableConfig: TableConfig[] = [
+  const tableConfig: ColumnsType<DerivedUserLoan> = [
     {
       align: 'left',
       dataIndex: 'token',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => (
+      render: ({ currency }): ReactNode => (
         <Token currency={currency} />
       ),
       title: 'Token',
@@ -25,7 +24,7 @@ export const WithdrawNoDebitLoan: FC = () => {
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (data: DerivedUserLoan): ReactNode => (
+      render: (data): ReactNode => (
         <FormatBalance
           balance={convertToFixed18(data.collateral)}
           currency={data.currency}
@@ -37,7 +36,7 @@ export const WithdrawNoDebitLoan: FC = () => {
     {
       align: 'right',
       /* eslint-disable-next-line react/display-name */
-      render: (data: DerivedUserLoan): ReactNode => {
+      render: (data): ReactNode => {
         const params = [data.currency, '-' + data.collateral, '0'];
 
         return (
@@ -72,9 +71,9 @@ export const WithdrawNoDebitLoan: FC = () => {
       padding={false}
     >
       <Table
-        config={tableConfig}
-        data={filterEmptyLoan(loans)}
-        showHeader
+        columns={tableConfig}
+        dataSource={filterEmptyLoan(loans)}
+        pagination={false}
       />
     </Card>
   );

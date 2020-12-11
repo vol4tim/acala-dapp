@@ -1,12 +1,17 @@
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
-import { useCouncilList } from '@acala-dapp/react-hooks';
-import { ArrowPixelIcon, styled, SubTitle } from '@acala-dapp/ui-components';
+import { ArrowPixelIcon, Row, Col, styled, SubTitle } from '@acala-dapp/ui-components';
 
 import { BareProps, ClickAbleProps } from '@acala-dapp/ui-components/types';
 import { usePageTitle } from '@acala-dapp/react-environment';
-import { CouncilesTab, getCouncilType } from './CouncliTab';
+
+import { CouncilesTab } from './CouncliTab';
+import { GovernanceStage } from './GovernanceStage';
+import { GovernanceIntro } from './GovernanceIntro';
+import { RecentProposals } from './RecentProposals';
+import { CouncilMembers } from './CouncilMembers';
+import { CouncilType } from '../config';
 
 const OverviewSubTitleExtra = styled<FC<{ content: string } & BareProps & ClickAbleProps >>(({ className, content, onClick }) => {
   return (
@@ -33,35 +38,55 @@ const OverviewSubTitleExtra = styled<FC<{ content: string } & BareProps & ClickA
 `;
 
 export const Overview: FC = () => {
-  const councils = useCouncilList();
   const naviagete = useNavigate();
-
-  const _councils = useMemo(() => {
-    if (!councils) return [];
-
-    return councils.map(getCouncilType);
-  }, [councils]);
 
   const goToCouncilDetailPage = useCallback(() => {
     naviagete('councils');
   }, [naviagete]);
 
+  const goToAllProposals = useCallback(() => {
+    naviagete('proposals');
+  }, [naviagete]);
+
+  const memberRender = useCallback((council: CouncilType) => <CouncilMembers council={council} />, []);
+
   // set page title
   usePageTitle({ content: 'Governance Overview' });
 
   return (
-    <>
-      <SubTitle
-        extra={
-          <OverviewSubTitleExtra
-            content='View All Councils'
-            onClick={goToCouncilDetailPage}
-          />
-        }
-      >
-        Councils
-      </SubTitle>
-      <CouncilesTab councils={_councils} />
-    </>
+    <Row gutter={[24, 24]}>
+      <Col span={24}>
+        <GovernanceStage />
+      </Col>
+      <Col span={24}>
+        <SubTitle
+          extra={
+            <OverviewSubTitleExtra
+              content='View All Proposals'
+              onClick={goToAllProposals}
+            />
+          }
+        >
+          Recent Council Proposals
+        </SubTitle>
+        <RecentProposals />
+      </Col>
+      <Col span={24}>
+        <SubTitle
+          extra={
+            <OverviewSubTitleExtra
+              content='View All Councils'
+              onClick={goToCouncilDetailPage}
+            />
+          }
+        >
+          Councils
+        </SubTitle>
+        <CouncilesTab contentRender={memberRender} />
+      </Col>
+      <Col span={24}>
+        <GovernanceIntro />
+      </Col>
+    </Row>
   );
 };

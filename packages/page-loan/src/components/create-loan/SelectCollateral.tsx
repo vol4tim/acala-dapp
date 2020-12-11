@@ -1,11 +1,10 @@
 import React, { FC, useContext, useState, useCallback, useMemo, useRef, useEffect, ReactNode } from 'react';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { useConstants, useAllUserLoans, useBalance } from '@acala-dapp/react-hooks';
-import { Table, TableConfig, Radio, Button } from '@acala-dapp/ui-components';
-import { Token, tokenEq, UserAssetBalance, UserAssetValue, Price, StableFeeAPR, RequiredCollateralRatio, LiquidationRatio, LiquidationPenalty } from '@acala-dapp/react-components';
+import { useConstants, useAllUserLoans, useBalance, useAllBalances } from '@acala-dapp/react-hooks';
+import { Table, ColumnsType, Radio, Button, styled } from '@acala-dapp/ui-components';
+import { Token, tokenEq, UserAssetBalance, UserAssetValue, Price, StableFeeAPR, RequiredCollateralRatio, LiquidationRatio, LiquidationPenalty, isSimilarZero } from '@acala-dapp/react-components';
 
-import classes from './SelectCollateral.module.scss';
 import { createProviderContext } from './CreateProvider';
 
 interface SelectProps {
@@ -39,24 +38,60 @@ const Select: FC<SelectProps> = ({
   );
 };
 
+const BalanceRoot = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  .balance__balance {
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: bold;
+    color: var(--text-color-primary);
+  }
+  .balance__value {
+    font-size: 16px;
+    line-height: 19px;
+    color: var(--text-color-second);
+  }
+`;
+
 const Balance: FC<{ currency: CurrencyId }> = ({ currency }) => {
   return (
-    <div className={classes.balanceArea}>
-      <UserAssetBalance className={classes.balance}
+    <BalanceRoot>
+      <UserAssetBalance className='balance__balance'
         currency={currency} />
-      <UserAssetValue className={classes.amount}
+      <UserAssetValue className='balance__value'
         currency={currency} />
-    </div>
+    </BalanceRoot>
   );
 };
+
+const SelectCollateralRoot = styled.div``;
+
+const ActionRoot = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+  padding: 0 24px;
+
+  button {
+    margin-left: 20px;
+  }
+`;
 
 export const SelectCollateral: FC = () => {
   const { loanCurrencies } = useConstants();
   const loans = useAllUserLoans(true);
+  const balances = useAllBalances();
   const [selected, setSelected] = useState<CurrencyId>();
   const { cancelCreate, setSelectedToken, setStep } = useContext(createProviderContext);
   const collateralDisabled = useRef<Map<string, boolean>>(new Map());
 
+  const data = useMemo(() => {
+    return loanCurrencies.map((currency) => ({ currency }));
+  }, [loanCurrencies]);
+
+  // if the loan is exit, disable select
   useEffect(() => {
     if (!loans) return;
 
@@ -65,13 +100,27 @@ export const SelectCollateral: FC = () => {
     });
   }, [loans]);
 
-  const handleRowClick = useCallback((_event: any, data: CurrencyId) => {
-    if (collateralDisabled.current.get(data.toString()) !== false) {
-      setSelected(data);
-    }
-  }, [setSelected]);
+  // if the balance is too small, disable select
+  useEffect(() => {
+    if (!balances) return;
+
+    loanCurrencies.forEach((currency): void => {
+      const balance = balances.find((item) => tokenEq(item.currency, currency));
+
+      if (!balance) {
+        collateralDisabled.current.set(currency.toString(), true);
+      }
+
+      collateralDisabled.current.set(
+        currency.toString(),
+        !!(balance && isSimilarZero(balance.balance))
+      );
+    });
+  }, [loanCurrencies, balances]);
 
   const handleSelect = useCallback((token: CurrencyId): void => {
+    if (collateralDisabled.current.get(token.toString())) return;
+
     setSelected(token);
   }, [setSelected]);
 
@@ -84,16 +133,14 @@ export const SelectCollateral: FC = () => {
 
   const isNextDisabled = useMemo(() => !selected, [selected]);
 
-  const tableConfig: TableConfig[] = useMemo(() => [
+  const tableConfig: ColumnsType<{ currency: CurrencyId}> = useMemo(() => [
     {
       align: 'left',
+      key: 'currency',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => {
-        if (!loans) return null;
-
-        const loan = loans.find((item) => tokenEq(item.currency, currency));
+      render: ({ currency }): ReactNode => {
         // disabled selector when loan exisit
-        const isDisabled = !!loan;
+        const isDisabled = collateralDisabled.current.get(currency.toString()) || false;
         const isSelected = !!selected && tokenEq(selected, currency);
 
         return (
@@ -109,53 +156,62 @@ export const SelectCollateral: FC = () => {
     },
     {
       align: 'right',
+      key: 'avail-balance',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <Balance currency={token} />,
+      render: ({ currency }): ReactNode => <Balance currency={currency} />,
       title: 'Avail.Balance'
     },
     {
       align: 'right',
+      key: 'price',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => <Price currency={currency} />,
+      render: ({ currency }): ReactNode => <Price currency={currency} />,
       title: 'Price'
     },
     {
       align: 'right',
+      key: 'interest-rate',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => <StableFeeAPR currency={currency} />,
+      render: ({ currency }): ReactNode => <StableFeeAPR currency={currency} />,
       title: 'Interest Rate'
     },
     {
       align: 'right',
+      key: 'min-collateral',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => <RequiredCollateralRatio currency={currency} />,
+      render: ({ currency }): ReactNode => <RequiredCollateralRatio currency={currency} />,
       title: 'Min.Collateral'
     },
     {
       align: 'right',
+      key: 'LIQ-ratio',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => <LiquidationRatio currency={currency} />,
+      render: ({ currency }): ReactNode => <LiquidationRatio currency={currency} />,
       title: 'LIQ Ratio'
     },
     {
       align: 'right',
+      key: 'LIQ-fee',
       /* eslint-disable-next-line react/display-name */
-      render: (currency: CurrencyId): ReactNode => <LiquidationPenalty currency={currency} />,
+      render: ({ currency }): ReactNode => <LiquidationPenalty currency={currency} />,
       title: 'LIQ Fee'
     }
-  ], [selected, handleSelect, loans]);
+  ], [selected, handleSelect]);
+
+  const onRow = useCallback((row) => ({
+    onClick: (): void => handleSelect(row.currency)
+  }), [handleSelect]);
 
   return (
-    <div className={classes.root}>
-      <Table<CurrencyId>
-        config={tableConfig}
-        data={loanCurrencies}
-        rawProps={{
-          onClick: handleRowClick
-        }}
-        showHeader
+    <SelectCollateralRoot>
+      <Table
+        columns={tableConfig}
+        dataSource={data}
+        onRow={onRow}
+        pagination={false}
+        rowKey='currency'
       />
-      <div className={classes.action}>
+      <ActionRoot>
         <Button
           onClick={cancelCreate}
           size='small'
@@ -170,7 +226,7 @@ export const SelectCollateral: FC = () => {
         >
           Next
         </Button>
-      </div>
-    </div>
+      </ActionRoot>
+    </SelectCollateralRoot>
   );
 };

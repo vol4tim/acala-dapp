@@ -90,6 +90,16 @@ p, span {
   --information-background: #edf3ff;
   --information-title-color: #0155ff;
   --information-content-color: #95ADDC;
+
+  --notification-success-color: #8fce65;
+  --notification-info-color: #108ee9;
+  --notification-warning-color: #f0af41;
+  --notification-error-color: #f35600;
+
+  --notification-message-color: #404040;
+  --notification-description-color: #666666;
+
+  --table-striped-background: #f7faff;
 }
 
 /* overwrite ant style */

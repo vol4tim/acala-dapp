@@ -70,3 +70,15 @@ export const focusToFixedPointNumber = (origin: Fixed18 | FixedPointNumber): Fix
 
   return origin;
 };
+
+export const MIN_NON_NEGATIVE = new FixedPointNumber('0.000001');
+
+export const isSimilarZero = (target: FixedPointNumber, minimum: FixedPointNumber = MIN_NON_NEGATIVE): boolean => {
+  if (target.isNegative()) {
+    target = FixedPointNumber.ZERO.minus(target);
+  }
+
+  if (target.isLessOrEqualTo(minimum)) return true;
+
+  return false;
+};

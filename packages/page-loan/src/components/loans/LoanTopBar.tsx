@@ -21,9 +21,9 @@ function getItemColor ({
 }: { active?: boolean; danger?: boolean; warning?: boolean }): string {
   if (active) return 'var(--color-primary)';
 
-  if (danger) return 'var(--color-error)';
+  if (danger) return '#fa0000';
 
-  if (warning) return 'var(--color-danger)';
+  if (warning) return '#f7b500';
 
   return '';
 }

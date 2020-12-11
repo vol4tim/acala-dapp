@@ -21,7 +21,6 @@ export * from './Input';
 export * from './Icon';
 export * from './Page';
 export * from './Radio';
-export * from './Section';
 export * from './Step';
 export * from './Table';
 export * from './Tabs';

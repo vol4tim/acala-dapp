@@ -1,11 +1,11 @@
 import React, { FC, useMemo, Children, useRef, cloneElement, ReactElement, useState, ReactNode, useEffect, useCallback } from 'react';
-import clsx from 'clsx';
 import { uniqueId, debounce } from 'lodash';
 
 import { Card, CardProps } from './Card';
 import { BareProps } from './types';
 import { Controller } from './Controller';
-import './ScrollCard.scss';
+import styled from 'styled-components';
+import clsx from 'clsx';
 
 export interface ScrollCardItemProps extends BareProps {
   key: string | number;
@@ -20,6 +20,40 @@ const Item: FC<ScrollCardItemProps> = ({
 };
 
 const MIN_PAGE = 0;
+
+const CCard = styled(Card)`
+  overflow: hidden;
+
+  .card__header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .card__content {
+    width: calc(100% - 48px);
+    margin: 0 24px 4px 24px;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(31, 45, 61, 0.14);
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      color: green;
+    }
+  }
+`;
+
+const Content = styled.div`
+  width: 0;
+  display: flex;
+  flex-wrap: nowrap
+`;
 
 interface ScrollCardProps extends CardProps {
   pageSize?: number;
@@ -48,7 +82,7 @@ export const _ScrollCard: FC<ScrollCardProps> = ({ children, itemClassName, page
 
     const $root = $rootRef.current;
     /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
-    const $container = $rootRef.current.querySelector('.aca-scroll-card__content')!;
+    const $container = $rootRef.current.querySelector('.card__content')!;
 
     setPage(page);
     $container.scrollTo({ left: $root.clientWidth * page });
@@ -77,7 +111,7 @@ export const _ScrollCard: FC<ScrollCardProps> = ({ children, itemClassName, page
 
     const $root = $rootRef.current;
     /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */
-    const $container = $root.querySelector('.aca-scroll-card__content')!;
+    const $container = $root.querySelector('.card__content')!;
 
     const inner = debounce((): void => {
       const $rootWidth = $root.clientWidth;
@@ -118,10 +152,8 @@ export const _ScrollCard: FC<ScrollCardProps> = ({ children, itemClassName, page
   }, [children, $rootRef, setMaxPage, pageSize, move]);
 
   return (
-    <Card
+    <CCard
       {...other}
-      className={clsx('aca-scroll-card__root', other.className)}
-      contentClassName={clsx('aca-scroll-card__content', other.contentClassName)}
       header={
         (
           <>
@@ -141,13 +173,12 @@ export const _ScrollCard: FC<ScrollCardProps> = ({ children, itemClassName, page
           </>
         )
       }
-      headerClassName='aca-scroll-card__header'
       ref={$rootRef}
     >
-      <div className='aca-scroll-card__container'>
+      <Content>
         {content}
-      </div>
-    </Card>
+      </Content>
+    </CCard>
   );
 };
 

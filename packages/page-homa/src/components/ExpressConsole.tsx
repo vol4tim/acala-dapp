@@ -308,6 +308,7 @@ export const ExpressConsole: FC = () => {
           header={
             <CardTabHeader
               active={currentTab === 'stake'}
+              key='tab-stake'
               onClick={(): void => changeTabs('stake')}
             >
               Stake
@@ -322,6 +323,7 @@ export const ExpressConsole: FC = () => {
           header={
             <CardTabHeader
               active={currentTab === 'unstake'}
+              key='tab-unstake'
               onClick={(): void => changeTabs('unstake')}
             >
               Unstake

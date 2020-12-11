@@ -5,14 +5,13 @@ import { CurrencyId, Balance } from '@acala-network/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { tokenEq } from '@acala-dapp/react-components';
-import { PriceData } from '@acala-dapp/react-environment/RxStore/type';
 
 import { useApi } from './useApi';
 import { useAccounts } from './useAccounts';
 import { useCall } from './useCall';
 import { useConstants } from './useConstants';
 import { AccountLike } from './types';
-import { usePrice, useAllPrices } from './priceHooks';
+import { usePrice, useAllPrices, PriceData } from './priceHooks';
 
 export type BalanceData = { currency: CurrencyId ; balance: FixedPointNumber };
 

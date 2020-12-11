@@ -9,10 +9,21 @@ import { DispatchError, AccountInfo } from '@polkadot/types/interfaces';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 import { useAccounts, useApi, useHistory } from '@acala-dapp/react-hooks';
-import { Button, ButtonProps, notification, LoadingOutlined } from '@acala-dapp/ui-components';
+import { Button, ButtonProps, notification, LoadingOutlined, styled } from '@acala-dapp/ui-components';
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 
 import { FormatAddress } from './format';
+
+const Loading = styled(LoadingOutlined)`
+  svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  path {
+    fill: var(--notification-info-color); 
+  }
+`;
 
 interface Props extends ButtonProps {
   api?: ApiRx;
@@ -130,14 +141,12 @@ export const TxButton: FC<PropsWithChildren<Props>> = ({
     const notify = (signedTx: SubmittableExtrinsic<'rxjs'>): [SubmittableExtrinsic<'rxjs'>, string] => {
       const hash = signedTx.hash.toString();
 
-      console.log(signedTx);
-
       const notificationKey = uniqueId(`${section}-${method}`);
 
       notification.info({
         description: <FormatAddress address={hash} />,
         duration: null,
-        icon: <LoadingOutlined spin />,
+        icon: <Loading spin />,
         key: notificationKey,
         message: `${section}: ${method}`
       });

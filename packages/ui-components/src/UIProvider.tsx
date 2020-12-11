@@ -1,8 +1,9 @@
 import React, { FC, useState } from 'react';
 
 import 'antd/dist/antd.css';
-import './styles/index.scss';
 import './styles/global.css';
+import './styles/notification.scss';
+import './styles/table.scss';
 import { BareProps } from './types';
 
 export interface UIData {
