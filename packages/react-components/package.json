@@ -1,12 +1,12 @@
 {
   "name": "@acala-dapp/react-components",
-  "version": "0.2.0",
+  "version": "0.2.1-beta.0",
   "description": "react components",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",
   "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
   "dependencies": {
-    "@acala-dapp/react-hooks": "^0.2.0",
+    "@acala-dapp/react-hooks": "0.2.1-beta.0",
     "@acala-network/api": "0.4.0-beta.27",
     "@acala-network/api-derive": "^0.4.0-beta.27",
     "@acala-network/app-util": "^0.4.0-beta.27",

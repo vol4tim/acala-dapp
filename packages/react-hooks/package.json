@@ -1,13 +1,13 @@
 {
   "name": "@acala-dapp/react-hooks",
-  "version": "0.2.0",
+  "version": "0.2.1-beta.0",
   "description": "react hooks",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",
   "homepage": "https://github.com/AcalaNetwork/acala-dapp#readme",
   "dependencies": {
-    "@acala-dapp/react-environment": "^0.2.0",
-    "@acala-dapp/ui-components": "^0.2.0",
+    "@acala-dapp/react-environment": "0.2.1-beta.0",
+    "@acala-dapp/ui-components": "0.2.1-beta.0",
     "@acala-network/api": "^0.4.0-beta.27",
     "@acala-network/types": "^0.4.0-beta.27",
     "@influxdata/influxdb-client": "^1.8.0",

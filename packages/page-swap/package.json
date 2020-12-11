@@ -1,6 +1,6 @@
 {
   "name": "@acala-dapp/page-swap",
-  "version": "0.2.0",
+  "version": "0.2.1-beta.0",
   "description": "swap page",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",

@@ -1,6 +1,6 @@
 {
   "name": "@acala-dapp/page-treasury-charts",
-  "version": "0.2.0",
+  "version": "0.2.1-beta.0",
   "description": "page swap charts",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",

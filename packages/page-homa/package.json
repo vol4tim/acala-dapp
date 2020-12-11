@@ -1,6 +1,6 @@
 {
   "name": "@acala-dapp/page-homa",
-  "version": "0.2.0",
+  "version": "0.2.1-beta.0",
   "description": "acala-dapp homa",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",
