@@ -10,7 +10,7 @@ jobs:
       matrix:
         step: ['bump-version']
     name: ${{ matrix.step }}
-    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')'"
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
