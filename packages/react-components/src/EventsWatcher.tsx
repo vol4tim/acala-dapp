@@ -43,9 +43,7 @@ export const EventsWatcher: FC = () => {
   const { active } = useAccounts();
 
   useEffect(() => {
-    if (isEmpty(api) || !active) {
-      return;
-    }
+    if (isEmpty(api) || !active) return;
 
     const subscriber = api.query.system.events<Vec<EventRecord>>().subscribe({
       next: (events: Vec<EventRecord>): void => {
@@ -62,7 +60,8 @@ export const EventsWatcher: FC = () => {
 
                 if (num.isLessThan(new FixedPointNumber('0.0000001'))) return;
 
-                notification.success({
+                notification.open({
+                  className: 'success',
                   message: (
                     <div>
                       <p>{`Received ${formatNumber(num, { decimalLength: 6, removeEmptyDecimalParts: true, removeTailZero: true })} ${getTokenName(data[0].Token || data[0].DEXShare)}`}</p>
@@ -85,7 +84,8 @@ export const EventsWatcher: FC = () => {
 
                 if (num.isLessThan(new FixedPointNumber('0.0000001'))) return;
 
-                notification.success({
+                notification.open({
+                  className: 'success',
                   message: (
                     <div>
                       <p>{`Received ${formatNumber(num, { decimalLength: 6, removeEmptyDecimalParts: true, removeTailZero: true })} ${getTokenName(data[0].Token || data[0].DEXShare)}`}</p>
@@ -103,7 +103,8 @@ export const EventsWatcher: FC = () => {
 
                 if (data[1] !== active?.address) return;
 
-                notification.error({
+                notification.open({
+                  className: 'error',
                   message: (
                     <div>
                       <p>{`The ${getTokenName(data[0])} Loan had been liquidated.`}</p>

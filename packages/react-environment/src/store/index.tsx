@@ -1,14 +1,23 @@
-import React, { createContext, FC, useEffect, useContext } from 'react';
+import React, { createContext, FC, useEffect, useContext, useMemo } from 'react';
 
-import { useApi } from '@acala-dapp/react-hooks';
+import { useApi, useMemorized } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useApiQueryStore } from './modules/api-query';
-import { useOraclePrices } from './modules/oracle-price';
+import { useOraclePricesStore } from './modules/oracle-prices';
 import { useUIConfig, UseUIConfigReturnType, UIData } from './modules/ui';
+import { useStakingStore, StakingPoolData } from './modules/staking';
+import { usePricesStore, PriceData } from './modules/prices';
+
+export type {
+  StakingPoolData,
+  PriceData
+};
 
 export type StoreData = {
-  apiQueryStore: ReturnType<typeof useApiQueryStore>;
-  oraclePrice: ReturnType<typeof useOraclePrices>;
+  apiQuery: ReturnType<typeof useApiQueryStore>;
+  oraclePrices: ReturnType<typeof useOraclePricesStore>;
+  prices: ReturnType<typeof usePricesStore>;
+  staking: ReturnType<typeof useStakingStore>;
   ui: UseUIConfigReturnType;
 };
 
@@ -16,25 +25,24 @@ const StoreContext = createContext<StoreData>({} as any);
 
 export const StoreProvier: FC<BareProps> = ({ children }) => {
   const { api } = useApi();
-  // const { state: pricesStore, setState: setPricesStore } = usePricesStore();
-  const apiQueryStore = useApiQueryStore();
-  const oraclePrice = useOraclePrices();
+  const apiQuery = useApiQueryStore();
+  const oraclePrices = useOraclePricesStore();
   const ui = useUIConfig();
+  const staking = useStakingStore();
+  const prices = usePricesStore();
 
-  useEffect(() => {
-    // api.isReady && api.isReady.subscribe(() => {
-    //   subscribePrice(api, () => {});
-    // });
-  }, [api]);
+  const data = useMemo(() => ({
+    apiQuery,
+    oraclePrices,
+    prices,
+    staking,
+    ui
+  }), [apiQuery, oraclePrices, prices, ui, staking]);
 
   if (!api) return null;
 
   return (
-    <StoreContext.Provider value={{
-      apiQueryStore,
-      oraclePrice,
-      ui
-    }}>
+    <StoreContext.Provider value={data}>
       {children}
     </StoreContext.Provider>
   );
@@ -47,10 +55,11 @@ export function useStore<T extends StoreData, K extends keyof T> (namespace: K):
 }
 
 export function usePageTitle (config: { content: string; breadcrumb?: UIData['breadcrumb'] }): void {
+  const _config = useMemorized(config);
   const ui = useStore('ui');
 
   useEffect(() => {
-    ui.setTitle(config);
+    ui.setTitle(_config);
   /* eslint-disable-next-line */
-  }, []);
+  }, [_config]);
 }

@@ -44,6 +44,7 @@ export const AddressInput: FC<AddressInputProps> = ({
               <Identicon
                 className={classes.identicon}
                 size={32}
+                theme='polkadot'
                 value={item.address}
               />
               <div>
@@ -96,6 +97,7 @@ export const AddressInput: FC<AddressInputProps> = ({
           <Identicon
             className={classes.icon}
             size={32}
+            theme='polkadot'
             value={value}
           />
         ) : undefined}

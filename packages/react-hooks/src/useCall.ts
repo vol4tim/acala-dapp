@@ -63,7 +63,7 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
 }): T | undefined {
   const { api } = useApi();
   const isAppReady = useIsAppReady();
-  const { get, set } = useStore('apiQueryStore');
+  const { get, set } = useStore('apiQuery');
   const key = useMemo(
     () =>
       `${path}${params.toString() ? '-' + JSON.stringify(params) : ''}${options?.cacheKey ? '-' + options.cacheKey : ''}`,

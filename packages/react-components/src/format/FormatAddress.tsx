@@ -42,7 +42,7 @@ export const FormatAddress: FC<Props> = memo(({
           <Identicon
             className={classes.icon}
             size={iconWidth}
-            theme='substrate'
+            theme='polkadot'
             value={address}
           />
         ) : null }

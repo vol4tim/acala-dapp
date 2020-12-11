@@ -1,31 +1,21 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { BlockNumber, SubAccountStatus, Amount, Balance } from '@acala-network/types/interfaces';
+import { useStore, StakingPoolData } from '@acala-dapp/react-environment';
 
 import { useApi } from './useApi';
 import { useCall } from './useCall';
-import { useRxStore } from './useRxStore';
 import { useBalance, useIssuance } from './balanceHooks';
 import { useConstants } from './useConstants';
 import { usePrice } from './priceHooks';
-import { StakingPoolData } from '@acala-dapp/react-environment/RxStore/type';
 import { useSubscription } from './useSubscription';
 import { useAccounts } from './useAccounts';
 
 export const useStakingPool = (): StakingPoolData | null => {
-  const [stakingPool, setStakingPool] = useState<StakingPoolData | null>(null);
-  const { stakingPool: stakingPoolStore } = useRxStore();
-
-  useEffect(() => {
-    const subscribe = stakingPoolStore.subscribe((result) => {
-      setStakingPool(result);
-    });
-
-    return (): void => subscribe.unsubscribe();
-  }, [stakingPoolStore, setStakingPool]);
+  const stakingPool = useStore('staking');
 
   return stakingPool;
 };

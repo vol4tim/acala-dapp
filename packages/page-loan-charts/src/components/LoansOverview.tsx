@@ -1,6 +1,5 @@
 import React, { FC, useMemo } from 'react';
-import { Table } from 'antd';
-import { Card } from '@acala-dapp/ui-components';
+import { Card, Table } from '@acala-dapp/ui-components';
 import { useConstants } from '@acala-dapp/react-hooks';
 import { Token, TotalCollateral, TotalDebit, RequiredCollateralRatio, TotalCollateralRatio } from '@acala-dapp/react-components';
 
@@ -48,21 +47,18 @@ export const LoansOverview: FC = () => {
     ];
   }, []);
 
-  const data = useMemo(
-    () =>
-      loanCurrencies.map((item) => ({
-        currency: item
-      })),
-    [loanCurrencies]
-  );
+  const data = useMemo(() =>
+    loanCurrencies.map((item) => ({ currency: item })),
+  [loanCurrencies]);
 
   return (
     <Card header='Loans Overview'
       padding={false}>
-      <Table columns={columns}
+      <Table
+        columns={columns}
         dataSource={data}
         pagination={false}
-        rowKey={(id): string => id.currency.toString()}
+        rowKey={'currency'}
       />
     </Card>
   );

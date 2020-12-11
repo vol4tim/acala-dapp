@@ -1,8 +1,9 @@
 import React, { FC, useContext, ReactNode, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 
+import { DerivedUserLoan } from '@acala-network/api-derive';
 import { CurrencyId } from '@acala-network/types/interfaces';
-import { Card, TableConfig, Table, Button, Step, styled } from '@acala-dapp/ui-components';
+import { Card, ColumnsType, Table, Button, Step, styled, FlexBox } from '@acala-dapp/ui-components';
 import { useConstants, useAllUserLoans } from '@acala-dapp/react-hooks';
 import { Token, getTokenName, StableFeeAPR, CollateralRate, Collateral, DebitAmount } from '@acala-dapp/react-components';
 import { ReactComponent as GuideBG } from '../../assets/guide-bg.svg';
@@ -54,12 +55,32 @@ export const Guide: FC = () => {
   );
 };
 
+const ManagerBtn: FC<{ currency: CurrencyId; onClick: (currency: CurrencyId) => void }> = ({ currency, onClick }) => {
+  const handleClick = useCallback(() => {
+    onClick(currency);
+  }, [onClick, currency]);
+
+  return (
+    <FlexBox
+      alignItems='center'
+      justifyContent='flex-end'
+    >
+      <Button
+        onClick={handleClick}
+        size='small'
+      >
+        Manager
+      </Button>
+    </FlexBox>
+  );
+};
+
 export const Overview: FC = () => {
   const loans = useAllUserLoans(true);
   const { selectCurrency } = useContext(LoanContext);
   const { stableCurrency } = useConstants();
 
-  const tableConfig: TableConfig[] = [
+  const tableConfig: ColumnsType<DerivedUserLoan> = [
     {
       align: 'left',
       dataIndex: 'currency',
@@ -75,52 +96,46 @@ export const Overview: FC = () => {
     },
     {
       align: 'left',
-      dataIndex: 'currency',
+      key: 'interest-rate',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <StableFeeAPR currency={token} />,
+      render: ({ currency }): ReactNode => <StableFeeAPR currency={currency} />,
       title: 'Interest Rate',
       width: 1
     },
     {
       align: 'right',
-      dataIndex: 'currency',
+      key: 'deposit',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <Collateral currency={token} />,
+      render: ({ currency }): ReactNode => <Collateral currency={currency} />,
       title: 'Deposit',
       width: 1
     },
     {
       align: 'right',
-      dataIndex: 'currency',
+      key: 'debit',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <DebitAmount currency={token} />,
+      render: ({ currency }): ReactNode => <DebitAmount currency={currency} />,
       title: `Debit ${getTokenName(stableCurrency.asToken.toString())}`,
       width: 2
     },
     {
       align: 'right',
-      dataIndex: 'currency',
+      key: 'current-ratio',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => <CollateralRate currency={token} />,
+      render: ({ currency }): ReactNode => <CollateralRate currency={currency} />,
       title: 'Current Ratio',
       width: 2
     },
     {
       align: 'right',
-      dataIndex: 'currency',
+      key: 'action',
       /* eslint-disable-next-line react/display-name */
-      render: (token: CurrencyId): ReactNode => {
-        const handleClick = (): void => selectCurrency(token);
-
-        return (
-          <Button
-            onClick={handleClick}
-            size='small'
-          >
-            Manage Loan
-          </Button>
-        );
-      },
+      render: ({ currency }): ReactNode => (
+        <ManagerBtn
+          currency={currency}
+          onClick={selectCurrency}
+        />
+      ),
       title: 'Action',
       width: 2
     }
@@ -136,9 +151,10 @@ export const Overview: FC = () => {
       padding={false}
     >
       <Table
-        config={tableConfig}
-        data={loans}
-        showHeader
+        columns={tableConfig}
+        dataSource={loans}
+        pagination={false}
+        rowKey={'currency'}
       />
     </Card>
   );

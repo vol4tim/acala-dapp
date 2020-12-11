@@ -1,6 +1,6 @@
 {
   "name": "acala-dapp",
-  "version": "0.0.1",
+  "version": "0.2.1",
   "private": true,
   "workspaces": [
     "packages/*"
@@ -11,12 +11,13 @@
   },
   "resolutions": {
     "@polkadot/api": "^2.3.2-17",
-    "@acala-network/api": "^0.4.0-beta.33",
-    "@acala-network/types": "^0.4.0-beta.33",
-    "@acala-network/app-util": "^0.4.0-beta.33",
-    "@acala-network/api-derive": "^0.4.0-beta.33"
+    "@acala-network/api": "^0.4.0-beta.34",
+    "@acala-network/types": "^0.4.0-beta.34",
+    "@acala-network/app-util": "^0.4.0-beta.34",
+    "@acala-network/api-derive": "^0.4.0-beta.34"
   },
   "scripts": {
+    "bump:version": "node scripts/bump-version.js",
     "start:dapp": "yarn run build:i18n && cd packages/apps && react-app-rewired start",
     "build:dapp": "cd packages/apps && react-app-rewired build",
     "start:dashboard": "cd packages/dashboard && react-app-rewired start",

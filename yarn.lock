@@ -2,32 +2,32 @@
 # yarn lockfile v1
 
 
-"@acala-network/api-derive@^0.4.0-beta.27", "@acala-network/api-derive@^0.4.0-beta.33":
-  version "0.4.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@acala-network/api-derive/-/api-derive-0.4.0-beta.33.tgz#85bf1483629079999ec408c2c389859ff5915999"
-  integrity sha512-Mo2rF/0vvxxBUVCvGPf3aM3KVo+R03ACBAT0BQZNlIm6V5RNnsjBaVxBaFrBEKtS0GLU9gNh+jBZZHMgPMb4Mw==
+"@acala-network/api-derive@^0.4.0-beta.27", "@acala-network/api-derive@^0.4.0-beta.34":
+  version "0.4.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@acala-network/api-derive/-/api-derive-0.4.0-beta.34.tgz#0d0b72692d392f9cb472331da74e73994f95a5d9"
+  integrity sha512-VhusdaTdkF5Fxx8HvXKEg3OCl49Sgh6fpMjLaR8WJ2OQ/M8ekR4Lmtt3vNIrUaGKBSCZzu/QMUxdNu/CWDtzig==
   dependencies:
-    "@acala-network/types" "^0.4.0-beta.33"
+    "@acala-network/types" "^0.4.0-beta.34"
     "@babel/runtime" "^7.10.2"
     "@polkadot/api-derive" "^2.3.2-4"
     rxjs "^6.5.5"
 
-"@acala-network/api@0.4.0-beta.27", "@acala-network/api@^0.4.0-beta.27", "@acala-network/api@^0.4.0-beta.33":
-  version "0.4.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@acala-network/api/-/api-0.4.0-beta.33.tgz#ae9d59aa45d49390b6aa7b681c1e1a28ce0be5e6"
-  integrity sha512-pAWoCexyGZiAyX5+ILFjMvHgyk2rbwcgInvkclYYYwwTtK2R98Q1udH3jTuGfa0+JCpXtsLfUyfcXy9wYSoaLA==
+"@acala-network/api@0.4.0-beta.27", "@acala-network/api@^0.4.0-beta.27", "@acala-network/api@^0.4.0-beta.33", "@acala-network/api@^0.4.0-beta.34":
+  version "0.4.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@acala-network/api/-/api-0.4.0-beta.34.tgz#14e8cfb290d9d5821b0b605d5ea56dd13acaa7f1"
+  integrity sha512-7np6MaM8MCE2v4Ccy2iiSUXP98NL41ZDyySZW5WYQhkHwobwD2H5oxHPdph95yl1yTevPL+h2kNuuedtKAkk6Q==
   dependencies:
-    "@acala-network/api-derive" "^0.4.0-beta.33"
-    "@acala-network/types" "^0.4.0-beta.33"
+    "@acala-network/api-derive" "^0.4.0-beta.34"
+    "@acala-network/types" "^0.4.0-beta.34"
     "@babel/runtime" "^7.10.2"
     "@open-web3/orml-api-derive" "^0.6.0-beta.26"
     "@polkadot/api" "^2.3.2-4"
     "@polkadot/rpc-core" "^2.3.2-4"
 
-"@acala-network/app-util@^0.4.0-beta.27", "@acala-network/app-util@^0.4.0-beta.33":
-  version "0.4.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@acala-network/app-util/-/app-util-0.4.0-beta.33.tgz#52d3993a440ca2eef6af104de706a9507d90e535"
-  integrity sha512-u6hTK+l4A80JBSnR3dcFCGPeob6th/2ga8dUlSvkm6jBJRYGC5jMNFniZVlQ70iuRRhiBlXnbsC5GAPCqufpIQ==
+"@acala-network/app-util@^0.4.0-beta.27", "@acala-network/app-util@^0.4.0-beta.34":
+  version "0.4.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@acala-network/app-util/-/app-util-0.4.0-beta.34.tgz#cb6bcf340475eaea7e61a8719d5a63bd09f5613d"
+  integrity sha512-SbABSgpHczf18milqmZ7+0Sz9N9DeJkOQtU8h1KAdfPwCWw9mz+EJ1nZouM3CLpEPJGzzvrg5H8GhqHRItnYng==
   dependencies:
     "@babel/runtime" "^7.10.2"
     bignumber.js "^9.0.0"
@@ -60,19 +60,19 @@
     "@acala-network/sdk-core" "^0.4.0-beta.33"
     lodash "^4.17.20"
 
-"@acala-network/type-definitions@^0.4.0-beta.33":
-  version "0.4.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@acala-network/type-definitions/-/type-definitions-0.4.0-beta.33.tgz#6b57fb5c415990ed33806ddf2547f797db125b9c"
-  integrity sha512-3c5WoUs23d2euM58w55itaiU35+CQrT5v8dOjX+I/Q7bqz0c/Q/qgKsZ22rtzjur18j0unBMbgM6OJSzuOTFQg==
+"@acala-network/type-definitions@^0.4.0-beta.34":
+  version "0.4.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@acala-network/type-definitions/-/type-definitions-0.4.0-beta.34.tgz#7e58d4990be76b6d0b6da5d15985e0cace06d479"
+  integrity sha512-NWUOm0cINP0FYWdOoQ64FFLDPzb1etwFuJnRQqcG7F4p6fCvxczuxWdmYx6adJKeiPO4UQaPEuZo2Y/jBetQig==
   dependencies:
     "@open-web3/orml-type-definitions" "^0.6.0-beta.26"
 
-"@acala-network/types@^0.4.0-beta.27", "@acala-network/types@^0.4.0-beta.33":
-  version "0.4.0-beta.33"
-  resolved "https://registry.yarnpkg.com/@acala-network/types/-/types-0.4.0-beta.33.tgz#bc7b81e8ba0ed2c3996c765213947cbff039f51b"
-  integrity sha512-q8d1I2HZYuhWYqY3gVPk7ksM0BjQTmbDm2vdF0sWEA9ikyEfO7lGVHFZuIL8EXbeO4q0BInvCBp1OEHlw4EjCg==
+"@acala-network/types@^0.4.0-beta.27", "@acala-network/types@^0.4.0-beta.34":
+  version "0.4.0-beta.34"
+  resolved "https://registry.yarnpkg.com/@acala-network/types/-/types-0.4.0-beta.34.tgz#100a0b17d7cc0dce37d1e731ee13faa6bcbc6e34"
+  integrity sha512-V9qc0Muv0M0DVb5+BI8wmQkoFiBmizcBXpDSMl2D/YbRgOKH1zSset0GIr/sh2uGk+XmTmKTMVIWEwfOXgwpdg==
   dependencies:
-    "@acala-network/type-definitions" "^0.4.0-beta.33"
+    "@acala-network/type-definitions" "^0.4.0-beta.34"
     "@babel/runtime" "^7.10.2"
     "@open-web3/api-mobx" "^0.6.0-beta.26"
     "@open-web3/orml-types" "^0.6.0-beta.26"

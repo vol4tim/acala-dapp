@@ -125,8 +125,11 @@ _Page.displayName = 'Page';
 _Page = memo(styled(_Page)`
   flex: 1;
   box-sizing: border-box;
+  height: 100vh;
   max-height: 100vh;
   min-height: 100vh;
+  /* for firfox doesn't support overlay */
+  overflow-y: auto;
   overflow-y: overlay;
   padding: 0 40px;
   padding-bottom: 64px;

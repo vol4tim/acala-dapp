@@ -33,9 +33,7 @@ export const formatNumber = (num: string | number | Fixed18 | FixedPointNumber |
   let [i, d] = _num.split('.');
 
   // test if the i is a validate number at first
-  if (!/^[0-9]*$/.test(i)) {
-    return 'N/A';
-  }
+  if (!/^-?[0-9]*$/.test(i)) return 'N/A';
 
   if (config.decimalLength) {
     d = (d || '').slice(0, config.decimalLength).padEnd(config.decimalLength, '0');

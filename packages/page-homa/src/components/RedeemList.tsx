@@ -1,9 +1,8 @@
 import React, { FC, ReactNode } from 'react';
 
-import { Col, Card, TableConfig, Table, Condition, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
-import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList } from '@acala-dapp/react-hooks';
+import { Col, Card, ColumnsType, Table, Condition, FlexBox, PaddingBox } from '@acala-dapp/ui-components';
+import { useCurrentRedeem, useStakingPool, useConstants, useRedeemList, RedeemItem } from '@acala-dapp/react-hooks';
 import { TxButton, FormatBalance } from '@acala-dapp/react-components';
-import { Fixed18 } from '@acala-network/app-util';
 
 export const RedeemList: FC = () => {
   const { stakingCurrency } = useConstants();
@@ -46,20 +45,21 @@ export const RedeemList: FC = () => {
     );
   };
 
-  const tableConfig: TableConfig[] = [
+  const tableConfig: ColumnsType<RedeemItem> = [
     {
       align: 'left',
-      dataIndex: 'era',
+      key: 'era',
       /* eslint-disable-next-line react/display-name */
-      render: (era: number): ReactNode => {
+      render: ({ era }): ReactNode => {
         return era;
       },
       title: 'Era'
     },
     {
       dataIndex: 'era',
+      key: 'status',
       /* eslint-disable-next-line react/display-name */
-      render: (era: number): ReactNode => {
+      render: ({ era }): ReactNode => {
         if (!stakingPool) {
           return '';
         }
@@ -80,14 +80,12 @@ export const RedeemList: FC = () => {
       align: 'right',
       dataIndex: 'balance',
       /* eslint-disable-next-line react/display-name */
-      render: (balance: Fixed18): ReactNode => {
-        return (
-          <FormatBalance
-            balance={balance}
-            currency={stakingCurrency}
-          />
-        );
-      },
+      render: ({ balance }): ReactNode => (
+        <FormatBalance
+          balance={balance}
+          currency={stakingCurrency}
+        />
+      ),
       title: 'Amount'
     }
   ];
@@ -104,8 +102,8 @@ export const RedeemList: FC = () => {
       >
         <Condition condition={!!redeemList.length}>
           <Table
-            config={tableConfig}
-            data={redeemList}
+            columns={tableConfig}
+            dataSource={redeemList}
             showHeader
             size='small'
           />

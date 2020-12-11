@@ -2,9 +2,9 @@ import React, { FC, useEffect, useMemo, useState } from 'react';
 
 import { FixedPointNumber } from '@acala-network/sdk-core';
 
-import { Card, styled, Table, TableConfig } from '@acala-dapp/ui-components';
+import { Card, styled, Table, ColumnsType } from '@acala-dapp/ui-components';
 import { useStore } from '@acala-dapp/react-environment';
-import { OracleProvider } from '@acala-dapp/react-environment/store/modules/oracle-price';
+import { OracleProvider } from '@acala-dapp/react-environment/store/modules/oracle-prices';
 
 import { FormatPrice, getTokenName } from '@acala-dapp/react-components';
 
@@ -71,7 +71,7 @@ const PriceWithChange: FC<{ price: FixedPointNumber; isHighest: boolean }> = ({ 
 };
 
 export const OracleDetails: FC = () => {
-  const oraclePrices = useStore('oraclePrice');
+  const oraclePrices = useStore('oraclePrices');
 
   const data = useMemo(() => {
     const result: Record<string, FixedPointNumber | string>[] = [];
@@ -101,7 +101,7 @@ export const OracleDetails: FC = () => {
     return result;
   }, [oraclePrices]);
 
-  const config = useMemo((): TableConfig[] => {
+  const columns = useMemo((): ColumnsType<any> => {
     const providers: string[] = (Object.keys(oraclePrices) as unknown as string[]).sort((item) => item === 'Aggregated' ? -1 : 1);
 
     return [
@@ -125,16 +125,20 @@ export const OracleDetails: FC = () => {
           ),
           title: item
         };
-      }) as TableConfig[]
+      }) as ColumnsType
     ];
   }, [oraclePrices]);
 
   return (
-    <Card padding={false}>
+    <Card
+      overflowHidden={true}
+      padding={false}
+    >
       <Table
-        config={config}
-        data={data}
-        showHeader
+        columns={columns}
+        dataSource={data}
+        pagination={false}
+        rowClassName='striped'
       />
     </Card>
   );

@@ -22,7 +22,7 @@ export const UserCard: FC = () => {
             <Identicon
               className={classes.icon}
               size={64}
-              theme='substrate'
+              theme='polkadot'
               value={active.address}
             />
             <div className={classes.info}>

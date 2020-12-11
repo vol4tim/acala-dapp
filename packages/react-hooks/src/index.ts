@@ -21,7 +21,6 @@ export * from './useConstants';
 export * from './useExtrinsicHistory';
 export * from './useInterval';
 export * from './useInitialize';
-export * from './useRxStore';
 export * from './useMemorized';
 
 // common
@@ -51,8 +50,7 @@ export * from './useCurrentRedeem';
 export * from './loanHooks';
 
 // council
-export * from './useCouncilList';
-export * from './useCouncilMembers';
+export * from './councilHooks';
 
 // emergency shoutdown
 export * from './useEmergencyShoutdown';

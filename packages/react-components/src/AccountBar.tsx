@@ -30,6 +30,7 @@ const Account = styled.div<{ active: boolean }>`
   font-size: 16px;
   color: var(--text-color-primary);
   font-weight: var(--text-weight-light);
+  white-space: nowrap;
 
   &:hover {
     box-shadow: 0 0 2px 2px rgba(23, 61, 201, 0.1);
@@ -92,6 +93,7 @@ export const AccountBar: FC = () => {
         <FormatAddress address={active?.name || active?.address || ''} />
         <AccountIcon
           size={16}
+          theme='polkadot'
           value={active?.address || ''}
         />
       </Account>

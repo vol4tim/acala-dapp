@@ -1,8 +1,10 @@
 import React, { FC } from 'react';
 import { Route, Routes } from 'react-router';
-import { CouncilDetails } from './components/CouncilDetails';
+import { CouncilPage } from './components/CouncilPage';
 
 import { Overview } from './components/Overview';
+import { ProposalPage } from './components/ProposalPage';
+import { CouncilProposalDetail } from './components/CouncilProposalDetail';
 
 const PageGovernance: FC = () => {
   return (
@@ -12,7 +14,15 @@ const PageGovernance: FC = () => {
         path='/'
       />
       <Route
-        element={<CouncilDetails />}
+        element={<ProposalPage />}
+        path='/proposals'
+      />
+      <Route
+        element={<CouncilProposalDetail />}
+        path='/proposals/:id'
+      />
+      <Route
+        element={<CouncilPage />}
         path='/councils'
       />
     </Routes>
