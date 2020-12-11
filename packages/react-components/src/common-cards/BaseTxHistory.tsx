@@ -44,6 +44,8 @@ export const BaseTxHistory: FC<Props> = ({
   //   onPaginationChagne({ currentPage: page - 1 });
   // };
 
+  return null;
+
   return (
     <Card
       className={classes.root}
