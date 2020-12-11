@@ -1,6 +1,6 @@
 {
   "name": "@acala-dapp/page-oracle-price",
-  "version": "0.2.1-beta.0",
+  "version": "0.2.1-beta.1",
   "description": "oracle price page",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",

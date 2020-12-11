@@ -1,6 +1,6 @@
 {
   "name": "@acala-dapp/page-loan",
-  "version": "0.2.1-beta.0",
+  "version": "0.2.1-beta.1",
   "description": "acala-dapp loan",
   "main": "index.js",
   "author": "Acala Developers <hello@acala.network>",
