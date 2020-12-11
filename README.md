@@ -2,7 +2,7 @@
 
 # Acala-Dapp
 
-acala web app with honzon, homa, dex features.  
+acala web app with honzon, homa, dex features.  1
 
 # Overview
 
