@@ -16,7 +16,7 @@ export const DEFAULT_ENDPOINTS: EndpointConfig = {
   testnet: [
     {
       name: 'Rococo Mandala',
-      url: 'wss://rococo-1.acala.laminar.one'
+      url: 'wss://rococo-demo-acala.phala.network/ws'
     }
   ],
   development: [

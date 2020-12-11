@@ -37,13 +37,13 @@ export const TOKEN_COLOR_MAP: Map<string, string> = new Map([
 ]);
 
 export const TOKEN_NAME_MAP: Map<string, string> = new Map([
-  ['AUSD', 'aUSD(TEST)'],
-  ['ACA', 'ACA(TEST)'],
-  ['BTC', 'BTC(TEST)'],
-  ['XBTC', 'XBTC(TEST)'],
-  ['RENBTC', 'renBTC(TEST)'],
-  ['LDOT', 'LDOT(TEST)'],
-  ['DOT', 'DOT(TEST)']
+  ['AUSD', 'aUSD'],
+  ['ACA', 'ACA'],
+  ['BTC', 'BTC'],
+  ['XBTC', 'XBTC'],
+  ['RENBTC', 'renBTC'],
+  ['LDOT', 'LDOT'],
+  ['DOT', 'DOT']
 ]);
 
 export function getTokenColor (token: CurrencyLike): string {

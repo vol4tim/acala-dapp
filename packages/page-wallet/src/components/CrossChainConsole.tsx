@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useMemo } from 'react';
+import React, { FC, ReactElement } from 'react';
 
 import { CurrencyLike } from '@acala-dapp/react-hooks/types';
 import { TokenImage, TokenName, TokenFullName } from '@acala-dapp/react-components';
@@ -9,6 +9,7 @@ import classes from './CrossChainConsole.module.scss';
 import { RenBtc } from './crosschain/RenBtc';
 import { AUSD } from './crosschain/AUSD';
 import { DOT } from './crosschain/DOT';
+import { ACA } from './crosschain/ACA';
 
 const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
   return (
@@ -27,13 +28,15 @@ const AssetCard: FC<{ currency: CurrencyLike}> = ({ currency }) => {
 const crossChainConsoleList: Map<string, ReactElement> = new Map([
   ['RENBTC', <RenBtc key='renbtc' />],
   ['AUSD', <AUSD key='ausd' />],
+  ['ACA', <ACA key='aca' />],
   ['DOT', <DOT key='dot' />]
 ]);
 
 const crossChainEnable: Map<string, boolean> = new Map([
-  ['RENBTC', true],
-  ['AUSD', true],
-  ['DOT', true]
+  ['RENBTC', false],
+  ['AUSD', false],
+  ['ACA', true],
+  ['DOT', false]
 ]);
 
 export const CrossChainConsole: FC = () => {
@@ -42,7 +45,7 @@ export const CrossChainConsole: FC = () => {
   return (
     <Tabs
       className={classes.tabs}
-      defaultKey='RENBTC'
+      defaultKey='ACA'
     >
       {
         crossChainCurrencies.map((currency) => {

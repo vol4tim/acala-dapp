@@ -1,0 +1,64 @@
+.root {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 58px 1fr 202px;
+  grid-template-rows: auto 58px auto;
+  grid-template-areas: 
+    'left-title . right-title .'
+    'left-content separation right-content action-btn'
+    'left-addition . right-addition .'
+  ;
+}
+
+.title {
+  font-size: 16px;
+  line-height: 19px;
+}
+
+.leftTitle {
+  grid-area: left-title;
+  margin-bottom: 24px;
+}
+
+.leftContent {
+  grid-area: left-content;
+}
+
+.rightTitle {
+  grid-area: right-title;
+  margin-bottom: 24px;
+}
+
+.rightContent {
+  grid-area: right-content;
+}
+
+.separation {
+  grid-area: separation;
+
+  width: 58px;
+  height: 58px;
+}
+
+.actionBtn {
+  grid-area: action-btn;
+  padding-left: 24px;
+}
+
+.rightArrow {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leftAddition {
+  grid-area: left-addition;
+  margin-top: 16px;
+}
+
+.rightAddition {
+  grid-area: right-addition;
+  margin-top: 16px;
+}

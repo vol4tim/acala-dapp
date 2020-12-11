@@ -11,13 +11,6 @@ export const Logo: FC = () => {
 
   return (
     <div className={classes.logo}>
-      <Tag
-        className={classes.testnet}
-        style='error'
-        type='flag'
-      >
-        Testnet
-      </Tag>
       {ui.breakpoint === 'md' ? <MandalaIogoSmall /> : <MandalaIogo/>}
     </div>
   );

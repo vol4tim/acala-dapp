@@ -17,7 +17,6 @@ export const Sidebar: React.FC<SideBarProps> = ({ config }) => {
   return (
     <div className={classes.root}>
       <Logo />
-      <ChainName className={classes.chainName} />
       <User />
       <Products data={config.products} />
       <SocialMedias data={config.socialMedia} />

@@ -60,7 +60,32 @@ export const ApiProvider: FC<Props> = ({
     // reset connect status
     setConnectStatus({ connected: false, error: false, loading: true });
 
-    const subscriber = ApiRx.create(options({ provider: createProvider(endpoint) })).pipe(
+    const config = options({ provider: createProvider(endpoint) });
+
+    config.types = {
+      ...config.types,
+      /* eslint-disable */
+      "ChainId": {
+        "_enum": {
+          "RelayChain": "Null",
+          "ParaChain": "ParaId"
+        }
+      },
+      "XCurrencyId": {
+        "chain_id": "ChainId",
+        "currency_id": "String"
+      },
+      "NetworkId": {
+        "_enum": {
+          "Any": null,
+          "Named": "Vec<u8>",
+          "Polkadot": null,
+          "Kusama": null
+        }
+      },
+    } as any;
+
+    const subscriber = ApiRx.create(config).pipe(
       timeout(MAX_CONNECT_TIME)
     ).subscribe({
       error: (): void => {

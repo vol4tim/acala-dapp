@@ -1,0 +1,12 @@
+.root {
+  flex: 1;
+
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    font-size: 16px;
+    color: var(--text-color-primary);
+  }
+}
