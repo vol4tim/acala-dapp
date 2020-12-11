@@ -5,7 +5,7 @@ import { BalanceInput, TxButton, numToFixed18Inner, UserAssetBalance } from '@ac
 import { useConstants, useAccounts, useBalanceValidator, useAddressValidator, useApi } from '@acala-dapp/react-hooks';
 import { Card, Select } from '@acala-dapp/ui-components';
 
-import { ReactComponent as PhalaLoogo } from '../../assets/phala.svg';
+import { ReactComponent as PhalaLogo } from '../../assets/phala.svg';
 import classes from './AUSD.module.scss';
 import { AddressToInput } from './AddressInput';
 
@@ -89,7 +89,7 @@ export const ACA: FC = () => {
             >
               <Select>
                 <Select.Option value={'phala'}>
-                  <PhalaLoogo style={{ filter: 'invert(1)' }} />
+                  <PhalaLogo style={{ width: 36, height: 36 }} />
                   <p>Phala</p>
                 </Select.Option>
               </Select>
