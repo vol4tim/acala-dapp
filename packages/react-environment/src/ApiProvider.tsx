@@ -3,11 +3,14 @@ import { timeout } from 'rxjs/operators';
 
 import { ApiRx } from '@polkadot/api';
 import { options } from '@acala-network/api';
+import { Fixed18 } from '@acala-network/app-util';
 
 import { createProvider } from './utils/endpoints';
 import { SettingContext } from './SettingProvider';
 
 const MAX_CONNECT_TIME = 1000 * 60; // one minute
+
+Fixed18.PRECISION = 10 ** 12;
 
 interface ConnectStatus {
   connected: boolean;

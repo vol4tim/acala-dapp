@@ -32,7 +32,7 @@ interface Props extends ButtonProps {
   onFailed?: () => void; // the callback will be executed when extrinsic failed
 }
 
-const MAX_TX_WAITING_TIME = 60 * 1000;
+const MAX_TX_WAITING_TIME = 5 * 60 * 1000;
 
 export const TxButton: FC<PropsWithChildren<Props>> = ({
   afterSend,
