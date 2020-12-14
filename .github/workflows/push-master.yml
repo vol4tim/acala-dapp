@@ -6,16 +6,21 @@ on:
 
 jobs:
   bump-version:
+    name: ${{ matrix.step }}
+    runs-on: ubuntu-latest
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
     strategy:
       matrix:
         step: ['bump-version']
-      name: ${{ matrix.step }}
-      if: "! startsWith(github.event.head_commit.message, '[CI Skip]')'"
-      runs-on: ubuntu-latest
+        node-version: [12.x]
     steps:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.GH_PAT }}
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
     - name: ${{ matrix.step }}
       env:
         GH_PAGES_SRC: packages/apps/build

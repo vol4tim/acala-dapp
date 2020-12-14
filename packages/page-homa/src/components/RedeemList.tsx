@@ -56,7 +56,6 @@ export const RedeemList: FC = () => {
       title: 'Era'
     },
     {
-      dataIndex: 'era',
       key: 'status',
       /* eslint-disable-next-line react/display-name */
       render: ({ era }): ReactNode => {
@@ -78,7 +77,6 @@ export const RedeemList: FC = () => {
     },
     {
       align: 'right',
-      dataIndex: 'balance',
       /* eslint-disable-next-line react/display-name */
       render: ({ balance }): ReactNode => (
         <FormatBalance
@@ -104,6 +102,7 @@ export const RedeemList: FC = () => {
           <Table
             columns={tableConfig}
             dataSource={redeemList}
+            pagination={false}
             showHeader
             size='small'
           />
