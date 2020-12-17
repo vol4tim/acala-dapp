@@ -15,7 +15,6 @@ const PageIncentives = lazy(() => import('@acala-dapp/page-incentives'));
 const PageGovernance = lazy(() => import('@acala-dapp/page-governance'));
 
 const CSuspense: FC = ({ children }) => {
-  // TODO: add minimal time
   return (
     <Suspense fallback={<PageContentLoading />}>
       {children}
@@ -44,6 +43,11 @@ export const config: RouterConfigData[] = [
       {
         element: <CSuspense><PageSwap /></CSuspense>,
         path: 'swap',
+        title: 'Swap'
+      },
+      {
+        element: <CSuspense><PageSwap /></CSuspense>,
+        path: 'swap/:tab',
         title: 'Swap'
       },
       {

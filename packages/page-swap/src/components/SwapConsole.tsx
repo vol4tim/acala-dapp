@@ -1,127 +1,179 @@
-import React, { FC, useContext, ReactElement, useCallback, useMemo, useState, useEffect, useRef } from 'react';
+import React, { FC, useContext, useCallback, useMemo, useState, useRef } from 'react';
+import clsx from 'clsx';
 
-import { ITuple } from '@polkadot/types/types';
-import { Balance } from '@acala-network/types/interfaces';
+import { Alert, Row, Col, Card, IconButton, styled } from '@acala-dapp/ui-components';
+import { BalanceInputValue, BalanceInput, formatBalance, tokenEq } from '@acala-dapp/react-components';
+import { useApi, useSubscription, useBalance, useBalanceValidator, useInputValue, useConstants, useModal } from '@acala-dapp/react-hooks';
 
-import { Row, Col, Card, IconButton, InputField, FlexBox } from '@acala-dapp/ui-components';
-import { BalanceInputValue, UserBalance, BalanceInput } from '@acala-dapp/react-components';
-import { useApi, useSubscription, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
-
-import classes from './SwapConsole.module.scss';
 import TxButton from './TxButton';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInput } from './SlippageInput';
 import { SwapContext } from './SwapProvider';
-import { token2CurrencyId, currencyId2Token, FixedPointNumber, TokenPair } from '@acala-network/sdk-core';
-import { SwapTrade } from '@acala-network/sdk-swap';
+import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
-import { SwapTradeMode } from '@acala-network/sdk-swap/help';
+import { ReactComponent as SettingIcon } from '../assets/setting.svg';
+import { Addon } from './common';
 
-// const DANGER_TRADE_IMPACT = new FixedPointNumber(0.05);
+const CCard = styled(Card)`
+  margin: 48px auto;
+  width: 550px;
+  height: auto;
+  border-radius: 22px;
+  box-shadow: 0 0 21px rgba(1, 85, 255, 0.15);
 
-interface SwapBtn {
-  onClick: () => void;
-}
+  .card__content {
+    padding: 24px;
+    padding-bottom: 12px;
+  }
+`;
 
-function SwapBtn ({ onClick }: SwapBtn): ReactElement {
+const Advanced: FC = styled(({ className }) => {
+  const { status, toggle } = useModal();
+
   return (
-    <IconButton
-      className={classes.swapBtn}
-      icon='swap'
-      onClick={onClick}
-      size='large'
-      type='border'
-    />
+    <div className={clsx(className, { open: status })}>
+      <div
+        className='advance__title'
+        onClick={toggle}
+      >
+        Advance
+        <SettingIcon className='advance__title__icon'/>
+      </div>
+      {
+        status ? <SlippageInput /> : null
+      }
+    </div>
   );
-}
+})`
+  .advance__title {
+    padding: 8px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    font-weight: 500;
+    color: var(--color-primary);
+    cursor: pointer;
+  }
+
+  .advance__title__icon {
+    width: 18px;
+    height: 18px;
+    margin-left: 4px;
+    transition: transform .6s ease-in-out;
+  } 
+
+  &.open .advance__title__icon {
+    transform: rotate(180deg);
+  }
+`;
+
+const CIconButton = styled(IconButton)`
+  margin-bottom: -24px;
+  max-width: 58px !important;
+  height: 58px !important;
+  transform: rotate(90deg);
+`;
+
+const CBalanceInput = styled(BalanceInput)`
+  border-radius: 10px;
+`;
+
+const Title = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 1.1875;
+  color: var(--color-primary);
+`;
+
+const CTxButton = styled(TxButton)`
+  margin-top: 12px;
+`;
 
 export const SwapConsole: FC = () => {
   const { api } = useApi();
-
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
-
-  const [inputError, setInputError] = useState<string>();
-  const [outputError, setOutputError] = useState<string>();
-
+  const parametersRef = useRef<TradeParameters | null>(null);
   const {
+    acceptSlippage,
     availableTokens,
-    swapTrade,
-    updateUserInput,
-    userInput
+    changeFlag,
+    getTradeParameters,
+    setTradeMode,
+    tradeMode
   } = useContext(SwapContext);
+  const { nativeCurrency, stableCurrency } = useConstants();
+  const [globalError, setGlobalError] = useState<string>('');
 
-  // reverse input and output
+  const availableCurrencies = useMemo(() => {
+    return Array.from(availableTokens).map((item) => token2CurrencyId(api, item));
+  }, [availableTokens, api]);
+
+  const [
+    input,
+    updateInput,
+    {
+      error: inputError,
+      setValidator: setInputValidator
+    }
+  ] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: nativeCurrency
+  });
+
+  useBalanceValidator({
+    currency: input.token,
+    updateValidator: setInputValidator
+  });
+
+  const maxInputBalance = useBalance(input.token);
+
+  const handleInputMax = useCallback(() => {
+    updateInput({
+      amount: maxInputBalance.toNumber()
+    });
+  }, [updateInput, maxInputBalance]);
+
+  const [
+    output,
+    updateOutput,
+    {
+      error: outputError
+    }
+  ] = useInputValue<BalanceInputValue>({
+    amount: 0,
+    token: stableCurrency
+  });
+
+  const selectableInputCurrencies = useMemo(() => {
+    return availableCurrencies.filter((item) => !tokenEq(item, output.token));
+  }, [availableCurrencies, output]);
+
+  const selectableOutputCurrencies = useMemo(() => {
+    return selectableInputCurrencies.filter((item) => !tokenEq(item, input.token));
+  }, [selectableInputCurrencies, input]);
+
+  const handleInputFocus = useCallback(() => {
+    setTradeMode('EXACT_INPUT');
+  }, [setTradeMode]);
+
+  const handleOutputFocus = useCallback(() => {
+    setTradeMode('EXACT_OUTPUT');
+  }, [setTradeMode]);
+
   const handleReverse = useCallback(() => {
-    updateUserInput({
-      inputAmount: 0,
-      inputToken: userInput.outputToken,
-      mode: userInput.mode,
-      outputAmount: 0,
-      outputToken: userInput.inputToken
-    });
+    updateInput({ ...output, amount: 0 });
+    updateOutput({ ...input, amount: 0 });
     setParameters(null);
-  }, [userInput, updateUserInput]);
-
-  const balance = useBalance(token2CurrencyId(api, userInput.inputToken));
-
-  const handleMax = useCallback(() => {
-    updateUserInput({
-      inputAmount: balance.toNumber(),
-      mode: 'EXACT_INPUT',
-      updateOrigin: 'outset'
-    });
-  }, [balance, updateUserInput]);
+  }, [input, output, updateInput, updateOutput]);
 
   const handleSuccess = useCallback(() => {
-    updateUserInput({
-      inputAmount: 0,
-      outputAmount: 0
-    });
+    updateInput({ amount: 0 });
+    updateOutput({ amount: 0 });
     setParameters(null);
-  }, [updateUserInput, setParameters]);
-
-  const params = useCallback(() => {
-    if (!parameters || !swapTrade) return;
-
-    const result = parameters.toChainData(swapTrade.mode);
-
-    return result;
-  }, [parameters, swapTrade]);
-
-  const setTradeMode = useCallback((mode: SwapTradeMode) => {
-    updateUserInput({ mode });
-  }, [updateUserInput]);
-
-  const balanceValidator = useBalanceValidator({ currency: token2CurrencyId(api, userInput.inputToken) });
-  const promiseRef = useRef<any>();
-
-  useEffect(() => {
-    // check balance
-    promiseRef.current = balanceValidator({
-      amount: userInput.inputAmount,
-      token: token2CurrencyId(api, userInput.inputToken)
-    });
-
-    promiseRef.current.then(() => setInputError(''))
-      .catch((e: any) => setInputError(e.message));
-  /* eslint-disable-next-line */
-  }, [balanceValidator, userInput.inputAmount]);
-
-  const setInput = useCallback((value: BalanceInputValue) => {
-    updateUserInput({
-      inputAmount: value.amount,
-      inputToken: currencyId2Token(value.token),
-      updateOrigin: 'outset'
-    });
-  }, [updateUserInput]);
-
-  const setOutput = useCallback((value: BalanceInputValue) => {
-    updateUserInput({
-      outputAmount: value.amount,
-      outputToken: currencyId2Token(value.token),
-      updateOrigin: 'outset'
-    });
-  }, [updateUserInput]);
+  }, [updateInput, updateOutput, setParameters]);
 
   const isDisable = useMemo(() => {
     if (!parameters) return true;
@@ -132,142 +184,151 @@ export const SwapConsole: FC = () => {
 
     if (inputError) return true;
 
-    if (userInput.outputAmount <= 0) return true;
+    if (input.amount <= 0) return true;
 
-    if (userInput.inputAmount <= 0) return true;
+    if (output.amount <= 0) return true;
+
+    if (globalError) return true;
 
     return false;
-  }, [inputError, outputError, parameters, userInput]);
+  }, [input, output, inputError, outputError, parameters, globalError]);
+
+  const params = useCallback(() => {
+    if (!parameters) return;
+
+    const result = parameters.toChainData(tradeMode);
+
+    return result;
+  }, [parameters, tradeMode]);
 
   useSubscription(() => {
-    if (!api || !swapTrade) return;
+    if (changeFlag.value === false) {
+      if (tradeMode === 'EXACT_INPUT' && input.amount === 0) return;
 
-    const usedTokenPairs = swapTrade.getTradeTokenPairsByPaths();
+      if (tradeMode === 'EXACT_OUTPUT' && output.amount === 0) return;
 
-    return api.queryMulti<ITuple<[Balance, Balance]>[]>(
-      usedTokenPairs.map((item) => [api.query.dex.liquidityPool, item.toChainData()])
-    ).subscribe((result) => {
-      const pools = SwapTrade.convertLiquidityPoolsToTokenPairs(usedTokenPairs, result);
-      const parameters = swapTrade.getTradeParameters(pools);
+      if (tradeMode === 'EXACT_INPUT' &&
+        input.amount === parametersRef.current?.input.amount.toNumber() &&
+        parametersRef.current?.input.isEqual(currencyId2Token(input.token))
+      ) return;
 
-      setParameters(parameters);
+      if (tradeMode === 'EXACT_OUTPUT' &&
+        output.amount === parametersRef.current?.output.amount.toNumber() &&
+        parametersRef.current?.output.isEqual(currencyId2Token(output.token))
+      ) return;
+    }
 
-      const { path } = parameters;
+    return getTradeParameters(
+      acceptSlippage,
+      input.amount,
+      input.token,
+      output.amount,
+      output.token,
+      tradeMode
+    ).subscribe({
+      error: (error) => {
+        setGlobalError(error.message);
+      },
+      next: (result) => {
+        setGlobalError('');
+        parametersRef.current = result;
+        setParameters(result);
 
-      if (path.length >= 2) {
-        const tailPair = new TokenPair(path[path.length - 1], path[path.length - 2]);
-        const tailPairPool = pools.find((item): boolean => item.isEqual(tailPair));
-
-        if (tailPairPool) {
-          // check output is sufficient in pool
-          if (parameters.midPrice.isLessOrEqualTo(FixedPointNumber.ZERO)) {
-            setOutputError('Insufficient token in the pool');
-          } else {
-            setOutputError('');
-          }
+        if (tradeMode === 'EXACT_INPUT') {
+          updateOutput({ amount: result.output.amount.toNumber() });
+        } else {
+          updateInput({ amount: result.input.amount.toNumber() });
         }
       }
-
-      // check input
-      if (parameters.input.amount.isGreaterThan(balance)) {
-        setInputError('Insufficient balance');
-      } else {
-        setInputError('');
-      }
-
-      updateUserInput({
-        inputAmount: parameters.input.amount.toNumber(),
-        outputAmount: parameters.output.amount.toNumber(),
-        updateOrigin: 'inner'
-      });
     });
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [api, swapTrade, setParameters]);
+  }, [acceptSlippage, input, output, tradeMode, updateOutput, updateInput, getTradeParameters]);
 
   return (
-    <Row gutter={[24, 24]}>
-      <Col span={24}>
-        <Card className={classes.root}
-          padding={false}>
-          <div className={classes.main}>
-            <InputField
-              leftRender={(): JSX.Element => {
-                return (
-                  <BalanceInput
-                    className={classes.inputLeft}
-                    disableTokens={[token2CurrencyId(api, userInput.outputToken)]}
-                    enableTokenSelect
-                    error={inputError}
-                    onChange={setInput}
-                    onFocus={(): void => setTradeMode('EXACT_INPUT')}
-                    onMax={handleMax}
-                    selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
-                    value={{
-                      amount: userInput.inputAmount,
-                      token: token2CurrencyId(api, userInput.inputToken)
-                    }}
+    <CCard>
+      <Row
+        gutter={[0, 24]}
+        justify='center'
+      >
+        <Col span={24}>
+          <Title>
+            Pay With
+            <Addon>
+              {
+                tradeMode === 'EXACT_OUTPUT' && !!maxInputBalance
+                  ? 'Estimated'
+                  : `Available: ${formatBalance(maxInputBalance)}`
+              }
+            </Addon>
+          </Title>
+        </Col>
+        <Col span={24}>
+          <CBalanceInput
+            enableTokenSelect
+            error={inputError}
+            onChange={updateInput}
+            onFocus={handleInputFocus}
+            onMax={handleInputMax}
+            selectableTokens={selectableInputCurrencies}
+            value={input}
+          />
+        </Col>
+        <CIconButton
+          icon='swap'
+          onClick={handleReverse}
+          type='ghost'
+        />
+        <Col span={24}>
+          <Title>
+            Receive
+            <Addon>
+              {tradeMode === 'EXACT_INPUT' ? 'Estimated' : ''}
+            </Addon>
+          </Title>
+        </Col>
+        <Col span={24}>
+          <CBalanceInput
+            disableZeroBalance={false}
+            enableTokenSelect
+            error={outputError}
+            onChange={updateOutput}
+            onFocus={handleOutputFocus}
+            selectableTokens={selectableOutputCurrencies}
+            value={output}
+          />
+        </Col>
+        <Col span={24}>
+          <Advanced />
+        </Col>
+        {
+          parameters && !isDisable ? (
+            <Col span={24}>
+              {
+                globalError ? (
+                  <Alert
+                    message={globalError}
                   />
-                );
-              }}
-              leftTitle={(): JSX.Element => {
-                return (
-                  <FlexBox justifyContent='space-between'>
-                    <p>{`Pay With${userInput.mode === 'EXACT_OUTPUT' ? ' (Estimate)' : ''}`}</p>
-                    <div className={classes.extra}>
-                      <span>max: </span>
-                      <UserBalance token={token2CurrencyId(api, userInput.inputToken)} />
-                    </div>
-                  </FlexBox>
-                );
-              }}
-              rightRender={(): JSX.Element => {
-                return (
-                  <BalanceInput
-                    checkSelectBalance={false}
-                    className={classes.inputRight}
-                    disableTokens={[token2CurrencyId(api, userInput.inputToken)]}
-                    enableTokenSelect
-                    error={outputError}
-                    onChange={setOutput}
-                    onFocus={(): void => setTradeMode('EXACT_OUTPUT')}
-                    selectableTokens={Array.from(availableTokens).map((item) => token2CurrencyId(api, item))}
-                    value={{
-                      amount: userInput.outputAmount,
-                      token: token2CurrencyId(api, userInput.outputToken)
-                    }}
+                ) : (
+                  <SwapInfo
+                    input={input}
+                    output={output}
+                    parameters={parameters}
                   />
-                );
-              }}
-              rightTitle={(): JSX.Element => {
-                return (
-                  <div>{`Receive${userInput.mode === 'EXACT_INPUT' ? ' (Estimate)' : ''}`}</div>
-                );
-              }}
-              separation={(): JSX.Element => {
-                return <SwapBtn onClick={handleReverse} />;
-              }}
-            />
-          </div>
-          {
-            (parameters && !isDisable) ? (
-              <SwapInfo parameters={parameters} />
-            ) : null
-          }
-          <SlippageInput />
-        </Card>
-      </Col>
-      <Col span={24}>
-        <TxButton
+                )
+              }
+            </Col>
+          ) : null
+        }
+        <CTxButton
           disabled={isDisable}
-          method={swapTrade?.mode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
+          method={tradeMode === 'EXACT_INPUT' ? 'swapWithExactSupply' : 'swapWithExactTarget'}
           onInblock={handleSuccess}
           params={params}
           section='dex'
           size='large'
         >
           Swap
-        </TxButton>
-      </Col>
-    </Row>
+        </CTxButton>
+      </Row>
+    </CCard>
   );
 };

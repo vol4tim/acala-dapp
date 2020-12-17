@@ -5,7 +5,6 @@ import { TagInput } from '@acala-dapp/ui-components/TagInput';
 
 import classes from './SlippageInput.module.scss';
 import { SwapContext } from './SwapProvider';
-import { FixedPointNumber } from '@acala-network/sdk-core';
 
 const SLIPPAGE_MAX = 50;
 const SLIPPAGE_MIN = 0;
@@ -13,15 +12,13 @@ const SUGGEST_VALUES = [0.001, 0.005, 0.01];
 const SUGGESTED_INDEX = 1; // suggest slippage positions
 
 export const SlippageInput: FC = () => {
-  const { updateUserInput, userInput } = useContext(SwapContext);
+  const { acceptSlippage, setAcceptSlippage } = useContext(SwapContext);
   const [custom, setCustom] = useState<number>(0);
 
   const handleClick = useCallback((num: number): void => {
-    updateUserInput({
-      acceptSlippage: new FixedPointNumber(num),
-      updateOrigin: 'outset'
-    });
-  }, [updateUserInput]);
+    setAcceptSlippage(num);
+    setCustom(0);
+  }, [setAcceptSlippage]);
 
   const renderSuggest = useCallback((num: number): string => {
     return `${num * 100}%${num === SUGGEST_VALUES[SUGGESTED_INDEX] ? ' (suggested)' : ''}`;
@@ -31,11 +28,8 @@ export const SlippageInput: FC = () => {
     const value = Number(_value);
 
     setCustom(value);
-    updateUserInput({
-      acceptSlippage: new FixedPointNumber(value / 100),
-      updateOrigin: 'outset'
-    });
-  }, [updateUserInput, setCustom]);
+    setAcceptSlippage(value / 100);
+  }, [setAcceptSlippage, setCustom]);
 
   return (
     <div className={classes.root}> <p className={classes.title}>Limit addtion price slippage</p>
@@ -46,7 +40,7 @@ export const SlippageInput: FC = () => {
               <Tag
                 key={`suggest-${suggest}`}
                 onClick={(): void => handleClick(suggest) }
-                style={userInput.acceptSlippage.isEqualTo(new FixedPointNumber(suggest)) ? 'primary' : 'normal'}
+                style={acceptSlippage === suggest ? 'primary' : 'normal'}
               >
                 {renderSuggest(suggest)}
               </Tag>

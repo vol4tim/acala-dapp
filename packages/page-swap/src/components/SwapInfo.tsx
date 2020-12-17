@@ -1,13 +1,11 @@
-import React, { FC, useContext, ReactNode } from 'react';
+import React, { FC, ReactNode } from 'react';
 import clsx from 'clsx';
 
-import { Tag, ArrowRightOutlined } from '@acala-dapp/ui-components';
-import { FormatBalance, getCurrencyIdFromName, TokenImage } from '@acala-dapp/react-components';
+import { Tag, ArrowRightOutlined, styled } from '@acala-dapp/ui-components';
+import { BalanceInputValue, FormatBalance, getCurrencyIdFromName, TokenImage } from '@acala-dapp/react-components';
 import { useApi } from '@acala-dapp/react-hooks';
 
 import classes from './SwapConsole.module.scss';
-import { SwapContext } from './SwapProvider';
-import { token2CurrencyId } from '@acala-network/sdk-core';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
 
 interface SwapRouteProps {
@@ -51,42 +49,57 @@ const SwapRoute: FC<SwapRouteProps> = ({ parameters }) => {
 //   );
 // };
 
+const InfoRoot = styled.div`
+  padding: 16px;
+  border-radius: 10px;
+  background: #EDF3FF;
+  font-size: 16px;
+  line-height: 1.1875;
+  color: var(--text-color-primary);
+`;
+
+const InfoContent = styled.div`
+  & > span {
+    line-height: 32px;
+    display: inline-block;
+    vertical-align: top;
+  }
+`;
+
 interface Props {
+  input: BalanceInputValue;
+  output: BalanceInputValue;
   parameters: TradeParameters;
 }
 
-export const SwapInfo: FC<Props> = ({ parameters }) => {
-  const { api } = useApi();
-  const {
-    userInput: {
-      inputToken,
-      outputToken
-    }
-  } = useContext(SwapContext);
-
+export const SwapInfo: FC<Props> = ({
+  input,
+  output,
+  parameters
+}) => {
   if (!parameters) return null;
 
   return (
-    <div className={classes.swapInfoRoot}>
-      <p>
-        You are selling
+    <InfoRoot>
+      <InfoContent>
+        <span>You are selling</span>
         <Tag>
           <FormatBalance balance={parameters.input.amount}
-            currency={token2CurrencyId(api, inputToken)} />
+            currency={input.token} />
         </Tag>
-        for at least
+        <span>for at least</span>
         <Tag>
           <FormatBalance
             balance={parameters.output.amount}
-            currency={token2CurrencyId(api, outputToken)}
+            currency={output.token}
           />
         </Tag>
-      </p>
+      </InfoContent>
       {
         parameters.path.length > 2 ? (
           <SwapRoute parameters={parameters} />
         ) : null
       }
-    </div>
+    </InfoRoot>
   );
 };

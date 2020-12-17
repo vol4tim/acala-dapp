@@ -1,5 +1,5 @@
 import React, { FC, cloneElement, ReactElement, useMemo, useEffect, createElement } from 'react';
-import { HashRouter, useRoutes } from 'react-router-dom';
+import { BrowserRouter as Router, useRoutes } from 'react-router-dom';
 import { useNavigate } from 'react-router';
 
 import { StoreData, usePageTitle } from './store';
@@ -83,8 +83,8 @@ export const RouterProvider: FC<Props> = ({ config }) => {
   }, [config]);
 
   return useMemo((): JSX.Element => (
-    <HashRouter>
+    <Router>
       <Routes config={_config} />
-    </HashRouter>
+    </Router>
   ), [_config]);
 };

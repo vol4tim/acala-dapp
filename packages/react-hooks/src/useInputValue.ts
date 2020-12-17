@@ -14,7 +14,7 @@ interface Options<T> {
 
 type UseInputValueReturnType<T> = [
   T,
-  (value: T) => void,
+  (value: Partial<T>) => void,
   Instance<T>
 ];
 
@@ -47,11 +47,16 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
       : setError('');
   }, [validator, value]);
 
-  const setValue = useCallback((value: T) => {
+  const setValue = useCallback((value: Partial<T>) => {
+    const _value = {
+      ...ref.current,
+      ...value
+    };
+
     // update ref
-    ref.current = value;
+    ref.current = _value;
     // update value
-    _setValue(value);
+    _setValue(_value);
   }, [_setValue]);
 
   const instance = useMemo(() => {
@@ -66,10 +71,10 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
   useLayoutEffect(() => {
     if (!validator.current) return;
 
-    const promise = validator.current(value);
+    const _validator = validator.current(value);
 
-    promise
-      ? promise
+    _validator
+      ? _validator
         .then(() => setError(''))
         .catch((e) => setError(e.message))
       : setError('');
@@ -79,5 +84,5 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
     _setValue(_value);
   }, [_value]);
 
-  return [value, setValue, instance];
+  return useMemo(() => [value, setValue, instance], [value, setValue, instance]);
 };

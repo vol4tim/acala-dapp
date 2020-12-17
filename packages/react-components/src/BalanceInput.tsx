@@ -4,7 +4,7 @@ import { FormikErrors } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { Button, Condition, NumberInput, NumberInputProps, InlineBlockBox } from '@acala-dapp/ui-components';
+import { Button, Condition, NumberInput, NumberInputProps, InlineBlockBox, styled } from '@acala-dapp/ui-components';
 
 import { TokenName, TokenImage } from './Token';
 import { TokenSelector } from './TokenSelector';
@@ -17,8 +17,40 @@ export type BalanceInputValue = {
   token: CurrencyId;
 }
 
+function getInputShadow (error: boolean, focused: boolean): string {
+  if (error) return '0 0 2px 2px var(--input-shadow-error)';
+
+  if (focused) return '0 0 2px 2px var(--input-shadow)';
+
+  return 'none';
+}
+
+const BalanceInputRoot = styled.div<{
+  error: boolean;
+  focused: boolean;
+}>`
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  align-items: stretch;
+  padding: 0 8px;
+  transition: all .2s cubic-bezier(0.0, 0, 0.2, 1);
+  border-radius: 2px;
+  border: ${({ error }): string => {
+    if (error) return '1px solid var(--input-border-color-error)';
+
+    return '1px solid var(--input-border-color)';
+  }};
+
+  box-shadow: ${({ error, focused }): string => getInputShadow(error, focused)};
+
+  &:hover {
+    box-shadow: ${({ error }): string => getInputShadow(error, true)};
+  }
+`;
+
 export interface BalanceInputProps extends BareProps {
-  checkSelectBalance?: boolean;
+  disableZeroBalance?: boolean;
   selectableTokens?: CurrencyId[];
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
@@ -42,7 +74,7 @@ export interface BalanceInputProps extends BareProps {
 
 export const BalanceInput: FC<BalanceInputProps> = ({
   border = true,
-  checkSelectBalance = true,
+  disableZeroBalance = true,
   className,
   disabled = false,
   disableTokens = [],
@@ -91,7 +123,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         condition={enableTokenSelect}
         match={(
           <TokenSelector
-            checkBalance={checkSelectBalance}
+            checkBalance={disableZeroBalance}
             className={
               clsx(
                 classes.tokenSelector,
@@ -118,7 +150,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         )}
       />
     );
-  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition, checkSelectBalance]);
+  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition, disableZeroBalance]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);
@@ -136,7 +168,6 @@ export const BalanceInput: FC<BalanceInputProps> = ({
     classes[size],
     {
       [classes.disabled]: disabled,
-      [classes.border]: border,
       [classes.noToken]: !showToken,
       [classes.error]: !!error,
       [classes.focused]: focused,
@@ -144,11 +175,13 @@ export const BalanceInput: FC<BalanceInputProps> = ({
       [classes.showIcon]: showIcon,
       [classes.lpToken]: isLPToken
     }
-  ), [className, size, disabled, border, showToken, error, focused, showMaxBtn, showIcon, isLPToken]);
+  ), [className, size, disabled, showToken, error, focused, showMaxBtn, showIcon, isLPToken]);
 
   return (
-    <div
+    <BalanceInputRoot
       className={rootClasses}
+      error={!!error}
+      focused={focused}
     >
       <Condition condition={tokenPosition === 'left'}>
         {renderToken}
@@ -178,6 +211,6 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         {renderToken()}
       </Condition>
       <p className={clsx(classes.error, { [classes.show]: !!error })}>{error ? error.toString() : ''}</p>
-    </div>
+    </BalanceInputRoot>
   );
 };

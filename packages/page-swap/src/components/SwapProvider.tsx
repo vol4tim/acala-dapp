@@ -1,11 +1,15 @@
-import React, { memo, createContext, FC, PropsWithChildren, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { memo, createContext, FC, PropsWithChildren, useState, useCallback, useMemo, Dispatch, SetStateAction, useRef } from 'react';
 import { u32 } from '@polkadot/types';
-import { CurrencyId } from '@acala-network/types/interfaces';
-import { Token, TokenPair, FixedPointNumber, getPresetToken } from '@acala-network/sdk-core';
+import { Observable } from 'rxjs';
+import { ITuple } from '@polkadot/types/types';
+import { map } from 'rxjs/operators';
+import { CurrencyId, Balance } from '@acala-network/types/interfaces';
+import { Token, TokenPair, FixedPointNumber, currencyId2Token } from '@acala-network/sdk-core';
 import { SwapTrade } from '@acala-network/sdk-swap';
 import { Fee, SwapTradeMode } from '@acala-network/sdk-swap/help';
 
 import { useApi } from '@acala-dapp/react-hooks';
+import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
 
 export interface PoolData {
   supplyCurrency: CurrencyId;
@@ -14,29 +18,63 @@ export interface PoolData {
   targetSize: number;
 }
 
-interface UserInput {
-  inputToken: Token;
-  outputToken: Token;
-  inputAmount: number;
-  outputAmount: number;
-  acceptSlippage: FixedPointNumber;
-  mode: SwapTradeMode;
-  updateOrigin: 'inner' | 'outset';
-}
-
 interface ContextData {
+  acceptSlippage: number;
+  setAcceptSlippage: (value: number) => void;
+  changeFlag: ChangeFlag;
   exchangeFee: Fee;
   enableTokenPairs: TokenPair[];
   availableTokens: Set<Token>;
-  userInput: UserInput;
-  updateUserInput: (input: Partial<UserInput>) => void;
-  swapTrade: SwapTrade | undefined;
+  tradeMode: SwapTradeMode;
+  setTradeMode: Dispatch<SetStateAction<SwapTradeMode>>;
+  getTradeParameters: (
+    acceptSlippage: number,
+    inputAmount: number,
+    inputCurrencyId: CurrencyId,
+    outputAmount: number,
+    outputCurrency: CurrencyId,
+    tradeMode: SwapTradeMode
+  ) => Observable<TradeParameters>;
+}
+
+class ChangeFlag {
+  private _value: boolean;
+
+  constructor (defaultValue: boolean) {
+    this._value = defaultValue;
+  }
+
+  static create (value: boolean): ChangeFlag {
+    return new ChangeFlag(value);
+  }
+
+  public update (value: boolean): void {
+    this._value = value;
+  }
+
+  get value (): boolean {
+    const _value = this._value;
+
+    if (_value) {
+      this._value = false;
+    }
+
+    return _value;
+  }
 }
 
 export const SwapContext = createContext<ContextData>({} as ContextData);
 
 export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
   const { api } = useApi();
+  const [tradeMode, setTradeMode] = useState<SwapTradeMode>('EXACT_INPUT');
+  const [acceptSlippage, _setAcceptSlippage] = useState<number>(0.005);
+  const changeFlag = useRef<ChangeFlag>(ChangeFlag.create(false));
+
+  const setAcceptSlippage = useCallback((value: number) => {
+    _setAcceptSlippage(value);
+    changeFlag.current.update(true);
+  }, [_setAcceptSlippage]);
 
   const exchangeFee = useMemo<Fee>((): Fee => {
     if (!api) return {} as Fee;
@@ -71,56 +109,72 @@ export const SwapProvider: FC<PropsWithChildren<{}>> = memo(({ children }) => {
     return result;
   }, [enableTokenPairs]);
 
-  const [userInput, setUserInput] = useState<UserInput>({
-    acceptSlippage: new FixedPointNumber(0.005),
-    inputAmount: 0,
-    inputToken: getPresetToken('ACA'),
-    mode: 'EXACT_INPUT',
-    outputAmount: 0,
-    outputToken: getPresetToken('AUSD'),
-    updateOrigin: 'outset'
-  });
-
-  const updateUserInput = useCallback((input: Partial<UserInput>) => {
-    setUserInput(Object.assign({}, userInput, input));
-  }, [userInput]);
-
-  const [swapTrade, setSwapTrade] = useState<SwapTrade>();
-
-  useEffect(() => {
-    const input = userInput.inputToken.clone({
-      amount: new FixedPointNumber(userInput.inputAmount)
-    });
-    const output = userInput.outputToken.clone({
-      amount: new FixedPointNumber(userInput.outputAmount)
+  const getTradeParameters = useCallback((
+    acceptSlippage: number,
+    inputAmount: number,
+    inputCurrencyId: CurrencyId,
+    outputAmount: number,
+    outputCurrency: CurrencyId,
+    tradeMode: SwapTradeMode
+  ): Observable<TradeParameters> => {
+    const input = currencyId2Token(inputCurrencyId).clone({
+      amount: new FixedPointNumber(inputAmount)
     });
 
-    const swapTrade = new SwapTrade({
-      acceptSlippage: userInput.acceptSlippage,
+    const output = currencyId2Token(outputCurrency).clone({
+      amount: new FixedPointNumber(outputAmount)
+    });
+
+    const swap = new SwapTrade({
+      acceptSlippage: new FixedPointNumber(acceptSlippage),
       availableTokenPairs: enableTokenPairs,
       fee: exchangeFee,
       input,
       maxTradePathLength,
-      mode: userInput.mode,
+      mode: tradeMode,
       output
     });
 
-    if (userInput.updateOrigin === 'inner') {
-      swapTrade.input = input;
-      swapTrade.output = output;
-    } else {
-      setSwapTrade(swapTrade);
-    }
-  }, [userInput, enableTokenPairs, exchangeFee, maxTradePathLength]);
+    const usedTokenPairs = swap.getTradeTokenPairsByPaths();
+
+    return api.queryMulti<ITuple<[Balance, Balance]>[]>(
+      usedTokenPairs.map((item) => [api.query.dex.liquidityPool, item.toChainData()])
+    ).pipe(
+      map((result) => {
+        const pools = SwapTrade.convertLiquidityPoolsToTokenPairs(usedTokenPairs, result);
+        const parameters = swap.getTradeParameters(pools);
+        const { path } = parameters;
+
+        if (path.length >= 2) {
+          const tailPair = new TokenPair(path[path.length - 1], path[path.length - 2]);
+          const tailPairPool = pools.find((item): boolean => item.isEqual(tailPair));
+
+          if (tailPairPool) {
+            // check output is sufficient in pool
+            console.log(parameters.midPrice.toString());
+
+            if (parameters.midPrice.isLessOrEqualTo(FixedPointNumber.ZERO)) {
+              throw new Error('Insufficient token in the pool.');
+            }
+          }
+        }
+
+        return parameters;
+      })
+    );
+  }, [enableTokenPairs, exchangeFee, maxTradePathLength, api]);
 
   return (
     <SwapContext.Provider value={{
+      acceptSlippage,
       availableTokens,
+      changeFlag: changeFlag.current,
       enableTokenPairs,
       exchangeFee,
-      swapTrade,
-      updateUserInput,
-      userInput
+      getTradeParameters,
+      setAcceptSlippage,
+      setTradeMode,
+      tradeMode
     }}>
       {children}
     </SwapContext.Provider>

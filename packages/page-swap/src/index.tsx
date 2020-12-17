@@ -1,4 +1,5 @@
-import React, { FC, useEffect } from 'react';
+import React, { FC, useLayoutEffect } from 'react';
+import { useParams } from 'react-router';
 
 import { Tabs, useTabs } from '@acala-dapp/ui-components';
 import { SwapConsole } from './components/SwapConsole';
@@ -6,23 +7,18 @@ import { DepositConsole } from './components/DepositConsole';
 import { WithdrawConsole } from './components/WithdrawConsole';
 import { SwapProvider } from './components/SwapProvider';
 
-const swapTabs = ['swap', 'add-liquidity', 'withdraw-liquidity'];
-
 type SwapTabType = 'swap' | 'add-liquidity' | 'withdraw-liquidity';
 
 const PageSwap: FC = () => {
   const { changeTabs, currentTab } = useTabs<SwapTabType>('swap');
+  const params = useParams();
 
-  // TODO: need remove
-  useEffect(() => {
-    const hash = window.location.hash.replace(/.*(?=\?)/, '');
-    const searchParams = new URLSearchParams(hash);
-    const tab = searchParams.get('tab');
-
-    if (tab && swapTabs.find((i) => i === tab)) {
-      changeTabs(searchParams.get('tab') as SwapTabType);
+  useLayoutEffect(() => {
+    if (params.tab) {
+      changeTabs(params.tab as SwapTabType);
     }
-  }, [changeTabs]);
+  /* eslint-disable-next-line */
+  }, []);
 
   return (
     <SwapProvider>
