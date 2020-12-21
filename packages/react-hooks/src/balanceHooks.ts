@@ -21,7 +21,7 @@ export type BalanceData = { currency: CurrencyId ; balance: FixedPointNumber };
  * @param currency
  * @param account
  */
-export const useBalance = (currency: CurrencyId, account?: AccountLike): FixedPointNumber => {
+export const useBalance = (currency?: CurrencyId, account?: AccountLike): FixedPointNumber => {
   const { active } = useAccounts();
   const _account = useMemo(() => account || (active ? active.address : '_'), [account, active]);
   const balance = useCall<Balance>('derive.currencies.balance', [_account, currency]);

@@ -22,6 +22,7 @@ const Item: FC<ScrollCardItemProps> = ({
 const MIN_PAGE = 0;
 
 const CCard = styled(Card)`
+  padding-bottom: 8px;
   overflow: hidden;
 
   .card__header {

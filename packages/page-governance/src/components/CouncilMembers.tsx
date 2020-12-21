@@ -1,6 +1,6 @@
 import React, { FC, ReactNode, useMemo } from 'react';
 import { upperFirst } from 'lodash';
-import AccountId from '@polkadot/types/generic/AccountId';
+import { AccountId } from '@polkadot/types/interfaces';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Card, Table, ColumnsType, styled } from '@acala-dapp/ui-components';
 import { useCouncilMembers } from '@acala-dapp/react-hooks';

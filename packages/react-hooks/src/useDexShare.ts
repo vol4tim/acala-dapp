@@ -1,5 +1,5 @@
 import { Share } from '@acala-network/types/interfaces';
-import AccountId from '@polkadot/types/generic/AccountId';
+import { AccountId } from '@polkadot/types/interfaces';
 
 import { useCall } from './useCall';
 import { useAccounts } from './useAccounts';

@@ -1,4 +1,4 @@
-import Bool from '@polkadot/types/primitive/Bool';
+import { Bool } from '@polkadot/types';
 
 import { useCall } from './useCall';
 

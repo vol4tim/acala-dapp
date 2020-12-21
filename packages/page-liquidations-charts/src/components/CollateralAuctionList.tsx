@@ -105,7 +105,7 @@ const AuctionMakeBid: FC<{ id: string }> = ({ id }) => {
         className={classes.auctionMakeBidButton}
         disabled={value.amount === 0}
         method='bid'
-        params={[id, new FixedPointNumber(value.amount).toChainData()]}
+        params={[id, new FixedPointNumber(value.amount || 0).toChainData()]}
         section='auction'
         size='small'
       >

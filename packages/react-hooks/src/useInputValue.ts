@@ -1,3 +1,4 @@
+import { isCodec } from '@acala-dapp/react-components';
 import { useState, useRef, MutableRefObject, useCallback, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useMemorized } from './useMemorized';
 
@@ -9,30 +10,30 @@ interface Instance<T> {
 }
 
 interface Options<T> {
-  validator: (value: T) => Promise<void> | void;
+  validator: (value: Partial<T>) => Promise<void> | void;
 }
 
 type UseInputValueReturnType<T> = [
-  T,
+  Partial<T>,
   (value: Partial<T>) => void,
-  Instance<T>
+  Instance<Partial<T>>
 ];
 
-export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInputValueReturnType<T> => {
+export const useInputValue = <T>(defaultValue: Partial<T>, options?: Options<T>): UseInputValueReturnType<T> => {
   const _value = useMemorized(defaultValue);
 
-  const [value, _setValue] = useState<T>(defaultValue);
+  const [value, _setValue] = useState<Partial<T>>(defaultValue);
 
   const _options = useMemorized(options);
 
   const validator = useRef<Options<T>['validator'] | undefined>(_options?.validator);
 
-  const ref = useRef<T>(value);
+  const ref = useRef<Partial<T>>(value);
 
   const [error, setError] = useState<string>();
 
   const reset = useCallback(() => {
-    _setValue(defaultValue);
+    _setValue(defaultValue as T);
   }, [_setValue, defaultValue]);
 
   const setValidator = useCallback((newValidator: Options<T>['validator']) => {
@@ -48,6 +49,14 @@ export const useInputValue = <T>(defaultValue: T, options?: Options<T>): UseInpu
   }, [validator, value]);
 
   const setValue = useCallback((value: Partial<T>) => {
+    // if the type of value is codec, number, string, update directly
+    if (isCodec(value) || typeof value !== 'object') {
+      ref.current = value as T;
+      _setValue(value as T);
+
+      return;
+    }
+
     const _value = {
       ...ref.current,
       ...value

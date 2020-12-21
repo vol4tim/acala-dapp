@@ -1,15 +1,29 @@
 import React, { FC, ReactElement, useContext, useCallback, useState } from 'react';
 
-import { TagGroup, Tag } from '@acala-dapp/ui-components';
+import { TagGroup, Tag, styled } from '@acala-dapp/ui-components';
 import { TagInput } from '@acala-dapp/ui-components/TagInput';
 
-import classes from './SlippageInput.module.scss';
 import { SwapContext } from './SwapProvider';
 
 const SLIPPAGE_MAX = 50;
 const SLIPPAGE_MIN = 0;
 const SUGGEST_VALUES = [0.001, 0.005, 0.01];
 const SUGGESTED_INDEX = 1; // suggest slippage positions
+
+const Root = styled.div`
+  padding: 16px 24px;
+  background: #eff1f7;
+  border-radius: 12px;
+  border: 1px solid #ecf0f2;
+`;
+
+const Title = styled.div`
+  margin-bottom: 16px;
+  font-size: 16px;
+  line-height: 19px;
+  font-weight: 500;
+  color: var(--text-color-primary);
+`;
 
 export const SlippageInput: FC = () => {
   const { acceptSlippage, setAcceptSlippage } = useContext(SwapContext);
@@ -32,7 +46,8 @@ export const SlippageInput: FC = () => {
   }, [setAcceptSlippage, setCustom]);
 
   return (
-    <div className={classes.root}> <p className={classes.title}>Limit addtion price slippage</p>
+    <Root>
+      <Title>Limit addtion price slippage</Title>
       <TagGroup>
         {
           SUGGEST_VALUES.map((suggest): ReactElement => {
@@ -58,6 +73,6 @@ export const SlippageInput: FC = () => {
           value={custom}
         />
       </TagGroup>
-    </div>
+    </Root>
   );
 };

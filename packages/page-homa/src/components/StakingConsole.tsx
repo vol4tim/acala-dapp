@@ -31,7 +31,7 @@ export const StakingConsole: FC = () => {
   const params = useMemo(() => {
     return [
       eliminateGap(
-        new FixedPointNumber(stakingValue.amount),
+        new FixedPointNumber(stakingValue.amount || 0),
         balance,
         new FixedPointNumber('0.000001')
       ).toChainData()

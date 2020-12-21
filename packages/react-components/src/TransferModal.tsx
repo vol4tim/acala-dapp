@@ -4,6 +4,8 @@ import clsx from 'clsx';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Dialog, ArrowIcon, CheckedCircleIcon, FormItem, Button, Condition, InlineBlockBox } from '@acala-dapp/ui-components';
 import { useModal, useAccounts, useConstants, useLPCurrencies, useBalance } from '@acala-dapp/react-hooks';
+import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
+import { FixedPointNumber } from '@acala-network/sdk-core';
 
 import { tokenEq, eliminateGap } from './utils';
 import { TokenName, TokenImage, TokenFullName } from './Token';
@@ -12,8 +14,6 @@ import classes from './TransferModal.module.scss';
 import { AddressInput } from './AddressInput';
 import { BalanceAmountInput, BalanceAmountValue } from './BalanceAmountInput';
 import { TxButton } from './TxButton';
-import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
-import { FixedPointNumber } from '@acala-network/sdk-core';
 
 interface AssetBoardProps {
   currency: CurrencyId;
@@ -110,7 +110,7 @@ interface AccountBalanceValue {
 interface TransferFormProps {
   mode: 'token' | 'lp-token';
   currency: CurrencyId;
-  value: AccountBalanceValue;
+  value: Partial<AccountBalanceValue>;
   onChange: (value: AccountBalanceValue) => void;
 }
 
@@ -121,7 +121,7 @@ const TransferForm: FC<TransferFormProps> = ({
 }) => {
   const { active } = useAccounts();
   const [accountValue, setAccountValue] = useState<{ address: string; error?: string}>();
-  const [balanceValue, setBalanceValue] = useState<BalanceAmountValue>();
+  const [balanceValue, setBalanceValue] = useState<Partial<BalanceAmountValue>>();
 
   useEffect(() => {
     onChange({
@@ -218,6 +218,8 @@ export const TransferModal: FC<TransferModalProps> = ({
   }, [mode, handleTokenSelect, selectedCurrency, allCurrencies, lpCurrencies]);
 
   const params = useCallback(() => {
+    if (!value.balance) return [];
+
     return [
       value.account,
       selectedCurrency,
@@ -232,7 +234,7 @@ export const TransferModal: FC<TransferModalProps> = ({
   const isDisabled = useMemo((): boolean => {
     if (!value.account) return true;
 
-    if (!value.account) return true;
+    if (!value.balance) return true;
 
     if (value.error) return true;
 

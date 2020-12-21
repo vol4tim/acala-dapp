@@ -67,8 +67,8 @@ const InfoContent = styled.div`
 `;
 
 interface Props {
-  input: BalanceInputValue;
-  output: BalanceInputValue;
+  input: Partial<BalanceInputValue>;
+  output: Partial<BalanceInputValue>;
   parameters: TradeParameters;
 }
 

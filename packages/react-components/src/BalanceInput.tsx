@@ -25,7 +25,7 @@ function getInputShadow (error: boolean, focused: boolean): string {
   return 'none';
 }
 
-const BalanceInputRoot = styled.div<{
+export const BalanceInputRoot = styled.div<{
   error: boolean;
   focused: boolean;
 }>`
@@ -56,11 +56,11 @@ export interface BalanceInputProps extends BareProps {
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
   disableTokens?: CurrencyId[];
-  onChange?: (value: BalanceInputValue) => void;
+  onChange?: (value: Partial<BalanceInputValue>) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
   placeholder?: string;
-  value?: BalanceInputValue;
+  value?: Partial<BalanceInputValue>;
   tokenPosition?: 'left' | 'right';
   showIcon?: boolean;
   showToken?: boolean;
@@ -73,7 +73,6 @@ export interface BalanceInputProps extends BareProps {
 }
 
 export const BalanceInput: FC<BalanceInputProps> = ({
-  border = true,
   disableZeroBalance = true,
   className,
   disabled = false,

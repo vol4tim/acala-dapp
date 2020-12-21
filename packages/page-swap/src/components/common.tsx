@@ -1,20 +1,22 @@
 import React, { FC } from 'react';
-import { styled } from '@acala-dapp/ui-components';
+import { Alert, Card, styled } from '@acala-dapp/ui-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
+import { TxButton } from '@acala-dapp/react-components';
 import { ReactComponent as WithdrawnIcon } from '../assets/withdrawn-icon.svg';
 import { ReactComponent as ReceiveIcon } from '../assets/receive-icon.svg';
+import { ReactComponent as AmountIcon } from '../assets/amount-icon.svg';
 
 const TitleRoot = styled.div`
   display: flex;
   align-items: center;
 
-  height: 38px;
-  border-radius: 19px;
+  height: 48px;
+  border-radius: 29px;
   border: 1px solid rgba(23, 61, 201, 0.21);
-  padding: 3px 6px 3px 3px;
+  padding: 6px 12px 6px 6px;
   background: #edf3ff;
 
-  font-size: 18px;
+  font-size: 20px;
   color: var(--information-title-color);
 
   .title__icon {
@@ -22,14 +24,12 @@ const TitleRoot = styled.div`
     display:  grid;
     place-items: center;
     margin-right: 6px;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     background-color: rgba(1, 85, 255, 0.1);
     border-radius: 50%;
 
     & > svg {
-      width: 18px;
-      height: 18px;
       margin-right: -4px;
     }
   }
@@ -51,6 +51,17 @@ export const ReceiveTitle: FC<BareProps> = ({ children }) => {
     <TitleRoot>
       <div className='title__icon'>
         <ReceiveIcon />
+      </div>
+      {children}
+    </TitleRoot>
+  );
+};
+
+export const AmountTitle: FC<BareProps> = ({ children }) => {
+  return (
+    <TitleRoot>
+      <div className='title__icon'>
+        <AmountIcon />
       </div>
       {children}
     </TitleRoot>
@@ -88,4 +99,44 @@ export const InfoRoot = styled.div`
 export const InfoItem = styled.div`
   display: flex;
   align-items: center;
+`;
+
+export const CardRoot = styled(Card)`
+  margin: 48px auto;
+  width: 550px;
+  height: auto;
+  border-radius: 22px;
+  box-shadow: 0 0 21px rgba(1, 85, 255, 0.15);
+
+  .card__content {
+    padding: 24px;
+    padding-bottom: 12px;
+  }
+`;
+
+export const CardTitle = styled.div`
+  font-size: 24px;
+  line-height: 1.2083;
+  font-weight: 500;
+`;
+
+export const CardSubTitle = styled.div`
+  font-size: 16px;
+  line-height: 1.1875;
+  color: var(--text-color-second);
+`;
+
+export const CTxButton = styled(TxButton)`
+  margin: 12px auto 0 auto;
+  padding: 0 40px;
+  border-radius: 10px;
+`;
+
+export const CAlert = styled(Alert)`
+  padding: 16px;
+
+  .alert__message {
+    display: flex;
+    align-items: center;
+  }
 `;

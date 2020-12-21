@@ -39,7 +39,7 @@ export const tokenEq = (base: CurrencyId | string, target: CurrencyId | string):
   return false;
 };
 
-export const eliminateGap = (target: FixedPointNumber, max: FixedPointNumber, gap: FixedPointNumber): FixedPointNumber => {
+export const eliminateGap = (target: FixedPointNumber, max: FixedPointNumber, gap: FixedPointNumber = new FixedPointNumber('0.000001')): FixedPointNumber => {
   const _gap = target.minus(max);
 
   // target is larger than max, but not large enough
@@ -81,4 +81,10 @@ export const isSimilarZero = (target: FixedPointNumber, minimum: FixedPointNumbe
   if (target.isLessOrEqualTo(minimum)) return true;
 
   return false;
+};
+
+export const isCodec = (target: any): boolean => {
+  if (typeof target !== 'object') return false;
+
+  return Reflect.has(target, 'toHuman');
 };

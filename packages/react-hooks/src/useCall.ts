@@ -75,6 +75,9 @@ export function useCall <T> (path: string, params: CallParams = [], options?: {
     // check if we have a function & that we are mounted
     if (!isAppReady) return;
 
+    // if path equal __mock, doesn't du anything
+    if (path === '__mock') return;
+
     tracker.subscribe(api, path, params, key, set);
 
     return (): void => tracker.unsubscribe(key);

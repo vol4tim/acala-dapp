@@ -6,20 +6,70 @@ import { useBalance } from './balanceHooks';
 import { useCallback, useLayoutEffect } from 'react';
 import { useMemorized } from './useMemorized';
 
+interface UseNumberValidatorConfig {
+  min: {
+    value: number;
+    customText?: string;
+  };
+  max: {
+    value: number;
+    customText?: string;
+  };
+  updateValidator?: (value: (value: number) => Promise<any>) => void;
+}
+
+export const useNumberValidator = (config: UseNumberValidatorConfig): (value: number) => Promise<any> => {
+  const _config = useMemorized(config);
+
+  const fn = useCallback((value: number): Promise<any> => {
+    if (value === 0) return Promise.resolve();
+
+    if (_config.max && value > _config.max.value) {
+      return Promise.reject(
+        new Error(_config.max.customText
+          ? _config.max.customText
+          : `Greater than the max amount ${_config.max.value}`)
+      );
+    }
+
+    if (_config.min && value < _config.min.value) {
+      return Promise.reject(
+        new Error(_config.min.customText
+          ? _config.min.customText
+          : `Less than The min amount ${_config.min.value}`
+        )
+      );
+    }
+
+    return Promise.resolve();
+  /* eslint-disable-next-line */
+  }, [_config]);
+
+  useLayoutEffect(() => {
+    if (_config.updateValidator) {
+      _config.updateValidator(fn);
+    }
+  }, [fn, _config]);
+
+  return fn;
+};
+
 interface UseBalanceValidatorConfig {
-  currency: CurrencyId;
+  currency?: CurrencyId;
   max?: [FixedPointNumber, string];
   min?: [FixedPointNumber, string];
   checkBalance?: boolean;
-  updateValidator?: (value: (value: BalanceInputValue) => Promise<any>) => void;
+  updateValidator?: (value: (value: Partial<BalanceInputValue>) => Promise<any>) => void;
 }
 
 export const useBalanceValidator = (config: UseBalanceValidatorConfig): (value: BalanceInputValue) => Promise<any> => {
   const _config = useMemorized(config);
   const balance = useBalance(_config.currency);
 
-  const fn = useCallback((value: BalanceInputValue): Promise<any> => {
-    const _amount = new FixedPointNumber(value.amount);
+  const fn = useCallback(({ amount }: Partial<BalanceInputValue>): Promise<any> => {
+    if (!_config.currency || !amount) return Promise.resolve();
+
+    const _amount = new FixedPointNumber(amount);
 
     if (_amount.isZero()) return Promise.resolve();
 

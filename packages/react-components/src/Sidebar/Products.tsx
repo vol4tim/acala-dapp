@@ -1,10 +1,11 @@
-import React, { createRef, FC, memo, useContext, useEffect } from 'react';
+import React, { createRef, FC, memo, useCallback, useContext, useEffect } from 'react';
 import { NavLink, NavLinkProps, useMatch } from 'react-router-dom';
 
 import { ProductItem as IProductItem } from './types';
 import { useModal } from '@acala-dapp/react-hooks';
 import { styled, ArrowIcon } from '@acala-dapp/ui-components';
 import { SidebarActiveContext } from './context';
+import { useStore } from '@acala-dapp/react-environment';
 
 interface ProductItemProps {
   collapse: boolean;
@@ -67,10 +68,15 @@ const ProductArrow = styled(ArrowIcon)<{ open: boolean }>`
 `;
 
 const ProductItem: FC<ProductItemProps> = memo(({ collapse, data }) => {
+  const { setSubMenu } = useStore('ui');
   const { status: isOpen, toggle } = useModal(false);
   const ref = createRef<HTMLAnchorElement>();
   const { active, setActive } = useContext(SidebarActiveContext);
   const isMatch = useMatch(data.path ?? '__unset__path');
+
+  const handleClick = useCallback(() => {
+    setSubMenu(null);
+  }, [setSubMenu]);
 
   useEffect(() => {
     if (!isMatch) return;
@@ -111,6 +117,7 @@ const ProductItem: FC<ProductItemProps> = memo(({ collapse, data }) => {
   return (
     <CNavLink
       $hasIcon={!!data.icon}
+      onClick={handleClick}
       ref={ref}
       to={data.path ?? '__unset__path'}
     >

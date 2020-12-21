@@ -44,7 +44,7 @@ const InputStep: FC = () => {
     return !form.values.amount;
   }, [form]);
 
-  const handleInput = useCallback((value: BalanceInputValue) => {
+  const handleInput = useCallback((value: Partial<BalanceInputValue>) => {
     form.setFieldValue('amount', value.amount);
   }, [form]);
 

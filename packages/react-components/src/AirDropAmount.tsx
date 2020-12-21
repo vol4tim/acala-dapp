@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 
-import AccountId from '@polkadot/types/generic/AccountId';
+import { AccountId } from '@polkadot/types/interfaces';
 import { useAccounts, useCall } from '@acala-dapp/react-hooks';
 import { Balance } from '@acala-network/types/interfaces';
 

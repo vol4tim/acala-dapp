@@ -64,7 +64,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
     return [
       currency,
       eliminateGap(
-        new FixedPointNumber(depositValue.amount),
+        new FixedPointNumber(depositValue.amount || 0),
         balance,
         new FixedPointNumber('0.000001')
       ).toChainData()
@@ -75,7 +75,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
     return [
       currency,
       eliminateGap(
-        new FixedPointNumber(withdrawValue.amount),
+        new FixedPointNumber(withdrawValue.amount || 0),
         share.share,
         new FixedPointNumber('0.000001')
       ).toChainData()
@@ -117,7 +117,7 @@ const ManagerModel: FC<ManagerModelProps> = ({
             <p>Deposit</p>
             <div>
               {'max: '}
-              <UserBalance token={currency} />
+              <UserBalance currency={currency} />
             </div>
           </FlexBox>
           <BalanceInput

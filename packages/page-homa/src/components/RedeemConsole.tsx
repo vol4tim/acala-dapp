@@ -92,10 +92,10 @@ export const RedeemConsole: FC = () => {
     return false;
   }, [liquidValue, error]);
 
-  const handleInput = useCallback((value: BalanceInputValue) => {
+  const handleInput = useCallback((value: Partial<BalanceInputValue>) => {
     setLiquidValue(value);
 
-    if (!stakingPool) return;
+    if (!stakingPool || !value.amount) return;
 
     if (redeemType === 'Immediately') {
       const result = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(
@@ -135,11 +135,8 @@ export const RedeemConsole: FC = () => {
   }, [stakingPool, setLiquidValue, redeemType, setReceived, setFee, targetEra, freeList]);
 
   const handleMax = useCallback(() => {
-    handleInput({
-      amount: maxLiquidCurrencyAmount.toNumber(),
-      token: liquidValue.token
-    });
-  }, [handleInput, liquidValue, maxLiquidCurrencyAmount]);
+    handleInput({ amount: maxLiquidCurrencyAmount.toNumber() });
+  }, [handleInput, maxLiquidCurrencyAmount]);
 
   const handleTypeChange = useCallback((value: RedeemType) => {
     setRedeemType(value);
@@ -150,7 +147,7 @@ export const RedeemConsole: FC = () => {
 
   const params = useMemo((): string[] => {
     const _params = [
-      new FixedPointNumber(liquidValue.amount).toChainData(),
+      new FixedPointNumber(liquidValue.amount || 0).toChainData(),
       redeemType as any
     ];
 
@@ -256,7 +253,7 @@ export const RedeemConsole: FC = () => {
             value={
               <Condition condition={!!liquidValue.amount}>
                 <FormatBalance
-                  balance={new FixedPointNumber(liquidValue.amount)}
+                  balance={new FixedPointNumber(liquidValue.amount || 0)}
                   currency={liquidCurrency}
                 />
               </Condition>

@@ -4,6 +4,7 @@ import 'antd/dist/antd.css';
 import './styles/global.css';
 import './styles/notification.scss';
 import './styles/table.scss';
+import './styles/form.scss';
 import { BareProps } from './types';
 
 export interface UIData {

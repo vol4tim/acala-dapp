@@ -19,10 +19,20 @@ export const useEnableLPs = (): TokenPair[] => {
 
 type LPSize = { [i: string]: FixedPointNumber };
 
-export const useLPSize = (token1: CurrencyId, token2: CurrencyId): LPSize => {
-  const pool = useCall<DerivedDexPool>('derive.dex.pool', [token1, token2]);
+export const useLPSize = (token1?: CurrencyId, token2?: CurrencyId): LPSize => {
+  const pool = useCall<DerivedDexPool>(
+    token1 && token2 ? 'derive.dex.pool' : '__mock',
+    [token1, token2]
+  );
 
   const result = useMemo<LPSize>((): LPSize => {
+    if (!token1 || !token2) {
+      return {
+        [token1?.asToken?.toString() || '']: FixedPointNumber.ZERO,
+        [token2?.asToken?.toString() || '']: FixedPointNumber.ZERO
+      };
+    }
+
     if (!pool) {
       return {
         [token1.asToken.toString()]: FixedPointNumber.ZERO,
@@ -80,9 +90,11 @@ export const useLPShares = (account: AccountId | string, lp: CurrencyId): [Fixed
   return result;
 };
 
-export const useLPExchangeRate = (token1: CurrencyId, token2: CurrencyId): FixedPointNumber => {
+export const useLPExchangeRate = (token1?: CurrencyId, token2?: CurrencyId): FixedPointNumber => {
   const lpSize = useLPSize(token1, token2);
   const result = useMemo(() => {
+    if (!token1 || !token2) return FixedPointNumber.ZERO;
+
     return lpSize[token1.asToken.toString()].div(lpSize[token2.asToken.toString()]);
   }, [lpSize, token1, token2]);
 
@@ -93,23 +105,27 @@ interface UseLPReturnType {
   availableLP: boolean;
   exchangeRate: FixedPointNumber;
   size: ReturnType<typeof useLPSize>;
-  lpCurrencyId: CurrencyId;
+  lpCurrencyId: CurrencyId | null;
   getAddLPSuggestAmount: (exact: CurrencyId, input: number) => FixedPointNumber;
 }
 
-export const useLP = (token1: CurrencyId, token2: CurrencyId): UseLPReturnType => {
+export const useLP = (token1?: CurrencyId, token2?: CurrencyId): UseLPReturnType => {
   const { api } = useApi();
   const enableLPs = useEnableLPs();
   const size = useLPSize(token1, token2);
   const exchangeRate = useLPExchangeRate(token1, token2);
 
   const availableLP = useMemo(() => {
+    if (!token1 || !token2) return false;
+
     const pair = new TokenPair(currencyId2Token(token1), currencyId2Token(token2));
 
     return !!enableLPs.find((item) => item.isEqual(pair));
   }, [enableLPs, token1, token2]);
 
   const lpCurrencyId = useMemo(() => {
+    if (!token1 || !token2) return null;
+
     const pair = new TokenPair(currencyId2Token(token1), currencyId2Token(token2)).getPair();
 
     return api.createType('CurrencyId' as any, { DEXShare: [pair[0].toString(), pair[1].toString()] });

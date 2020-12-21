@@ -49,3 +49,8 @@ export const GridBox = styled.div<GridBoxProps>`
   grid-template-columns: ${({ column }): string => `repeat(${column}, 1fr)`};
   grid-template-rows: ${({ row }): string => row === 'auto' ? 'auto' : `repeat(${row}) 1fr`};
 `;
+
+export const SpaceBox = styled.div<{ height: number}>`
+  width: 100%;
+  height: ${({ height }): number => height}px;
+`;

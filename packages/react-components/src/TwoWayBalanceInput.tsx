@@ -12,14 +12,12 @@ import { Condition, SwitchIcon } from '@acala-dapp/ui-components';
 interface TwoWayBalanceInputProps {
   className?: string;
   error?: string;
-  value: [BalanceInputValue, BalanceInputValue];
-  onChange: (value: BalanceInputValue) => void;
+  value: [Partial<BalanceInputValue>, Partial<BalanceInputValue>];
+  onChange: (value: Partial<BalanceInputValue>) => void;
   onSwap?: () => void;
   onMax?: () => void;
   showSwap?: boolean;
 }
-
-type Direction = 'forward' | 'reverse';
 
 export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
   className,
@@ -77,14 +75,20 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
             prefix='≈'
           />
           <div className={classes.token}>
-            <TokenImage
-              className={classes.tokenImage}
-              currency={value[1].token}
-            />
-            <TokenName
-              className={classes.tokenName}
-              currency={value[1].token}
-            />
+            {
+              value[1].token ? (
+                <>
+                  <TokenImage
+                    className={classes.tokenImage}
+                    currency={value[1].token}
+                  />
+                  <TokenName
+                    className={classes.tokenName}
+                    currency={value[1].token}
+                  />
+                </>
+              ) : null
+            }
           </div>
         </div>
       </div>

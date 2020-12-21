@@ -1,6 +1,5 @@
-import { TokenImage as OTokenImage } from '@acala-dapp/react-components';
+import { TokenImage as OTokenImage, TxButton } from '@acala-dapp/react-components';
 import { Button, styled } from '@acala-dapp/ui-components';
-import TxButton from '@acala-dapp/page-swap/components/TxButton';
 
 export const CardRoot = styled.div`
   margin-top: 40px;

@@ -1,7 +1,7 @@
 import React, { FC, memo, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useApi, useBreakpoint, useIsAppReady, useSetting } from '@acala-dapp/react-hooks';
-import { styled, PageLoading, Page } from '@acala-dapp/ui-components';
+import { styled, PageLoading, Page, SubMenu } from '@acala-dapp/ui-components';
 
 import { Sidebar, SidebarConfig } from '../Sidebar';
 import { useStore } from '@acala-dapp/react-environment';
@@ -67,12 +67,20 @@ const Main: FC<MainLayoutProps> = memo(({
         <Page.Title
           breadcrumb={breadcrumb}
           extra={<AccountBar />}
-          title={ui.pageTitle}
+          title={
+            ui.subMenu ? (
+              <SubMenu
+                active={ui.subMenu.active}
+                content={ui.subMenu.content}
+                onClick={ui.subMenu.onClick}
+              />
+            ) : ui.pageTitle
+          }
         />
         <Page.Content>{children}</Page.Content>
       </Page>
     );
-  }, [isAppReady, ui.pageTitle, breadcrumb, children]);
+  }, [isAppReady, ui.pageTitle, ui.subMenu, breadcrumb, children]);
 
   return (
     <MainContainer>

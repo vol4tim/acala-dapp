@@ -7,13 +7,13 @@ import { Menu, Dropdown } from 'antd';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { ArrowIcon } from '@acala-dapp/ui-components';
 import { CurrencyId } from '@acala-network/types/interfaces';
+import { useBalance } from '@acala-dapp/react-hooks';
 
 import { Token, TokenImage, TokenName } from './Token';
 import { tokenEq } from './utils';
 import { CurrencyChangeFN } from './types';
 import classes from './TokenSelector.module.scss';
 import { UserAssetBalance } from './Assets';
-import { useBalance } from '@acala-dapp/react-hooks';
 
 interface MenuItemProps {
   value?: CurrencyId;
@@ -110,7 +110,6 @@ export const TokenSelector: FC<Props> = ({
   return (
     <Dropdown
       className={className}
-      getPopupContainer={(triggerNode): any => triggerNode.parentNode}
       onVisibleChange={setVisible}
       overlay={(
         <Menu>

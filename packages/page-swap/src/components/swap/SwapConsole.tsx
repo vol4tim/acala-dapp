@@ -1,31 +1,18 @@
 import React, { FC, useContext, useCallback, useMemo, useState, useRef } from 'react';
 import clsx from 'clsx';
 
-import { Alert, Row, Col, Card, IconButton, styled } from '@acala-dapp/ui-components';
+import { Alert, Row, Col, IconButton, styled } from '@acala-dapp/ui-components';
 import { BalanceInputValue, BalanceInput, formatBalance, tokenEq } from '@acala-dapp/react-components';
 import { useApi, useSubscription, useBalance, useBalanceValidator, useInputValue, useConstants, useModal } from '@acala-dapp/react-hooks';
+import { CurrencyId } from '@acala-network/types/interfaces';
 
-import TxButton from './TxButton';
 import { SwapInfo } from './SwapInfo';
 import { SlippageInput } from './SlippageInput';
-import { SwapContext } from './SwapProvider';
+import { SwapProvider, SwapContext } from './SwapProvider';
 import { token2CurrencyId, currencyId2Token, FixedPointNumber } from '@acala-network/sdk-core';
 import { TradeParameters } from '@acala-network/sdk-swap/trade-parameters';
-import { ReactComponent as SettingIcon } from '../assets/setting.svg';
-import { Addon } from './common';
-
-const CCard = styled(Card)`
-  margin: 48px auto;
-  width: 550px;
-  height: auto;
-  border-radius: 22px;
-  box-shadow: 0 0 21px rgba(1, 85, 255, 0.15);
-
-  .card__content {
-    padding: 24px;
-    padding-bottom: 12px;
-  }
-`;
+import { ReactComponent as SettingIcon } from '../../assets/setting.svg';
+import { CardRoot, Addon, CTxButton } from '../common';
 
 const Advanced: FC = styled(({ className }) => {
   const { status, toggle } = useModal();
@@ -88,11 +75,7 @@ const Title = styled.div`
   color: var(--color-primary);
 `;
 
-const CTxButton = styled(TxButton)`
-  margin-top: 12px;
-`;
-
-export const SwapConsole: FC = () => {
+export const Inner: FC = () => {
   const { api } = useApi();
   const [parameters, setParameters] = useState<TradeParameters | null>(null);
   const parametersRef = useRef<TradeParameters | null>(null);
@@ -148,11 +131,15 @@ export const SwapConsole: FC = () => {
   });
 
   const selectableInputCurrencies = useMemo(() => {
-    return availableCurrencies.filter((item) => !tokenEq(item, output.token));
+    if (!output.token) return availableCurrencies;
+
+    return availableCurrencies.filter((item) => !tokenEq(item, output.token as CurrencyId));
   }, [availableCurrencies, output]);
 
   const selectableOutputCurrencies = useMemo(() => {
-    return selectableInputCurrencies.filter((item) => !tokenEq(item, input.token));
+    if (!input.token) return selectableInputCurrencies;
+
+    return selectableInputCurrencies.filter((item) => !tokenEq(item, input.token as CurrencyId));
   }, [selectableInputCurrencies, input]);
 
   const handleInputFocus = useCallback(() => {
@@ -184,9 +171,9 @@ export const SwapConsole: FC = () => {
 
     if (inputError) return true;
 
-    if (input.amount <= 0) return true;
+    if ((input?.amount || 0) <= 0) return true;
 
-    if (output.amount <= 0) return true;
+    if ((output?.amount || 0) <= 0) return true;
 
     if (globalError) return true;
 
@@ -209,20 +196,24 @@ export const SwapConsole: FC = () => {
 
       if (tradeMode === 'EXACT_INPUT' &&
         input.amount === parametersRef.current?.input.amount.toNumber() &&
+        input.token &&
         parametersRef.current?.input.isEqual(currencyId2Token(input.token))
       ) return;
 
       if (tradeMode === 'EXACT_OUTPUT' &&
         output.amount === parametersRef.current?.output.amount.toNumber() &&
+        output.token &&
         parametersRef.current?.output.isEqual(currencyId2Token(output.token))
       ) return;
     }
 
+    if (!input.token || !output.token) return;
+
     return getTradeParameters(
       acceptSlippage,
-      input.amount,
+      input.amount || 0,
       input.token,
-      output.amount,
+      output.amount || 0,
       output.token,
       tradeMode
     ).subscribe({
@@ -244,7 +235,7 @@ export const SwapConsole: FC = () => {
   }, [acceptSlippage, input, output, tradeMode, updateOutput, updateInput, getTradeParameters]);
 
   return (
-    <CCard>
+    <CardRoot>
       <Row
         gutter={[0, 24]}
         justify='center'
@@ -329,6 +320,14 @@ export const SwapConsole: FC = () => {
           Swap
         </CTxButton>
       </Row>
-    </CCard>
+    </CardRoot>
+  );
+};
+
+export const SwapConsole: FC = () => {
+  return (
+    <SwapProvider>
+      <Inner />
+    </SwapProvider>
   );
 };

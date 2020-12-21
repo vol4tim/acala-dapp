@@ -1,4 +1,4 @@
-import React, { createRef, FC, PropsWithChildren, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { createRef, FC, PropsWithChildren, ReactNode, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Motion, spring, presets } from 'react-motion';
 import styled from 'styled-components';
 import { BareProps } from './types';
@@ -32,9 +32,9 @@ const TextAnimationItem = styled.div.attrs<{ opacity: number; top: number }>(({ 
   left: 0;
 `;
 
-export const TextAnimation: FC<{ value: string } & BareProps> = ({ className, value }) => {
-  const [prevValue, setPrevValue] = useState<string>('');
-  const valueRef = useRef<string>('');
+export const TextAnimation: FC<{ value: ReactNode } & BareProps> = ({ className, value }) => {
+  const [prevValue, setPrevValue] = useState<ReactNode>('');
+  const valueRef = useRef<ReactNode>('');
   const $value = createRef<HTMLDivElement>();
   const $container = createRef<HTMLDivElement>();
   const [motionData, setMotionData] = useState({

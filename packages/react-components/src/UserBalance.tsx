@@ -1,8 +1,8 @@
 import React, { FC } from 'react';
 
-import AccountId from '@polkadot/types/generic/AccountId';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { Balance, CurrencyId } from '@acala-network/types/interfaces';
+import { AccountId } from '@polkadot/types/interfaces';
 
 import { useCall, useAccounts, usePrice } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
@@ -10,7 +10,7 @@ import { FormatValue, FormatBalance } from './format';
 
 interface Props extends BareProps {
   account?: AccountId | string;
-  token?: CurrencyId;
+  currency?: CurrencyId;
   showValue?: boolean;
   showCurrencyName?: boolean;
 }
@@ -18,15 +18,15 @@ interface Props extends BareProps {
 export const UserBalance: FC<Props> = ({
   account,
   className,
+  currency,
   showCurrencyName = true,
-  showValue = false,
-  token
+  showValue = false
 }) => {
   const { active } = useAccounts();
   const _account = account !== undefined ? account : active ? active.address : '';
   // FIXME: need fix api-derive type
-  const result = useCall<Balance>('derive.currencies.balance', [_account, token]);
-  const price = usePrice(token);
+  const result = useCall<Balance>('derive.currencies.balance', [_account, currency]);
+  const price = usePrice(currency);
 
   if (!result) return null;
 
@@ -45,7 +45,7 @@ export const UserBalance: FC<Props> = ({
     <FormatBalance
       balance={FixedPointNumber.fromInner(result.toString())}
       className={className}
-      currency={showCurrencyName ? token : undefined}
+      currency={showCurrencyName ? currency : undefined}
     />
   );
 };

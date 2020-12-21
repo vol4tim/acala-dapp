@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import React, { FC, memo, ReactNode } from 'react';
 import styled from 'styled-components';
 import { TextAnimation } from './Animation';
@@ -20,7 +21,7 @@ const TitleContent = styled.div`
 `;
 
 interface BreadcrumbItemData {
-  content: string;
+  content: ReactNode;
   onClick: () => void;
 }
 
@@ -84,7 +85,7 @@ const Breadcrumb = memo(styled<FC<{ breadcrumb: BreadcrumbItemData[]} & BareProp
 `);
 
 interface TitleProps extends BareProps {
-  title: string;
+  title: ReactNode;
   breadcrumb?: BreadcrumbItemData[];
   extra?: ReactNode;
 }
@@ -175,3 +176,50 @@ export const SubTitle = memo(styled<FC<SubTitleProps>>(({ children, className, e
   font-weight: 500;
   color: var(--text-color-primary);
 `);
+
+export interface SubMenuProps extends BareProps {
+  content: {
+    content: ReactNode;
+    key: string;
+  }[];
+  active: string;
+  onClick: (key: string) => void;
+}
+
+export const SubMenu = styled(({ active, className, content, onClick }: SubMenuProps) => {
+  return (
+    <ul className={className}>
+      {
+        content.map(({ content, key }) => (
+          <li
+            className={clsx('sub-menu__item', { active: active === key })}
+            key={`submenu-${key}`}
+            onClick={(): void => onClick(key)}
+          >
+            {content}
+          </li>
+        ))
+      }
+    </ul>
+  );
+})`
+  margin-left: -40px;
+  display: flex;
+  align-items: stretch;
+  list-style: none;
+
+  .sub-menu__item {
+    padding-left: 40px;
+    transition: color .2s;
+    color: var(--text-color-second);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-primary)
+    }
+
+    &.active {
+      color: var(--text-color-primary);
+    }
+  }
+`;

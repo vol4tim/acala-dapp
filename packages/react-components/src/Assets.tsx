@@ -1,6 +1,6 @@
 import React, { FC, useMemo } from 'react';
 
-import AccountId from '@polkadot/types/generic/AccountId';
+import { AccountId } from '@polkadot/types/interfaces';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useBalance, useValue, useTotalValue, usePrice } from '@acala-dapp/react-hooks';

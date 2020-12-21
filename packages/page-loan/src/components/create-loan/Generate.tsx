@@ -37,7 +37,6 @@ export const Generate: FC = () => {
 
   const [depositValue, setDepositValue, {
     error: depositError,
-    ref: depositValueRef,
     setValidator: setDepositValidator
   }] = useInputValue<BalanceInputValue>({
     amount: 0,
@@ -84,30 +83,21 @@ export const Generate: FC = () => {
   const handleDepositMax = useCallback((): void => {
     setDeposit(selectedCurrencyBalance.toNumber());
     setColalteralAmount(selectedCurrencyBalance.toNumber());
-    setDepositValue({
-      amount: selectedCurrencyBalance.toNumber(),
-      token: depositValueRef.current.token
-    });
-  }, [setDepositValue, selectedCurrencyBalance, depositValueRef, setDeposit]);
+    setDepositValue({ amount: selectedCurrencyBalance.toNumber() });
+  }, [setDepositValue, selectedCurrencyBalance, setDeposit]);
 
-  const handleDepositChange = useCallback((value: BalanceInputValue) => {
-    setDeposit(value.amount);
-    setColalteralAmount(value.amount);
+  const handleDepositChange = useCallback(({ amount }: Partial<BalanceInputValue>) => {
+    setDeposit(amount || 0);
+    setColalteralAmount(amount || 0);
 
-    setDepositValue({
-      amount: value.amount,
-      token: depositValueRef.current.token
-    });
-  }, [setDepositValue, setDeposit, setColalteralAmount, depositValueRef]);
+    setDepositValue({ amount });
+  }, [setDepositValue, setDeposit, setColalteralAmount]);
 
-  const handleGenerateChange = useCallback((value: BalanceInputValue) => {
-    setGenerate(value.amount);
+  const handleGenerateChange = useCallback(({ amount }: Partial<BalanceInputValue>) => {
+    setGenerate(amount || 0);
 
-    setGenerateValue({
-      amount: value.amount,
-      token: generateValue.token
-    });
-  }, [setGenerateValue, setGenerate, generateValue]);
+    setGenerateValue({ amount });
+  }, [setGenerateValue, setGenerate]);
 
   if (!helper) {
     return null;
@@ -129,7 +119,7 @@ export const Generate: FC = () => {
             value={depositValue}
           />
           <div className={classes.addon}>
-            <UserBalance token={selectedToken} />
+            <UserBalance currency={selectedToken} />
             <span>Max to Lock</span>
           </div>
           <p className={classes.title}>How much {getTokenName(stableCurrency.asToken.toString())} would you like to borrow?</p>

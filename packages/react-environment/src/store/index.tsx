@@ -1,10 +1,10 @@
-import React, { createContext, FC, useEffect, useContext, useMemo } from 'react';
+import React, { createContext, FC, useEffect, useContext, useMemo, ReactNode } from 'react';
 
 import { useApi, useMemorized } from '@acala-dapp/react-hooks';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useApiQueryStore } from './modules/api-query';
 import { useOraclePricesStore } from './modules/oracle-prices';
-import { useUIConfig, UseUIConfigReturnType, UIData } from './modules/ui';
+import { useUIConfig, UseUIConfigReturnType, UIData, SubMenu } from './modules/ui';
 import { useStakingStore, StakingPoolData } from './modules/staking';
 import { usePricesStore, PriceData } from './modules/prices';
 
@@ -54,12 +54,22 @@ export function useStore<T extends StoreData, K extends keyof T> (namespace: K):
   return context[namespace];
 }
 
-export function usePageTitle (config: { content: string; breadcrumb?: UIData['breadcrumb'] }): void {
+export function usePageTitle (config: { content: ReactNode; breadcrumb?: UIData['breadcrumb'] }): void {
   const _config = useMemorized(config);
   const ui = useStore('ui');
 
   useEffect(() => {
     ui.setTitle(_config);
+  /* eslint-disable-next-line */
+  }, [_config]);
+}
+
+export function useSubMenu (config: SubMenu | null): void {
+  const _config = useMemorized(config);
+  const ui = useStore('ui');
+
+  useEffect(() => {
+    ui.setSubMenu(_config);
   /* eslint-disable-next-line */
   }, [_config]);
 }

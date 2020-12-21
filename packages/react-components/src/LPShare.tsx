@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import AccountId from '@polkadot/types/generic/AccountId';
+import { AccountId } from '@polkadot/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { useLPShares, useAccounts } from '@acala-dapp/react-hooks';
 import { FormatRatio, FormatBalance } from './format';

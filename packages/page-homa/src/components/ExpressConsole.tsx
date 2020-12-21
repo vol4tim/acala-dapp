@@ -49,7 +49,7 @@ const StakePanel: FC = () => {
     return [
       inputValue,
       {
-        amount: stakingPool?.stakingPool.getLiquidAmountInMint(new FixedPointNumber(inputValue.amount)).toNumber() || 0,
+        amount: stakingPool?.stakingPool.getLiquidAmountInMint(new FixedPointNumber(inputValue.amount || 0)).toNumber() || 0,
         token: liquidCurrency
       }
     ] as [BalanceInputValue, BalanceInputValue];
@@ -60,9 +60,8 @@ const StakePanel: FC = () => {
 
     return [
       eliminateGap(
-        new FixedPointNumber(inputValue.amount),
-        stakingCurrencyBalance,
-        new FixedPointNumber('0.000001')
+        new FixedPointNumber(inputValue.amount || 0),
+        stakingCurrencyBalance
       ).toChainData()
     ];
   }, [inputValue, stakingCurrencyBalance]);
@@ -104,7 +103,7 @@ const StakePanel: FC = () => {
         <List>
           <List.Item
             label='Max To Stake'
-            value={<UserBalance token={stakingCurrency} />}
+            value={<UserBalance currency={stakingCurrency} />}
           />
           <List.Item
             label='Price'
@@ -150,7 +149,7 @@ const UnstakePanel: FC = () => {
     updateValidator: setValidator
   });
 
-  const [twoWayValue, setTwoWayValue] = useState<[BalanceInputValue, BalanceInputValue]>([
+  const [twoWayValue, setTwoWayValue] = useState<[Partial<BalanceInputValue>, Partial<BalanceInputValue>]>([
     inputValue,
     { amount: 0, token: stakingCurrency }
   ]);
@@ -161,18 +160,15 @@ const UnstakePanel: FC = () => {
     const unstakeResult = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(maxToUnstake);
 
     setUnStakeResult(unstakeResult);
-    setInputValue({
-      amount: maxToUnstake.toNumber(),
-      token: inputValue.token
-    });
+    setInputValue({ amount: maxToUnstake.toNumber() });
     setTwoWayValue([
       { amount: maxToUnstake.toNumber(), token: inputValue.token },
       { amount: unstakeResult.received.toNumber(), token: stakingCurrency }
     ]);
   }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, stakingCurrency, maxToUnstake, inputValue]);
 
-  const handleChange = useCallback((value: BalanceInputValue) => {
-    if (!stakingPool) return;
+  const handleChange = useCallback((value: Partial<BalanceInputValue>) => {
+    if (!stakingPool || !value.amount) return;
 
     const unstakeResult = stakingPool.stakingPool.getStakingAmountInRedeemByFreeUnbonded(
       new FixedPointNumber(value.amount)
@@ -193,7 +189,7 @@ const UnstakePanel: FC = () => {
   }, [stakingPool, setInputValue, setUnStakeResult, setTwoWayValue, stakingCurrency]);
 
   const params = useCallback(() => {
-    if (!liquidCurrencyBalance) return;
+    if (!liquidCurrencyBalance || !inputValue.amount) return;
 
     return [
       eliminateGap(
