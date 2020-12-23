@@ -143,9 +143,7 @@ const TransferForm: FC<TransferFormProps> = ({
           onChange={setAccountValue}
         />
       </FormItem>
-      <FormItem
-        label='Amount'
-      >
+      <FormItem label='Amount'>
         <BalanceAmountInput
           currency={currency}
           mode={mode}

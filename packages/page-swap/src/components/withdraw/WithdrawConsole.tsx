@@ -1,13 +1,13 @@
 import React, { FC, useCallback, useMemo } from 'react';
 
-import { FlexBox, Row, Col, SpaceBox, Button } from '@acala-dapp/ui-components';
+import { FlexBox, Row, Col, SpaceBox } from '@acala-dapp/ui-components';
 import { BalanceInput, BalanceInputValue, getCurrenciesFromDexShare, eliminateGap } from '@acala-dapp/react-components';
 import { useLPCurrencies, useApi, useBalance, useBalanceValidator } from '@acala-dapp/react-hooks';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
-import { AmountTitle, CardRoot, CardSubTitle, CardTitle, CTxButton, WithdrawnTitle } from '../common';
+import { AmountTitle, CardRoot, CardSubTitle, CardTitle, CTxButton, WithdrawnTitle, CMaxBtn } from '../common';
 import { TokenInput } from '@acala-dapp/react-components/TokenInput';
 
 export const WithdrawConsole: FC = () => {
@@ -90,12 +90,12 @@ export const WithdrawConsole: FC = () => {
             justifyContent='space-between'
           >
             <AmountTitle>Amount</AmountTitle>
-            <Button
+            <CMaxBtn
               onClick={handleMax}
               type='ghost'
             >
               MAX
-            </Button>
+            </CMaxBtn>
           </FlexBox>
         </Col>
         <Col span={24}>

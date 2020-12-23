@@ -97,7 +97,6 @@ const AuctionMakeBid: FC<{ id: string }> = ({ id }) => {
         className={classes.auctionMakeBidInput}
         onChange={onChange}
         showIcon={false}
-        showToken={false}
         size='mini'
         value={value}
       />

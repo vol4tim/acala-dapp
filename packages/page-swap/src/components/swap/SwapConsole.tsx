@@ -61,10 +61,6 @@ const CIconButton = styled(IconButton)`
   transform: rotate(90deg);
 `;
 
-const CBalanceInput = styled(BalanceInput)`
-  border-radius: 10px;
-`;
-
 const Title = styled.div`
   display: flex;
   align-items: center;
@@ -253,7 +249,7 @@ export const Inner: FC = () => {
           </Title>
         </Col>
         <Col span={24}>
-          <CBalanceInput
+          <BalanceInput
             enableTokenSelect
             error={inputError}
             onChange={updateInput}
@@ -277,7 +273,7 @@ export const Inner: FC = () => {
           </Title>
         </Col>
         <Col span={24}>
-          <CBalanceInput
+          <BalanceInput
             disableZeroBalance={false}
             enableTokenSelect
             error={outputError}

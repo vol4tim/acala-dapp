@@ -129,6 +129,7 @@ export const TokenSelector: FC<Props> = ({
           }
         </Menu>
       )}
+      placement='bottomRight'
       trigger={['click']}
       visible={visible}
     >

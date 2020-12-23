@@ -53,20 +53,20 @@
     line-height: 29px;
 
     > .token {
-      width: 150px;
-      padding: 0 12px;
+      padding: 0 16px;
       display: flex;
       align-items: center;
     }
 
     .tokenName {
       font-size: 18px;
+      font-weight: bold;
     }
 
     .tokenImage {
       width: 24px;
       line-height: 24px;
-      margin-right: 16px;
+      margin-right: 8px;
     }
   }
 }

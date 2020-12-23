@@ -1,7 +1,8 @@
 import React, { FC } from 'react';
-import { Alert, Card, styled } from '@acala-dapp/ui-components';
+import { Alert, Card, styled, Button } from '@acala-dapp/ui-components';
 import { BareProps } from '@acala-dapp/ui-components/types';
 import { TxButton } from '@acala-dapp/react-components';
+
 import { ReactComponent as WithdrawnIcon } from '../assets/withdrawn-icon.svg';
 import { ReactComponent as ReceiveIcon } from '../assets/receive-icon.svg';
 import { ReactComponent as AmountIcon } from '../assets/amount-icon.svg';
@@ -139,4 +140,9 @@ export const CAlert = styled(Alert)`
     display: flex;
     align-items: center;
   }
+`;
+
+export const CMaxBtn = styled(Button)`
+  min-width: auto;
+  font-weight: bold;
 `;

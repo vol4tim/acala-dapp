@@ -163,9 +163,9 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
       <div className={classes.inputArea}>
         <Condition condition={inputType === 'balance'}>
           <BalanceInput
-            border={false}
             className={classes.balanceInput}
             error={balanceError}
+            noBorder={true}
             onBlur={hanleBlur}
             onChange={setBalanceValue}
             onFocus={handleFocus}
@@ -175,7 +175,7 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
             value={balanceValue}
           />
           {
-            mode === 'token' && balanceValue.token && balanceValue.amount ? (
+            mode === 'token' && balanceValue.token ? (
               <div className={classes.amountDisplay}>
                 <FormatValue data={amountForBalance} />
                 <TokenName currency={stableCurrency} />
@@ -191,9 +191,9 @@ export const BalanceAmountInput: FC<BalanceAmountInputProps> = ({
         </Condition>
         <Condition condition={inputType === 'amount'}>
           <BalanceInput
-            border={false}
             className={classes.balanceInput}
             error={amountError}
+            noBorder={true}
             onChange={setAmountValue}
             onMax={handleAmountMax}
             showIcon={false}

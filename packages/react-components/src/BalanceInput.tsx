@@ -1,14 +1,12 @@
 import React, { FC, FocusEventHandler, useState, ReactNode, useCallback, useMemo } from 'react';
-import clsx from 'clsx';
 import { FormikErrors } from 'formik';
 
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { BareProps } from '@acala-dapp/ui-components/types';
-import { Button, Condition, NumberInput, NumberInputProps, InlineBlockBox, styled } from '@acala-dapp/ui-components';
+import { Button, NumberInput, NumberInputProps, styled, getInputShadow, getInputBorder } from '@acala-dapp/ui-components';
 
-import { TokenName, TokenImage } from './Token';
+import { TokenName } from './Token';
 import { TokenSelector } from './TokenSelector';
-import classes from './BalanceInput.module.scss';
 
 type BalanceInputSize = 'large' | 'middle' | 'small' | 'mini';
 
@@ -17,45 +15,91 @@ export type BalanceInputValue = {
   token: CurrencyId;
 }
 
-function getInputShadow (error: boolean, focused: boolean): string {
-  if (error) return '0 0 2px 2px var(--input-shadow-error)';
-
-  if (focused) return '0 0 2px 2px var(--input-shadow)';
-
-  return 'none';
-}
-
 export const BalanceInputRoot = styled.div<{
   error: boolean;
   focused: boolean;
+  noBorder: boolean;
 }>`
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 100px;
+  display: flex;
   align-items: stretch;
-  padding: 0 8px;
+  padding: 0;
+  padding-left: 16px;
+  height: 58px;
   transition: all .2s cubic-bezier(0.0, 0, 0.2, 1);
   border-radius: 2px;
-  border: ${({ error }): string => {
-    if (error) return '1px solid var(--input-border-color-error)';
-
-    return '1px solid var(--input-border-color)';
-  }};
-
-  box-shadow: ${({ error, focused }): string => getInputShadow(error, focused)};
+  border: ${({ error, noBorder }): string => getInputBorder(noBorder, error)};
+  box-shadow: ${({ error, focused, noBorder }): string => getInputShadow(noBorder, error, focused)};
 
   &:hover {
-    box-shadow: ${({ error }): string => getInputShadow(error, true)};
+    box-shadow: ${({ error, noBorder }): string => getInputShadow(noBorder, error, true)};
+  }
+`;
+
+const CNumberInput = styled(NumberInput)`
+  flex: 1 1 auto;
+  padding: none;
+`;
+
+const MaxBtn = styled(Button)`
+  height: auto;
+  min-width: auto;
+  font-size: 14px;
+  font-weight: bold;
+`;
+
+const Currency = styled.div<{ icon: boolean }>`
+  display: flex;
+  align-items: center;
+  line-height: 100%;
+  color: var(--color-primary);
+  padding-right: 16px;
+  font-size: 18px;
+
+  .balance-input__icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .balance-input__currency {
+    white-space: nowrap;
+  }
+`;
+
+const Error = styled.div<{ show: boolean }>`
+  opacity: ${({ show }): number => show ? 1 : 0};
+  position: absolute;
+  box-sizing: border-box;
+  top: -36px;
+  right: 0;
+  padding: 4px 8px;
+  background: var(--color-error);
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 16px;
+  color: #ffffff;
+  font-weight: 500;
+
+  &:after {
+    position: absolute;
+    content: '';
+    width: 0;
+    height: 0;
+    bottom: -4px;
+    right: 18px;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid var(--color-error);
   }
 `;
 
 export interface BalanceInputProps extends BareProps {
   disableZeroBalance?: boolean;
   selectableTokens?: CurrencyId[];
+  disableTokens?: CurrencyId[];
   enableTokenSelect?: boolean;
   error?: string | string[] | FormikErrors<any> | FormikErrors<any>[];
   disabled?: boolean;
-  disableTokens?: CurrencyId[];
   onChange?: (value: Partial<BalanceInputValue>) => void;
   onFocus?: FocusEventHandler<HTMLInputElement>;
   onBlur?: FocusEventHandler<HTMLInputElement>;
@@ -63,13 +107,12 @@ export interface BalanceInputProps extends BareProps {
   value?: Partial<BalanceInputValue>;
   tokenPosition?: 'left' | 'right';
   showIcon?: boolean;
-  showToken?: boolean;
   size?: BalanceInputSize;
   min?: number;
   max?: number;
   onMax?: () => void;
-  border?: boolean;
   numberInputProps?: Partial<NumberInputProps>;
+  noBorder?: boolean;
 }
 
 export const BalanceInput: FC<BalanceInputProps> = ({
@@ -82,6 +125,7 @@ export const BalanceInput: FC<BalanceInputProps> = ({
   max,
   min,
   numberInputProps,
+  noBorder = false,
   onBlur,
   onChange,
   onFocus,
@@ -89,13 +133,10 @@ export const BalanceInput: FC<BalanceInputProps> = ({
   placeholder,
   selectableTokens = [],
   showIcon = true,
-  showToken = true,
-  size = 'large',
   tokenPosition = 'right',
   value
 }) => {
   const [focused, setFocused] = useState<boolean>(false);
-  const isLPToken = useMemo(() => value?.token?.isDexShare, [value]);
   const showMaxBtn = useMemo(() => !!onMax, [onMax]);
 
   const onTokenChange = useCallback((token: CurrencyId) => {
@@ -115,41 +156,28 @@ export const BalanceInput: FC<BalanceInputProps> = ({
   }, [onChange, value]);
 
   const renderToken = useCallback((): ReactNode => {
-    if (!showToken) return null;
+    if (enableTokenSelect) {
+      return (
+        <TokenSelector
+          checkBalance={disableZeroBalance}
+          currencies={selectableTokens}
+          disabledCurrencies={disableTokens}
+          onChange={onTokenChange}
+          showIcon={showIcon}
+          value={value?.token}
+        />
+      );
+    }
 
     return (
-      <Condition
-        condition={enableTokenSelect}
-        match={(
-          <TokenSelector
-            checkBalance={disableZeroBalance}
-            className={
-              clsx(
-                classes.tokenSelector,
-                classes[tokenPosition],
-                {
-                  [classes.showIcon]: showIcon
-                }
-              )
-            }
-            currencies={selectableTokens}
-            disabledCurrencies={disableTokens}
-            onChange={onTokenChange}
-            showIcon={showIcon}
-            value={value?.token}
-          />
-        )}
-        or={(
-          <div className={clsx(classes.token, { [classes.showIcon]: showIcon })}>
-            { showIcon ? <TokenImage currency={value?.token} /> : null }
-            <InlineBlockBox margin={[0, 8]}>
-              <TokenName currency={value?.token || ''} />
-            </InlineBlockBox>
-          </div>
-        )}
-      />
+      <Currency icon={showIcon}>
+        <TokenName
+          className='balance-input__currency'
+          currency={value?.token || ''}
+        />
+      </Currency>
     );
-  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, showToken, tokenPosition, disableZeroBalance]);
+  }, [value, disableTokens, enableTokenSelect, onTokenChange, selectableTokens, showIcon, disableZeroBalance]);
 
   const _onFocus: FocusEventHandler<HTMLInputElement> = useCallback((event) => {
     setFocused(true);
@@ -161,32 +189,16 @@ export const BalanceInput: FC<BalanceInputProps> = ({
     onBlur && onBlur(event);
   }, [setFocused, onBlur]);
 
-  const rootClasses = useMemo<string>((): string => clsx(
-    className,
-    classes.root,
-    classes[size],
-    {
-      [classes.disabled]: disabled,
-      [classes.noToken]: !showToken,
-      [classes.error]: !!error,
-      [classes.focused]: focused,
-      [classes.showMax]: showMaxBtn,
-      [classes.showIcon]: showIcon,
-      [classes.lpToken]: isLPToken
-    }
-  ), [className, size, disabled, showToken, error, focused, showMaxBtn, showIcon, isLPToken]);
-
   return (
     <BalanceInputRoot
-      className={rootClasses}
+      className={className}
       error={!!error}
       focused={focused}
+      noBorder={noBorder}
     >
-      <Condition condition={tokenPosition === 'left'}>
-        {renderToken}
-      </Condition>
-      <NumberInput
-        className={classes.input}
+      { tokenPosition === 'left' ? renderToken() : null}
+      <CNumberInput
+        className='balance-input__input'
         disabled={disabled}
         max={max}
         min={min}
@@ -197,19 +209,20 @@ export const BalanceInput: FC<BalanceInputProps> = ({
         value={value?.amount}
         {...numberInputProps}
       />
-      <Condition condition={showMaxBtn}>
-        <Button
-          className={classes.maxBtn}
-          onClick={onMax}
-          type='ghost'
-        >
-          MAX
-        </Button>
-      </Condition>
-      <Condition condition={tokenPosition === 'right'}>
-        {renderToken()}
-      </Condition>
-      <p className={clsx(classes.error, { [classes.show]: !!error })}>{error ? error.toString() : ''}</p>
+      {
+        showMaxBtn ? (
+          <MaxBtn
+            onClick={onMax}
+            type='ghost'
+          >
+            MAX
+          </MaxBtn>
+        ) : null
+      }
+      { tokenPosition === 'right' ? renderToken() : null}
+      <Error show={!!error}>
+        {error}
+      </Error>
     </BalanceInputRoot>
   );
 };

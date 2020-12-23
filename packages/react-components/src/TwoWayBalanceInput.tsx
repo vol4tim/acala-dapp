@@ -1,13 +1,11 @@
-import React, { FC, useState, useCallback, useMemo } from 'react';
-import clsx from 'clsx';
+import React, { FC, useState, useCallback } from 'react';
 import { noop } from 'lodash';
 
-import classes from './TwoWayBalanceInput.module.scss';
+import { getInputBorder, styled, SwitchIcon, getInputShadow } from '@acala-dapp/ui-components';
 
 import { FormatNumber } from './format';
 import { TokenImage, TokenName } from './Token';
 import { BalanceInput, BalanceInputValue } from './BalanceInput';
-import { Condition, SwitchIcon } from '@acala-dapp/ui-components';
 
 interface TwoWayBalanceInputProps {
   className?: string;
@@ -18,6 +16,66 @@ interface TwoWayBalanceInputProps {
   onMax?: () => void;
   showSwap?: boolean;
 }
+
+const TwoWayBalanceInputRoot = styled.div<{
+  error: boolean;
+  focused: boolean;
+}>`
+  display: flex;
+  align-items: stretch;
+  width: 512px;
+  transition: all 200ms cubic-bezier(0.23, 1, 0.320, 1);
+  border-radius: 2px;
+  border: ${({ error }): string => getInputBorder(false, error)};
+  box-shadow: ${({ error, focused }): string => getInputShadow(false, error, focused)};
+
+  &:hover {
+    box-shadow: ${({ error }): string => getInputShadow(false, error, true)};
+  }
+`;
+
+const Swap = styled.div`
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  cursor: pinter
+`;
+
+const Container = styled.div`
+  flex: 1;
+`;
+
+const InputRoot = styled.div`
+  height: 59.5px;
+  border-bottom: 1px solid #e9e9e9;
+`;
+
+const DisplayRoot = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 58.5px;
+  padding-left: 16px;
+
+  color: var(--text-color-second); 
+  font-size: 20px;
+  line-height: 29px;
+
+  .two-way-balance-input__display__token {
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .two-way-balance-input__display__token__img {
+    width: 24px;
+    line-height: 24px;
+    margin-right: 8px;
+  }
+`;
 
 export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
   className,
@@ -30,13 +88,6 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
 }) => {
   const [focused, setFocused] = useState<boolean>(false);
 
-  const rootClassName = useMemo(() => {
-    return clsx(classes.root, className, {
-      [classes.focused]: focused,
-      [classes.error]: error
-    });
-  }, [focused, className, error]);
-
   const handleFocus = useCallback(() => {
     setFocused(true);
   }, [setFocused]);
@@ -46,52 +97,55 @@ export const TwoWayBalanceInput: FC<TwoWayBalanceInputProps> = ({
   }, [setFocused]);
 
   return (
-    <div className={rootClassName}>
-      <Condition condition={showSwap}>
-        <div
-          className={classes.switchArea}
-          onClick={onSwap}
-        >
-          <SwitchIcon />
-        </div>
-      </Condition>
-      <div className={classes.inputContainer}>
-        <div className={classes.inputArea}>
+    <TwoWayBalanceInputRoot
+      className={className}
+      error={!!error}
+      focused={focused}
+    >
+      {
+        showSwap ? (
+          <Swap
+            onClick={onSwap}
+          >
+            <SwitchIcon />
+          </Swap>
+        ) : null
+      }
+      <Container>
+        <InputRoot>
           <BalanceInput
-            border={false}
-            className={classes.balanceInput}
             error={error}
+            noBorder={true}
             onBlur={handleBlur}
             onChange={onChange}
             onFocus={handleFocus}
             onMax={onMax}
             value={value[0]}
           />
-        </div>
-        <div className={classes.displayArea}>
+        </InputRoot>
+        <DisplayRoot>
           <FormatNumber
-            className={classes.amount}
+            className='two-way-balance-input__display__number'
             data={value[1].amount}
             prefix='≈'
           />
-          <div className={classes.token}>
+          <div className='two-way-balance-input__display__token'>
             {
               value[1].token ? (
                 <>
                   <TokenImage
-                    className={classes.tokenImage}
+                    className='two-way-balance-input__display__token__img'
                     currency={value[1].token}
                   />
                   <TokenName
-                    className={classes.tokenName}
                     currency={value[1].token}
                   />
                 </>
               ) : null
             }
           </div>
-        </div>
-      </div>
-    </div>
+        </DisplayRoot>
+      </Container>
+    </TwoWayBalanceInputRoot>
   );
 };

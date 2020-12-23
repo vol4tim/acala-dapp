@@ -2,13 +2,13 @@ import React, { FC, useCallback, useMemo, useEffect } from 'react';
 import { FixedPointNumber } from '@acala-network/sdk-core';
 import { CurrencyId } from '@acala-network/types/interfaces';
 
-import { Row, Col, FlexBox, SpaceBox, Button } from '@acala-dapp/ui-components';
+import { Row, Col, FlexBox, SpaceBox } from '@acala-dapp/ui-components';
 import { useLP, useBalance, useBalanceValidator, useLPEnabledCurrencies } from '@acala-dapp/react-hooks';
 import { BalanceInput, BalanceInputValue, tokenEq, eliminateGap, Token } from '@acala-dapp/react-components';
 import { useInputValue } from '@acala-dapp/react-hooks/useInputValue';
 import { TokenInput } from '@acala-dapp/react-components/TokenInput';
 
-import { CardRoot, CardTitle, CardSubTitle, CTxButton, WithdrawnTitle, AmountTitle, CAlert } from '../common';
+import { CardRoot, CardTitle, CardSubTitle, CTxButton, WithdrawnTitle, AmountTitle, CAlert, CMaxBtn } from '../common';
 
 export const DepositConsole: FC = () => {
   const lpEnableCurrencies = useLPEnabledCurrencies();
@@ -210,12 +210,12 @@ export const DepositConsole: FC = () => {
                   justifyContent='space-between'
                 >
                   <AmountTitle>Amount</AmountTitle>
-                  <Button
+                  <CMaxBtn
                     onClick={handleMax}
                     type='ghost'
                   >
                     MAX
-                  </Button>
+                  </CMaxBtn>
                 </FlexBox>
               </Col>
               <Col span={24}>

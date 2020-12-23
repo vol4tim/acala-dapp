@@ -120,6 +120,7 @@ export const TokenInput: FC<TokenInputProps> = styled<FC<TokenInputProps>>(({
       className={className}
       error={!!error}
       focused={focused}
+      noBorder={false}
       onBlur={onBlur}
       onFocus={onFocus}
     >

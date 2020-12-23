@@ -27,14 +27,9 @@
   }
 
   .balanceInput {
-    height: 48px !important;
-    border-color: #E9E9E9 !important;
+    height: 48px;
     border-bottom: 1px solid #E9E9E9 !important;
-    font-size: 16px !important;
-
-    input {
-      height: 46px !important;
-    }
+    padding-left: 0;
   }
 
   .amountDisplay {
