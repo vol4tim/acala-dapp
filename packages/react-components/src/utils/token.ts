@@ -4,6 +4,7 @@ import BtcIcon from '../assets/coins-icon/BTC.svg';
 import DotIcon from '../assets/coins-icon/DOT.svg';
 import LDotIcon from '../assets/coins-icon/LDOT.svg';
 import RenIcon from '../assets/coins-icon/REN.svg';
+import XrtIcon from '../assets/coins-icon/XRT.svg';
 import { ApiRx } from '@polkadot/api';
 import { CurrencyId } from '@acala-network/types/interfaces';
 import { Token, TokenPair, currencyId2Token } from '@acala-network/sdk-core';
@@ -15,7 +16,8 @@ export const TOKEN_IMAGES: Map<string, string> = new Map([
   ['DOT', DotIcon],
   ['LDOT', LDotIcon],
   ['RENBTC', RenIcon],
-  ['XBTC', BtcIcon]
+  ['XBTC', BtcIcon],
+  ['XRT', XrtIcon]
 ]);
 
 export const TOKEN_FULLNAMES: Map<string, string> = new Map([
@@ -25,7 +27,8 @@ export const TOKEN_FULLNAMES: Map<string, string> = new Map([
   ['DOT', 'Polkadot'],
   ['LDOT', 'Liquid DOT'],
   ['RENBTC', 'Ren Bitcoin'],
-  ['XBTC', 'Interchain Bitcoin']
+  ['XBTC', 'Interchain Bitcoin'],
+  ['XRT', 'Robonomics']
 ]);
 
 export const TOKEN_COLOR: Map<string, string> = new Map([
@@ -42,7 +45,8 @@ export const TOKEN_COLOR: Map<string, string> = new Map([
   ['aUSD-XBTC', '#F7931A'],
   ['aUSD-renBTC', '#87888C'],
   ['aUSD-LDOT', '#00F893'],
-  ['aUSD-DOT', '#e6007a']
+  ['aUSD-DOT', '#e6007a'],
+  ['aUSD-XRT', '#3b87e6'],
 ]);
 
 export const TOKEN_NAME: Map<string, string> = new Map([
@@ -52,7 +56,8 @@ export const TOKEN_NAME: Map<string, string> = new Map([
   ['XBTC', 'XBTC'],
   ['RENBTC', 'renBTC'],
   ['LDOT', 'LDOT'],
-  ['DOT', 'DOT']
+  ['DOT', 'DOT'],
+  ['XRT', 'XRT']
 ]);
 
 export const TOKEN_WEIGHT: Map<string, number> = new Map([
@@ -63,7 +68,8 @@ export const TOKEN_WEIGHT: Map<string, number> = new Map([
   ['RENBTC', 2],
   ['RENBTC', 2],
   ['DOT', 2],
-  ['LDOT', 2]
+  ['LDOT', 2],
+  ['XRT', 2]
 ]);
 
 export function getTokenColor (token: string): string {

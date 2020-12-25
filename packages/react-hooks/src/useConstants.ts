@@ -12,7 +12,8 @@ const LOAN_CURRENCIES_WEIGHT = new Map<string, number>([
   ['DOT', 9],
   ['RENBTC', 8],
   ['LDOT', 7],
-  ['XBTC', 6]
+  ['XBTC', 6],
+  ['XRT', 5]
 ]);
 
 const CURRENCIES_WEIGHT = new Map<string, number>([
@@ -21,7 +22,8 @@ const CURRENCIES_WEIGHT = new Map<string, number>([
   ['DOT', 7],
   ['RENBTC', 6],
   ['LDOT', 5],
-  ['XBTC', 4]
+  ['XBTC', 4],
+  ['XRT', 3]
 ]);
 
 export type HooksReturnType = {
